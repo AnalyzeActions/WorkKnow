@@ -51,7 +51,11 @@ def analyze(
     console, logger = setup(debug_level)
     # STEP: display the message about the tool
     console.print()
-    console.print(constants.actionstory.Emoji + constants.markers.Space + constants.actionstory.Tagline)
+    console.print(
+        constants.actionstory.Emoji
+        + constants.markers.Space
+        + constants.actionstory.Tagline
+    )
     console.print()
     # STEP: create the URL needed for accessing the repository's Action builds
     github_api_url = create.create_github_api_url(organization, repo)
