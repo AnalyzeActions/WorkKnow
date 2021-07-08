@@ -41,3 +41,9 @@ logging = create_constants(
     Format="%(message)s",
     Rich="Rich",
 )
+
+# define the constants for markers
+markers = create_constants(
+    "markers",
+    Space=" ",
+)
