@@ -6,6 +6,19 @@ import requests
 
 from actionstory import constants
 
+# Sample of the JSON file returned by the request:
+
+# {
+# │   'total_count': 149,
+# │   'workflow_runs': [
+# │   │   {'id': 161802486, 'name': 'build', 'node_id': 'MDExOldvcmtmbG93UnVuMTYxODAyNDg2', 'head_branch': 'commit_message_check', ... +23},
+# │   │   {'id': 160433969, 'name': 'build', 'node_id': 'MDExOldvcmtmbG93UnVuMTYwNDMzOTY5', 'head_branch': 'commit_message_check', ... +23},
+# │   │   {'id': 160372604, 'name': 'build', 'node_id': 'MDExOldvcmtmbG93UnVuMTYwMzcyNjA0', 'head_branch': 'commit_message_check', ... +23},
+# │   │   {'id': 160358243, 'name': 'build', 'node_id': 'MDExOldvcmtmbG93UnVuMTYwMzU4MjQz', 'head_branch': 'commit_message_check', ... +23},
+# │   │   ... +25
+# │   ]
+# }
+
 
 def request_json_from_github(github_api_url: str) -> str:
     """Request the JSON response from the GitHub API."""
