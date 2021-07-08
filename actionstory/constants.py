@@ -15,6 +15,16 @@ def create_constants(name, *args, **kwargs):
     return new_constants(*itertools.chain(args, kwargs.values()))
 
 
+# define the constants for ActionStory
+actionstory = create_constants(
+    "actionstory",
+    Emoji=":light_bulb:",
+    Tagline="ActionStory: Surfacing the saga of builds on GitHub Actions!",
+    Https="https://",
+    Separator="/",
+)
+
+
 # define the constants for accessing GitHub
 github = create_constants(
     "github",
