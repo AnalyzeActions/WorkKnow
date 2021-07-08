@@ -17,7 +17,11 @@ def create_constants(name, *args, **kwargs):
 
 # define the constants for accessing GitHub
 github = create_constants(
-    "github", Api="https://api.github.com/repos/", Actions="actions/runs"
+    "github",
+    Api="api.github.com/repos/",
+    Actions="actions/runs",
+    Https="https://",
+    Separator="/",
 )
 
 
