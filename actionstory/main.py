@@ -11,6 +11,7 @@ from rich.console import Console
 from actionstory import configure
 from actionstory import constants
 from actionstory import create
+from actionstory import request
 
 
 cli = typer.Typer()
@@ -57,3 +58,6 @@ def analyze(
     console.print("Analyzing the build history of the GitHub repository at:")
     console.print(github_api_url, style="link " + github_api_url)
     console.print()
+    # STEP: access the JSON file that contains the build history
+    json_response = request.request_json_from_github(github_api_url)
+    logger.debug(json_response)
