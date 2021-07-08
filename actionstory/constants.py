@@ -15,6 +15,12 @@ def create_constants(name, *args, **kwargs):
     return new_constants(*itertools.chain(args, kwargs.values()))
 
 
+# define the constants for accessing GitHub
+github = create_constants(
+    "github", Api="https://api.github.com/repos/", Actions="actions/runs"
+)
+
+
 # The defined logging levels, in order of increasing severity, are as follows:
 #
 # DEBUG
