@@ -9,7 +9,7 @@ readme = "README.md"
 actionstory = "actionstory.main:cli"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 typer = {extras = ["all"], version = "^0.3.2"}
 rich = "^10.5.0"
 requests = "^2.25.1"
