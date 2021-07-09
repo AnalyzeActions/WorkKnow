@@ -11,7 +11,7 @@ from rich.pretty import pprint
 
 from actionstory import configure
 from actionstory import constants
-from actionstory import create
+from actionstory import process
 from actionstory import request
 
 
@@ -59,12 +59,12 @@ def analyze(
     )
     console.print()
     # STEP: create the URL needed for accessing the repository's Action builds
-    github_api_url = create.create_github_api_url(organization, repo)
+    github_api_url = process.create_github_api_url(organization, repo)
     console.print("Analyzing the build history of the GitHub repository at:")
     console.print(github_api_url, style="link " + github_api_url)
     console.print()
     # STEP: access the JSON file that contains the build history
     json_responses = request.request_json_from_github(github_api_url)
-    console.print(f"Downloaded a total of {create.create_count_individual_builds(json_responses)} build records that look like:")
+    console.print(f"Downloaded a total of {process.count_individual_builds(json_responses)} build records that look like:")
     pprint(json_responses, max_length=3)
     console.print()
