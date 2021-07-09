@@ -12,6 +12,8 @@ actionstory = "actionstory.main:cli"
 python = "^3.9"
 typer = {extras = ["all"], version = "^0.3.2"}
 rich = "^10.5.0"
+requests = "^2.25.1"
+python-dotenv = "^0.18.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
