@@ -25,6 +25,13 @@ actionstory = create_constants(
 )
 
 
+# define the constants for environment variables
+environment = create_constants(
+    "environment",
+    Github="GITHUB_ACCESS_TOKEN",
+)
+
+
 # define the constants for accessing GitHub
 github = create_constants(
     "github",
