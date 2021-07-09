@@ -41,7 +41,15 @@ def get_github_personal_access_token():
     return github_personal_access_token
 
 
-def request_json_from_github(github_api_url: str) -> Dict[str, Dict[str, List[str]]]:
+def get_workflow_runs(json_responses):
+    """Get the list of workflow run information for a JSON-deri ed dictionary."""
+    # this dictionary has a key called "workflow_runs" that has as its value a
+    # list of dictionaries, one for each run inside of GitHub Actions. This
+    # will return the list so that it can be stored and analyzed.
+    return json_responses["workflow_runs"]
+
+
+def request_json_from_github(github_api_url: str) -> List:
     """Request the JSON response from the GitHub API."""
     logger = logging.getLogger(constants.logging.Rich)
     github_authentication = ('user', get_github_personal_access_token())
