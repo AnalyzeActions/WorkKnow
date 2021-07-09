@@ -75,4 +75,7 @@ def analyze(
     pprint(json_responses[0][0], max_length=25)
     logger.debug(json_responses[0][0])
     console.print()
-    # pprint(json_responses[0][0])
+    pprint(json_responses[0][0])
+    # STEP: create the workflows dictionary
+    workflows_dictionary = produce.create_workflows_dataframe(json_responses)
+    pprint(workflows_dictionary)
