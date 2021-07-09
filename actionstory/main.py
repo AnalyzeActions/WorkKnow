@@ -68,5 +68,11 @@ def analyze(
     console.print(
         f"Downloaded a total of {process.count_individual_builds(json_responses)} build records that look like:"
     )
+    # STEP: print debugging information in a summarized fashion
     pprint(json_responses, max_length=3)
     console.print()
+    console.print("The first build records looks like:")
+    pprint(json_responses[0][0], max_length=25)
+    logger.debug(json_responses[0][0])
+    console.print()
+    # pprint(json_responses[0][0])
