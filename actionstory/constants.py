@@ -19,7 +19,7 @@ def create_constants(name, *args, **kwargs):
 actionstory = create_constants(
     "actionstory",
     Emoji=":light_bulb:",
-    Tagline="ActionStory: Surfacing the saga of builds on GitHub Actions!",
+    Tagline="ActionStory: Surfacing the story of builds on GitHub Actions!",
     Https="https://",
     Separator="/",
 )
