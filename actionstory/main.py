@@ -7,6 +7,7 @@ from typing import Tuple
 import typer
 
 from rich.console import Console
+from rich.pretty import pprint
 
 from actionstory import configure
 from actionstory import constants
@@ -63,5 +64,5 @@ def analyze(
     console.print(github_api_url, style="link " + github_api_url)
     console.print()
     # STEP: access the JSON file that contains the build history
-    json_response = request.request_json_from_github(github_api_url)
-    logger.debug(json_response)
+    json_responses = request.request_json_from_github(github_api_url)
+    pprint(json_responses, max_length=4)
