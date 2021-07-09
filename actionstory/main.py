@@ -65,4 +65,6 @@ def analyze(
     console.print()
     # STEP: access the JSON file that contains the build history
     json_responses = request.request_json_from_github(github_api_url)
-    pprint(json_responses, max_length=4)
+    console.print(f"Downloaded a total of {create.create_count_individual_builds(json_responses)} build records that look like:")
+    pprint(json_responses, max_length=3)
+    console.print()
