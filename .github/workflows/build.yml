@@ -52,10 +52,6 @@ jobs:
         - name: Install all of the dependencies
           run: |
             poetry install
-        # Run the pytest test suite and collect coverage
-        - name: Run Pytest Test Suite with Coverage Monitoring
-          run: |
-            poetry run task coverage
         # Run the black code formatter in checking mode
         - name: Run Black Code Formatter
           run: |
