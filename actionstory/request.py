@@ -5,6 +5,7 @@ import os
 
 from typing import Dict
 from typing import List
+from typing import Union
 
 import requests
 from dotenv import load_dotenv
@@ -51,17 +52,37 @@ def get_workflow_runs(json_responses):
 
 def request_json_from_github(github_api_url: str) -> List:
     """Request the JSON response from the GitHub API."""
+    # initialize the logging subsystem
     logger = logging.getLogger(constants.logging.Rich)
-    github_authentication = ('user', get_github_personal_access_token())
-    github_params = {"per_page": "30"}
-    response = requests.get(github_api_url, auth=github_authentication)
-    json_responses = response.json()
+    # access the person's GitHub personal access token so that
+    # the use of the tool is not rapidly rate limited
+    github_authentication = ("user", get_github_personal_access_token())
+    # request the maximum of 100 entries per page
+    github_params = {"per_page": "100"}
+    # use requests to access the GitHub API with:
+    # --> provided GitHub URL that accesses a project's GitHub Actions log
+    # --> the parameters that currently specify the page limit and will specify the page
+    # --> the GitHub authentication information with the personal access token
+    response = requests.get(github_api_url, params=github_params, auth=github_authentication)
+    # create an empty list that can store all of the JSON responses for workflow runs
+    json_responses = []
+    # extract the JSON document (it is a dict) and then extract from that the workflow runs list
+    # finally, append the list of workflow runs to the running list of response details
+    json_responses.append(get_workflow_runs(response.json()))
     logger.debug(response.headers)
+    # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
+    # and thus the next page that we will need to extract (if needed) is 2
     page = 2
+    # continue to extract data from the pages as long as the "next" field is evident
     while "next" in response.links.keys():
-        github_params = {"page": str(page)}
+        # update the "page" variable in the URL to go to the next page
+        # otherwise, make sure to use all of the same parameters as the first request
+        github_params["page"] = str(page)
         response = requests.get(github_api_url, params=github_params, auth=github_authentication)
         logger.debug(response.headers)
-        json_responses.update(response.json())
+        # again extract the specific workflow runs list and append it to running response details
+        json_responses.append(get_workflow_runs(response.json()))
+        # go to the next page in the pagination results list
         page = page + 1
+    # return the list of workflow runs dictionaries
     return json_responses
