@@ -35,6 +35,8 @@ load_dotenv()
 
 def get_github_personal_access_token():
     """Retrieve the GitHub personal access token from the environment."""
+    # extract the GITHUB_ACCESS_TOKEN environment variable; note that this
+    # only works because of the fact that load_dotenv was previously called
     github_personal_access_token = os.getenv(constants.environment.Github)
     return github_personal_access_token
 
