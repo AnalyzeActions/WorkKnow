@@ -63,7 +63,9 @@ def request_json_from_github(github_api_url: str) -> List:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
     # --> the GitHub authentication information with the personal access token
-    response = requests.get(github_api_url, params=github_params, auth=github_authentication)
+    response = requests.get(
+        github_api_url, params=github_params, auth=github_authentication
+    )
     # create an empty list that can store all of the JSON responses for workflow runs
     json_responses = []
     # extract the JSON document (it is a dict) and then extract from that the workflow runs list
@@ -78,7 +80,9 @@ def request_json_from_github(github_api_url: str) -> List:
         # update the "page" variable in the URL to go to the next page
         # otherwise, make sure to use all of the same parameters as the first request
         github_params["page"] = str(page)
-        response = requests.get(github_api_url, params=github_params, auth=github_authentication)
+        response = requests.get(
+            github_api_url, params=github_params, auth=github_authentication
+        )
         logger.debug(response.headers)
         # again extract the specific workflow runs list and append it to running response details
         json_responses.append(get_workflow_runs(response.json()))
