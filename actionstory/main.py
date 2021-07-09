@@ -66,12 +66,12 @@ def analyze(
     # STEP: access the JSON file that contains the build history
     json_responses = request.request_json_from_github(github_api_url)
     console.print(
-        f"Downloaded a total of {produce.count_individual_builds(json_responses)} build records that look like:"
+        f"Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:"
     )
     # STEP: print debugging information in a summarized fashion
     pprint(json_responses, max_length=3)
     console.print()
-    console.print("The first build records looks like:")
+    console.print("The first workflow record looks like:")
     pprint(json_responses[0][0], max_length=25)
     logger.debug(json_responses[0][0])
     console.print()
