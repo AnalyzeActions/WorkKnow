@@ -3,9 +3,7 @@
 import logging
 import os
 
-from typing import Dict
 from typing import List
-from typing import Union
 
 import requests
 from dotenv import load_dotenv
