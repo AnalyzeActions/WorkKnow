@@ -2,6 +2,8 @@
 
 import logging
 
+import pandas
+
 from actionstory import constants
 
 
@@ -33,3 +35,26 @@ def count_individual_builds(json_responses) -> int:
         running_build_total = running_build_total + len(internal_json_responses)
     # return the running total of builds
     return running_build_total
+
+
+def create_workflows_dataframe(workflows_dictionary_list) -> pandas.DataFrame:
+    """Create a dictionary of all of the relevant workflow data."""
+    subset_key_names = {
+        "id",
+        "head_branch",
+        "head_sha",
+        "event",
+        "status",
+        "conclusion",
+    }
+    total_workflow_list = []
+    for current_workflow_dictionary_inner_list in workflows_dictionary_list:
+        for current_workflow_dictionary in current_workflow_dictionary_inner_list:
+            chosen_keys_values = {
+                key: value
+                for key, value in current_workflow_dictionary.items()
+                if key in subset_key_names
+            }
+            total_workflow_list.append(chosen_keys_values)
+    total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
+    return total_workflow_dataframe
