@@ -24,6 +24,9 @@ pydocstyle = "^5.1.1"
 flake8 = "^3.8.4"
 taskipy = "^1.8.1"
 pytest-cov = "^2.11.1"
+mypy = "^0.910"
+pandas-stubs = "^1.1.0"
+types-requests = "^2.25.0"
 
 [tool.taskipy.tasks]
 black = { cmd = "black workknow tests --check", help = "Run the black checks for source code format" }
