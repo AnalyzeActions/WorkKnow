@@ -39,22 +39,36 @@ def count_individual_builds(json_responses) -> int:
 
 def create_workflows_dataframe(workflows_dictionary_list) -> pandas.DataFrame:
     """Create a dictionary of all of the relevant workflow data."""
+    # create a tuple of the key names that we want to retain from
+    # those keys that are inside of all those in a dictionary (row) of data
     subset_key_names = {
         "id",
-        "head_branch",
         "head_sha",
+        "created_at",
+        "updated_at",
         "event",
         "status",
         "conclusion",
+        "jobs_url",
     }
+    # create an empty list that will store dictionaries to be made into
+    # rows of a Pandas DataFrame. This approach avoids the need to incrementally
+    # add rows to a Pandas DataFrame, which is known to be inefficient.
     total_workflow_list = []
+    # iterate through the outer list that contains a separate list for each
+    # of the separate pages returned from the GitHub API
     for current_workflow_dictionary_inner_list in workflows_dictionary_list:
+        # iterate through the inner list which contains a dictionary for each
+        # "row" in the JSON file that was returned from the GitHub API
         for current_workflow_dictionary in current_workflow_dictionary_inner_list:
+            # only keep those key-value pairs that are for keys in subset_key_names
             chosen_keys_values = {
                 key: value
                 for key, value in current_workflow_dictionary.items()
                 if key in subset_key_names
             }
+            # add the list of chosen key-value pairs to the list of workflow details
             total_workflow_list.append(chosen_keys_values)
+    # create a Pandas DataFrame from the list of dictionaries
     total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
     return total_workflow_dataframe
