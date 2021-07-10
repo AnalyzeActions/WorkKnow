@@ -23,6 +23,14 @@ environment = create_constants(
 )
 
 
+# define the constants for environment variables
+filesystem = create_constants(
+    "filesystem",
+    Csv_Extension=".csv",
+    Dash="-",
+)
+
+
 # define the constants for accessing GitHub
 github = create_constants(
     "github",
