@@ -1,7 +1,7 @@
 # WorkKnow
 
 <p align="center">
-<img width="500" height="500" src="https://raw.githubusercontent.com/AnalyzeActions/WorkKnow/master/.github/logos/WorkKnow-Logo.png" alt="WorkKnow"</img>
+<img width="350" height="350" src="https://raw.githubusercontent.com/AnalyzeActions/WorkKnow/master/.github/logos/WorkKnow-Logo.png" alt="WorkKnow"</img>
 </p>
 
 ![](../../workflows/build/badge.svg)
