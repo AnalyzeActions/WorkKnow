@@ -4,7 +4,6 @@ from enum import Enum
 from logging import Logger
 from pathlib import Path
 
-from typing import Optional
 from typing import Tuple
 
 import typer
@@ -50,7 +49,7 @@ def analyze(
     organization: str = typer.Option(...),
     repo: str = typer.Option(...),
     debug_level: DebugLevel = DebugLevel.ERROR,
-    results_dir: Optional[Path] = typer.Option(None),
+    results_dir: Path = typer.Option(None),
     save: bool = typer.Option(False),
 ):
     """Analyze GitHub Action history of repository at URL."""
@@ -88,7 +87,13 @@ def analyze(
         console.print(
             f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
-        files.save_dataframe(results_dir, organization, repo, workflows_dataframe)
+        files.save_dataframe(
+            results_dir,
+            organization,
+            repo,
+            constants.filesystem.Workflows,
+            workflows_dataframe,
+        )
     else:
         console.print(
             f"Could not save workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"

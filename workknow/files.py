@@ -26,7 +26,11 @@ def confirm_valid_directory(directory: Path) -> bool:
 
 
 def save_dataframe(
-    results_dir: Path, organization: str, repository: str, repo_data: pandas.DataFrame
+    results_dir: Path,
+    organization: str,
+    repository: str,
+    label: str,
+    repo_data: pandas.DataFrame,
 ) -> None:
     """Save the provided DataFrame in a file connected to organization and repo in the results_dir."""
     # create the complete file path, making all parent directories
@@ -34,12 +38,21 @@ def save_dataframe(
     create_directory(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     # create the directory given the provided input details
-    file_name = organization + "-" + repository + ".csv"
+    file_name = (
+        organization
+        + constants.filesystem.Dash
+        + repository
+        + constants.filesystem.Dash
+        + label
+        + constants.filesystem.Csv_Extension
+    )
     # log the name of the file and the results directory
     logger = logging.getLogger(constants.logging.Rich)
     logger.debug(results_dir)
     logger.debug(file_name)
-    # construct the complete file path
+    # construct the complete file path including (in order):
+    # --> the fully qualified path for the results directory
+    # --> the full name of the file storing the data
     complete_file_path = results_dir / file_name
     # resolve the complete file path to get its absolute name
     resolved_complete_file_path = complete_file_path.resolve()

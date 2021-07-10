@@ -11,6 +11,7 @@ def create_constants(name, *args, **kwargs):
     # for *args with "Constant_Name" or **kwargs with Constant_Name = "AnyConstantName"
     # note that this creates a constant that will
     # throw an AttributeError when attempting to redefine
+    # the return value from this function is always a new type
     new_constants = collections.namedtuple(name, itertools.chain(args, kwargs.keys()))
     return new_constants(*itertools.chain(args, kwargs.values()))
 
@@ -22,13 +23,26 @@ environment = create_constants(
 )
 
 
+# define the constants for environment variables
+filesystem = create_constants(
+    "filesystem", Csv_Extension=".csv", Dash="-", Workflows="Workflows"
+)
+
+
 # define the constants for accessing GitHub
 github = create_constants(
     "github",
-    Api="api.github.com/repos/",
     Actions="actions/runs",
+    Api="api.github.com/repos/",
     Https="https://",
+    Next="next",
+    Page="page",
+    Page_Start=2,
+    Per_Page="per_page",
+    Per_Page_Maximum="100",
     Separator="/",
+    User="User",
+    Workflow_Runs="workflow_runs",
 )
 
 
@@ -59,11 +73,27 @@ markers = create_constants(
     Space=" ",
 )
 
+
+# define the constants for workflow
+workflow = create_constants(
+    "workflow",
+    Conclusion="conclusion",
+    Created_At="created_at",
+    Event="event",
+    Head_Sha="head_sha",
+    Jobs_Url="jobs_url",
+    Id="id",
+    Name="name",
+    Status="status",
+    Updated_At="updated_at",
+)
+
+
 # define the constants for workknow
 workknow = create_constants(
     "workknow",
     Emoji=":light_bulb:",
-    Tagline="WorkKnow: Get to Know Your GitHub Actions Workflows!",
+    Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Https="https://",
     Separator="/",
 )

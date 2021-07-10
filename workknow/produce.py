@@ -2,6 +2,10 @@
 
 import logging
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 import pandas
 
 from workknow import constants
@@ -25,7 +29,7 @@ def create_github_api_url(organization: str, repo: str) -> str:
     return github_api_url
 
 
-def count_individual_builds(json_responses) -> int:
+def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
     """Count the number of lists inside of the nested list."""
     running_build_total = 0
     # iterate through each of the JSON responses in the list and
@@ -37,20 +41,22 @@ def count_individual_builds(json_responses) -> int:
     return running_build_total
 
 
-def create_workflows_dataframe(workflows_dictionary_list) -> pandas.DataFrame:
+def create_workflows_dataframe(
+    workflows_dictionary_list: List[Dict[Any, Any]]
+) -> pandas.DataFrame:
     """Create a dictionary of all of the relevant workflow data."""
     # create a tuple of the key names that we want to retain from
     # those keys that are inside of all those in a dictionary (row) of data
     subset_key_names = {
-        "id",
-        "name",
-        "head_sha",
-        "created_at",
-        "updated_at",
-        "event",
-        "status",
-        "conclusion",
-        "jobs_url",
+        constants.workflow.Id,
+        constants.workflow.Name,
+        constants.workflow.Head_Sha,
+        constants.workflow.Created_At,
+        constants.workflow.Updated_At,
+        constants.workflow.Event,
+        constants.workflow.Status,
+        constants.workflow.Conclusion,
+        constants.workflow.Jobs_Url,
     }
     # create an empty list that will store dictionaries to be made into
     # rows of a Pandas DataFrame. This approach avoids the need to incrementally

@@ -45,7 +45,7 @@ def get_workflow_runs(json_responses):
     # this dictionary has a key called "workflow_runs" that has as its value a
     # list of dictionaries, one for each run inside of GitHub Actions. This
     # will return the list so that it can be stored and analyzed.
-    return json_responses["workflow_runs"]
+    return json_responses[constants.github.Workflow_Runs]
 
 
 def request_json_from_github(github_api_url: str) -> List:
@@ -54,9 +54,9 @@ def request_json_from_github(github_api_url: str) -> List:
     logger = logging.getLogger(constants.logging.Rich)
     # access the person's GitHub personal access token so that
     # the use of the tool is not rapidly rate limited
-    github_authentication = ("user", get_github_personal_access_token())
-    # request the maximum of 100 entries per page
-    github_params = {"per_page": "100"}
+    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # request the maximum of number of entries per page
+    github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
@@ -72,12 +72,12 @@ def request_json_from_github(github_api_url: str) -> List:
     logger.debug(response.headers)
     # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
     # and thus the next page that we will need to extract (if needed) is 2
-    page = 2
+    page = constants.github.Page_Start
     # continue to extract data from the pages as long as the "next" field is evident
-    while "next" in response.links.keys():
+    while constants.github.Next in response.links.keys():
         # update the "page" variable in the URL to go to the next page
         # otherwise, make sure to use all of the same parameters as the first request
-        github_params["page"] = str(page)
+        github_params[constants.github.Page] = str(page)
         response = requests.get(
             github_api_url, params=github_params, auth=github_authentication
         )
