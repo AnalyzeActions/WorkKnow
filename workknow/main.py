@@ -53,9 +53,7 @@ def analyze(
     # STEP: display the message about the tool
     console.print()
     console.print(
-        constants.workknow.Emoji
-        + constants.markers.Space
-        + constants.workknow.Tagline
+        constants.workknow.Emoji + constants.markers.Space + constants.workknow.Tagline
     )
     console.print()
     # STEP: create the URL needed for accessing the repository's Action builds
