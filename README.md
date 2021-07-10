@@ -5,5 +5,6 @@
 </p>
 
 ![](../../workflows/build/badge.svg)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/CommittedTeam/CommitCanvas/graphs/commit-activity)
 
 WorkKnow ensures that you are in the know about your GitHub Actions workflows!
