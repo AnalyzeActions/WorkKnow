@@ -92,5 +92,7 @@ def analyze(
     # STEP: save the workflows DataFrame when saving is stipulated and
     # the results directory is valid for the user's file system
     if save and confirm_valid_results_dir(results_dir):
-        console.print(f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}")
+        console.print(
+            f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+        )
         files.save_dataframe(results_dir, organization, repo, workflows_dataframe)
