@@ -50,7 +50,7 @@ def analyze(
     organization: str = typer.Option(...),
     repo: str = typer.Option(...),
     debug_level: DebugLevel = DebugLevel.ERROR,
-    results_dir: Optional[Path] = typer.Option(None),
+    results_dir: Path = typer.Option(None),
     save: bool = typer.Option(False),
 ):
     """Analyze GitHub Action history of repository at URL."""
