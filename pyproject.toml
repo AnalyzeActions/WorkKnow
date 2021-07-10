@@ -31,7 +31,7 @@ coverage = { cmd = "pytest -s --cov-config .coveragerc --cov-report term-missing
 flake8 = { cmd = "flake8 workknow tests", help = "Run the flake8 checks for source code documentation" }
 pydocstyle = { cmd = "pydocstyle workknow tests", help = "Run the pydocstyle checks for source code documentation" }
 pylint = { cmd = "pylint workknow tests", help = "Run the pylint checks for source code documentation" }
-test = { cmd = "pytest -x -s", help = "Run the pytest test suite (takes a long time)" }
+test = { cmd = "pytest -x -s", help = "Run the pytest test suite" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
