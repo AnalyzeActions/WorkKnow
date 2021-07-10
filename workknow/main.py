@@ -87,7 +87,13 @@ def analyze(
         console.print(
             f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
-        files.save_dataframe(results_dir, organization, repo, workflows_dataframe)
+        files.save_dataframe(
+            results_dir,
+            organization,
+            repo,
+            constants.filesystem.Workflows,
+            workflows_dataframe,
+        )
     else:
         console.print(
             f"Could not save workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
