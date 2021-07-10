@@ -45,7 +45,7 @@ def get_workflow_runs(json_responses):
     # this dictionary has a key called "workflow_runs" that has as its value a
     # list of dictionaries, one for each run inside of GitHub Actions. This
     # will return the list so that it can be stored and analyzed.
-    return json_responses["workflow_runs"]
+    return json_responses[constants.github.Workflow_Runs]
 
 
 def request_json_from_github(github_api_url: str) -> List:
