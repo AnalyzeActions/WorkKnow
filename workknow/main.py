@@ -45,13 +45,6 @@ def setup(debug_level: DebugLevel) -> Tuple[Console, Logger]:
     return console, logger
 
 
-def confirm_valid_results_dir(results_dir: Path) -> bool:
-    """Confirm that the provided results directory is a valid path."""
-    if results_dir is not None and results_dir.is_dir():
-        return True
-    return False
-
-
 @cli.command()
 def analyze(
     organization: str = typer.Option(...),
@@ -91,8 +84,12 @@ def analyze(
     workflows_dataframe = produce.create_workflows_dataframe(json_responses)
     # STEP: save the workflows DataFrame when saving is stipulated and
     # the results directory is valid for the user's file system
-    if save and confirm_valid_results_dir(results_dir):
+    if save and files.confirm_valid_directory(results_dir):
         console.print(
             f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
         files.save_dataframe(results_dir, organization, repo, workflows_dataframe)
+    else:
+        console.print(
+            f"Could not save workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+        )
