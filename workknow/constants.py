@@ -67,6 +67,21 @@ markers = create_constants(
 )
 
 
+# define the constants for workflow
+workflow = create_constants(
+    "workflow",
+    Conclusion="conclusion",
+    Created_At="created_at",
+    Event="event",
+    Head_Sha="head_sha",
+    Jobs_Url="jobs_url",
+    Id="id",
+    Name="name",
+    Status="status",
+    Updated_At="updated_at",
+)
+
+
 # define the constants for workknow
 workknow = create_constants(
     "workknow",
