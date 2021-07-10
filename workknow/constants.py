@@ -66,11 +66,12 @@ markers = create_constants(
     Space=" ",
 )
 
+
 # define the constants for workknow
 workknow = create_constants(
     "workknow",
     Emoji=":light_bulb:",
-    Tagline="WorkKnow: Get to Know Your GitHub Actions Workflows!",
+    Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Https="https://",
     Separator="/",
 )
