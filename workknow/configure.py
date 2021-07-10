@@ -11,6 +11,11 @@ from workknow import constants
 
 def configure_tracebacks() -> None:
     """Configure stack tracebacks arising from a crash to use rich."""
+    # Use the install function provided by rich to get colorful
+    # and nicely labelled and organized tracebacks when program crashes.
+    # Note that the tracebacks will not be rich-ified before this
+    # function is called and thus an early program crash will lead to
+    # a traceback that is, sadly, not rich-ified
     install()
 
 
