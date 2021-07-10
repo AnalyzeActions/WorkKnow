@@ -38,7 +38,10 @@ github = create_constants(
     Next="next",
     Page="page",
     Page_Start=2,
+    Per_Page="per_page",
+    Per_Page_Maximum="100",
     Separator="/",
+    User="User",
 )
 
 
