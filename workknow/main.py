@@ -4,7 +4,6 @@ from enum import Enum
 from logging import Logger
 from pathlib import Path
 
-from typing import Optional
 from typing import Tuple
 
 import typer
