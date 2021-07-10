@@ -54,9 +54,9 @@ def request_json_from_github(github_api_url: str) -> List:
     logger = logging.getLogger(constants.logging.Rich)
     # access the person's GitHub personal access token so that
     # the use of the tool is not rapidly rate limited
-    github_authentication = ("user", get_github_personal_access_token())
-    # request the maximum of 100 entries per page
-    github_params = {"per_page": "100"}
+    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # request the maximum of number of entries per page
+    github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
