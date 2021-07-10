@@ -23,6 +23,8 @@ def configure_logging(
     debug_level: str = constants.logging.Default_Logging_Level,
 ) -> logging.Logger:
     """Configure standard Python logging package to use rich."""
+    # configure the logger to use the RichHandler, ensuring that
+    # there is nicely formatted and colorful output in terminal log
     logging.basicConfig(
         level=debug_level,
         format=constants.logging.Format,
