@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import pandas
-import typer
 
 from workknow import constants
 
