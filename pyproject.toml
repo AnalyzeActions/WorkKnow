@@ -32,10 +32,11 @@ types-requests = "^2.25.0"
 black = { cmd = "black workknow tests --check", help = "Run the black checks for source code format" }
 coverage = { cmd = "pytest -s --cov-config .coveragerc --cov-report term-missing --cov-report xml --cov --cov-branch", help = "Run coverage monitoring for the test suite" }
 flake8 = { cmd = "flake8 workknow tests", help = "Run the flake8 checks for source code documentation" }
+mypy = { cmd = "poetry run mypy workknow", help = "Run the mypy type checker for potential type errors" }
 pydocstyle = { cmd = "pydocstyle workknow tests", help = "Run the pydocstyle checks for source code documentation" }
 pylint = { cmd = "pylint workknow tests", help = "Run the pylint checks for source code documentation" }
 test = { cmd = "pytest -x -s", help = "Run the pytest test suite" }
-all = "task black && task flake8 && task pydocstyle && task pylint && task test && task coverage"
+all = "task black && task flake8 && task pydocstyle && task pylint && task mypy && task test && task coverage"
 lint = "task black && task flake8 && task pydocstyle && task pylint"
 tests = "task test && task coverage"
 
