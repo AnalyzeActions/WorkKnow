@@ -44,7 +44,7 @@ def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
 def create_workflows_dataframe(
     workflows_dictionary_list: List[Dict[Any, Any]]
 ) -> pandas.DataFrame:
-    """Create a dictionary of all of the relevant workflow data."""
+    """Create a DataFrame of all of the relevant workflow data."""
     # create a tuple of the key names that we want to retain from
     # those keys that are inside of all those in a dictionary (row) of data
     subset_key_names = {
