@@ -32,9 +32,12 @@ filesystem = create_constants(
 # define the constants for accessing GitHub
 github = create_constants(
     "github",
-    Api="api.github.com/repos/",
     Actions="actions/runs",
+    Api="api.github.com/repos/",
     Https="https://",
+    Next="next",
+    Page="page",
+    Page_Start=2,
     Separator="/",
 )
 
