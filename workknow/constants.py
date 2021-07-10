@@ -42,6 +42,7 @@ github = create_constants(
     Per_Page_Maximum="100",
     Separator="/",
     User="User",
+    Workflow_Runs="workflow_runs",
 )
 
 
