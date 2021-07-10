@@ -4,7 +4,7 @@ import logging
 
 import pandas
 
-from actionstory import constants
+from workknow import constants
 
 
 def create_github_api_url(organization: str, repo: str) -> str:

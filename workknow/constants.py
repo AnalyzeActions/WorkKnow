@@ -15,16 +15,6 @@ def create_constants(name, *args, **kwargs):
     return new_constants(*itertools.chain(args, kwargs.values()))
 
 
-# define the constants for ActionStory
-actionstory = create_constants(
-    "actionstory",
-    Emoji=":light_bulb:",
-    Tagline="ActionStory: Surfacing the story of builds on GitHub Actions!",
-    Https="https://",
-    Separator="/",
-)
-
-
 # define the constants for environment variables
 environment = create_constants(
     "environment",
@@ -67,4 +57,13 @@ logging = create_constants(
 markers = create_constants(
     "markers",
     Space=" ",
+)
+
+# define the constants for workknow
+workknow = create_constants(
+    "workknow",
+    Emoji=":light_bulb:",
+    Tagline="WorkKnow: Get to Know Your GitHub Actions Workflows!",
+    Https="https://",
+    Separator="/",
 )

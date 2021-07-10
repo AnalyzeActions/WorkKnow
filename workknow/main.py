@@ -1,4 +1,4 @@
-"""Command-line interface for the ActionStory program."""
+"""Command-line interface for the workknow program."""
 
 from enum import Enum
 from logging import Logger
@@ -9,10 +9,10 @@ import typer
 from rich.console import Console
 from rich.pretty import pprint
 
-from actionstory import configure
-from actionstory import constants
-from actionstory import produce
-from actionstory import request
+from workknow import configure
+from workknow import constants
+from workknow import produce
+from workknow import request
 
 
 cli = typer.Typer()
@@ -53,9 +53,9 @@ def analyze(
     # STEP: display the message about the tool
     console.print()
     console.print(
-        constants.actionstory.Emoji
+        constants.workknow.Emoji
         + constants.markers.Space
-        + constants.actionstory.Tagline
+        + constants.workknow.Tagline
     )
     console.print()
     # STEP: create the URL needed for accessing the repository's Action builds

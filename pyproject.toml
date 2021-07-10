@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "ActionStory"
+name = "WorkKnow"
 version = "0.1.0"
 description = "Surface the Story of GitHub Actions Builds"
 authors = ["Gregory M. Kapfhammer <gkapfham@allegheny.edu>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
-actionstory = "actionstory.main:cli"
+workknow = "workknow.main:cli"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -26,11 +26,11 @@ taskipy = "^1.8.1"
 pytest-cov = "^2.11.1"
 
 [tool.taskipy.tasks]
-black = { cmd = "black actionstory tests --check", help = "Run the black checks for source code format" }
+black = { cmd = "black workknow tests --check", help = "Run the black checks for source code format" }
 coverage = { cmd = "pytest -s --cov-config .coveragerc --cov-report term-missing --cov-report xml --cov --cov-branch", help = "Run coverage monitoring for the test suite" }
-flake8 = { cmd = "flake8 actionstory tests", help = "Run the flake8 checks for source code documentation" }
-pydocstyle = { cmd = "pydocstyle actionstory tests", help = "Run the pydocstyle checks for source code documentation" }
-pylint = { cmd = "pylint actionstory tests", help = "Run the pylint checks for source code documentation" }
+flake8 = { cmd = "flake8 workknow tests", help = "Run the flake8 checks for source code documentation" }
+pydocstyle = { cmd = "pydocstyle workknow tests", help = "Run the pydocstyle checks for source code documentation" }
+pylint = { cmd = "pylint workknow tests", help = "Run the pylint checks for source code documentation" }
 test = { cmd = "pytest -x -s", help = "Run the pytest test suite (takes a long time)" }
 
 [build-system]

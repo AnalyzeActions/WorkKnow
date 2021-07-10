@@ -1,4 +1,4 @@
-"""Use Python HTTPx to Access the GitHub API."""
+"""Use the GitHub REST API to access information about GitHub Action Workflows."""
 
 import logging
 import os
@@ -8,7 +8,7 @@ from typing import List
 import requests
 from dotenv import load_dotenv
 
-from actionstory import constants
+from workknow import constants
 
 # Sample of the JSON file returned by the request:
 

@@ -6,7 +6,7 @@ import logging.config
 from rich.logging import RichHandler
 from rich.traceback import install
 
-from actionstory import constants
+from workknow import constants
 
 
 def configure_tracebacks() -> None:
