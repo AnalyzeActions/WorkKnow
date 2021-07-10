@@ -43,6 +43,7 @@ def create_workflows_dataframe(workflows_dictionary_list) -> pandas.DataFrame:
     # those keys that are inside of all those in a dictionary (row) of data
     subset_key_names = {
         "id",
+        "name",
         "head_sha",
         "created_at",
         "updated_at",
