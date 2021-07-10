@@ -11,6 +11,7 @@ def create_constants(name, *args, **kwargs):
     # for *args with "Constant_Name" or **kwargs with Constant_Name = "AnyConstantName"
     # note that this creates a constant that will
     # throw an AttributeError when attempting to redefine
+    # the return value from this function is always a new type
     new_constants = collections.namedtuple(name, itertools.chain(args, kwargs.keys()))
     return new_constants(*itertools.chain(args, kwargs.values()))
 
