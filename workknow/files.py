@@ -8,7 +8,9 @@ import pandas
 from workknow import constants
 
 
-def save_dataframe(results_dir: Path, organization: str, repository: str, repo_data: pandas.DataFrame) -> None:
+def save_dataframe(
+    results_dir: Path, organization: str, repository: str, repo_data: pandas.DataFrame
+) -> None:
     """Save the provided DataFrame in a file connected to organization and repo in the results_dir."""
     # create the directory given the provided input details
     logger = logging.getLogger(constants.logging.Rich)

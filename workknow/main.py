@@ -51,7 +51,7 @@ def analyze(
     repo: str = typer.Option(...),
     debug_level: DebugLevel = DebugLevel.ERROR,
     results_dir: Optional[Path] = typer.Option(None),
-    save: bool = typer.Option(False)
+    save: bool = typer.Option(False),
 ):
     """Analyze GitHub Action history of repository at URL."""
     # STEP: setup the console and the logger and then create a blank line for space
