@@ -8,6 +8,23 @@ import pandas
 from workknow import constants
 
 
+def create_directory(directory: Path) -> None:
+    """Create a directory if it does not exist and don't fail if it does."""
+    # create the complete file path, making all parent directories
+    # if needed and not failing if the directory already exists
+    directory.mkdir(parents=True, exist_ok=True)
+
+
+def confirm_valid_directory(directory: Path) -> bool:
+    """Confirm that the provided results directory is a valid path."""
+    # attempt to create the directory first if it does not already exist
+    if directory is not None:
+        create_directory(directory)
+        if directory.is_dir():
+            return True
+    return False
+
+
 def save_dataframe(
     results_dir: Path, organization: str, repository: str, repo_data: pandas.DataFrame
 ) -> None:
