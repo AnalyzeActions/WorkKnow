@@ -48,15 +48,15 @@ def create_workflows_dataframe(
     # create a tuple of the key names that we want to retain from
     # those keys that are inside of all those in a dictionary (row) of data
     subset_key_names = {
-        "id",
-        "name",
-        "head_sha",
-        "created_at",
-        "updated_at",
-        "event",
-        "status",
-        "conclusion",
-        "jobs_url",
+        constants.workflow.Id,
+        constants.workflow.Name,
+        constants.workflow.Head_Sha,
+        constants.workflow.Created_At,
+        constants.workflow.Updated_At,
+        constants.workflow.Event,
+        constants.workflow.Status,
+        constants.workflow.Conclusion,
+        constants.workflow.Jobs_Url,
     }
     # create an empty list that will store dictionaries to be made into
     # rows of a Pandas DataFrame. This approach avoids the need to incrementally
