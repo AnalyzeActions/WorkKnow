@@ -2,7 +2,7 @@
 
 import pytest
 
-from actionstory import constants
+from workknow import constants
 
 CANNOT_SET_CONSTANT_VARIABLE = "cannot_set_constant_variable"
 
