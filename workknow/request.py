@@ -72,12 +72,12 @@ def request_json_from_github(github_api_url: str) -> List:
     logger.debug(response.headers)
     # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
     # and thus the next page that we will need to extract (if needed) is 2
-    page = 2
+    page = constants.github.Page_Start
     # continue to extract data from the pages as long as the "next" field is evident
-    while "next" in response.links.keys():
+    while constants.github.Next in response.links.keys():
         # update the "page" variable in the URL to go to the next page
         # otherwise, make sure to use all of the same parameters as the first request
-        github_params["page"] = str(page)
+        github_params[constants.github.Page] = str(page)
         response = requests.get(
             github_api_url, params=github_params, auth=github_authentication
         )
