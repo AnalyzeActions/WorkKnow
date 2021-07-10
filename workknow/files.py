@@ -34,7 +34,12 @@ def save_dataframe(
     create_directory(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     # create the directory given the provided input details
-    file_name = organization + "-" + repository + ".csv"
+    file_name = (
+        organization
+        + constants.filesystem.Dash
+        + repository
+        + constants.filesystem.Csv_Extension
+    )
     # log the name of the file and the results directory
     logger = logging.getLogger(constants.logging.Rich)
     logger.debug(results_dir)
