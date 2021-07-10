@@ -2,6 +2,9 @@
 
 from enum import Enum
 from logging import Logger
+from pathlib import Path
+
+from typing import Optional
 from typing import Tuple
 
 import typer
@@ -11,6 +14,7 @@ from rich.pretty import pprint
 
 from workknow import configure
 from workknow import constants
+from workknow import files
 from workknow import produce
 from workknow import request
 
@@ -46,6 +50,8 @@ def analyze(
     organization: str = typer.Option(...),
     repo: str = typer.Option(...),
     debug_level: DebugLevel = DebugLevel.ERROR,
+    results_dir: Optional[Path] = typer.Option(None),
+    save: bool = typer.Option(False)
 ):
     """Analyze GitHub Action history of repository at URL."""
     # STEP: setup the console and the logger and then create a blank line for space
@@ -74,6 +80,6 @@ def analyze(
     logger.debug(json_responses[0][0])
     console.print()
     pprint(json_responses[0][0])
-    # STEP: create the workflows dictionary
-    workflows_dictionary = produce.create_workflows_dataframe(json_responses)
-    pprint(workflows_dictionary)
+    # STEP: create the workflows DataFrame
+    workflows_dataframe = produce.create_workflows_dataframe(json_responses)
+    files.save_dataframe(results_dir, organization, repo, workflows_dataframe)
