@@ -42,7 +42,7 @@ def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
     return running_build_total
 
 
-def create_subsetted_dataframe(
+def create_subsetted_list_dict(
     subset_key_names: Set, workflows_dictionary_list: List[Dict[Any, Any]]
 ) -> List[Dict[Any, Any]]:
     """Create a DataFrame of all of the relevant workflow data."""
@@ -86,7 +86,7 @@ def create_workflows_dataframe(
         constants.workflow.Conclusion,
         constants.workflow.Jobs_Url,
     }
-    total_workflow_list = create_subsetted_dataframe(
+    total_workflow_list = create_subsetted_list_dict(
         subset_key_names, workflows_dictionary_list
     )
     total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
@@ -102,7 +102,7 @@ def create_commits_dataframe(
     subset_key_names = {
         constants.workflow.Head_Commit,
     }
-    commits_dataframe = create_subsetted_dataframe(
+    commits_dataframe = create_subsetted_list_dict(
         subset_key_names, workflows_dictionary_list
     )
     total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
