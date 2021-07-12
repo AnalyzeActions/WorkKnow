@@ -24,11 +24,11 @@ cli = typer.Typer()
 class DebugLevel(str, Enum):
     """The predefined levels for debugging."""
 
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
+    DEBUG = constants.logging.Debug
+    INFO = constants.logging.Info
+    WARNING = constants.logging.Warning
+    ERROR = constants.logging.Error
+    CRITICAL = constants.logging.Critical
 
 
 def setup(debug_level: DebugLevel) -> Tuple[Console, Logger]:
