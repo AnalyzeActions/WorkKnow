@@ -6,7 +6,6 @@ from pathlib import Path
 
 from typing import Tuple
 
-import pandas
 import typer
 
 from rich.console import Console
