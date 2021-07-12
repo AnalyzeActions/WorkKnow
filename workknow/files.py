@@ -25,6 +25,38 @@ def confirm_valid_directory(directory: Path) -> bool:
     return False
 
 
+def save_dataframe_all(
+    results_dir: Path,
+    label: str,
+    repo_data: pandas.DataFrame,
+) -> None:
+    """Save the provided DataFrame in a file in the results_dir with a label for all data sets."""
+    # create the complete file path, making all parent directories
+    # if needed and not failing if the directory already exists
+    create_directory(results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    # create the directory given the provided input details
+    file_name = (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + label
+        + constants.filesystem.Csv_Extension
+    )
+    # log the name of the file and the results directory
+    logger = logging.getLogger(constants.logging.Rich)
+    logger.debug(results_dir)
+    logger.debug(file_name)
+    # construct the complete file path including (in order):
+    # --> the fully qualified path for the results directory
+    # --> the full name of the file storing the data
+    complete_file_path = results_dir / file_name
+    # resolve the complete file path to get its absolute name
+    resolved_complete_file_path = complete_file_path.resolve()
+    # convert the pathlib Path object to a string and then use
+    # Pandas to save the file to the textualized path as a CSV file
+    repo_data.to_csv(str(resolved_complete_file_path))
+
+
 def save_dataframe(
     results_dir: Path,
     organization: str,
