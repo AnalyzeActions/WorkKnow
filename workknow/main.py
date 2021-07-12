@@ -110,6 +110,7 @@ def analyze(
             commits_dataframe,
         )
     else:
+        # explain that the save could not work correctly due to invalid results directory
         console.print(
             f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
