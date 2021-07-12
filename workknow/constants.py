@@ -101,4 +101,5 @@ workknow = create_constants(
     Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Https="https://",
     Separator="/",
+    Website="https://github.com/AnalyzeActions/WorkKnow",
 )
