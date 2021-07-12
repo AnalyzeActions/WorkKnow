@@ -68,7 +68,9 @@ def analyze(
         organization, repo = produce.parse_github_url(repo_url)
         if organization is not None and repo is not None:
             github_api_url = produce.create_github_api_url(organization, repo)
-            console.print(":runner: Analyzing the workflow history of the GitHub repository at:")
+            console.print(
+                ":runner: Analyzing the workflow history of the GitHub repository at:"
+            )
             console.print(github_api_url, style="link " + github_api_url)
             console.print()
             # STEP: access the JSON file that contains the build history
@@ -80,7 +82,9 @@ def analyze(
             pprint(json_responses, max_length=constants.github.Maximum_Length_All)
             console.print()
             console.print(":lion_face: The first workflow record looks like:\n")
-            pprint(json_responses[0][0], max_length=constants.github.Maximum_Length_Record)
+            pprint(
+                json_responses[0][0], max_length=constants.github.Maximum_Length_Record
+            )
             logger.debug(json_responses[0][0])
             console.print()
             # pprint(json_responses[0][0])
