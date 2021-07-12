@@ -6,6 +6,7 @@ from pathlib import Path
 
 from typing import Tuple
 
+import pandas
 import typer
 
 from rich.console import Console
@@ -81,9 +82,13 @@ def analyze(
     pprint(json_responses[0][0])
     # STEP: create the workflows DataFrame
     workflows_dataframe = produce.create_workflows_dataframe(json_responses)
+    # STEP: create the commit details DataFrame
+    commits_dataframe = produce.create_commits_dataframe(json_responses)
+    pprint(commits_dataframe)
     # STEP: save the workflows DataFrame when saving is stipulated and
     # the results directory is valid for the user's file system
     if save and files.confirm_valid_directory(results_dir):
+        # save the workflows DataFrame
         console.print(
             f"Saving workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
@@ -94,7 +99,18 @@ def analyze(
             constants.filesystem.Workflows,
             workflows_dataframe,
         )
+        # save the commits DataFrame
+        console.print(
+            f"Saving commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+        )
+        files.save_dataframe(
+            results_dir,
+            organization,
+            repo,
+            constants.filesystem.Commits,
+            commits_dataframe,
+        )
     else:
         console.print(
-            f"Could not save workflow details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+            f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
