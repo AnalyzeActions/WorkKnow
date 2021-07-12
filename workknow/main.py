@@ -54,14 +54,12 @@ def analyze(
     """Analyze GitHub Action history of repository at URL."""
     # STEP: setup the console and the logger and then create a blank line for space
     console, logger = setup(debug_level)
-    # STEP: display the message about the tool
+    # STEP: display the messages about the tool
     console.print()
     console.print(
         constants.workknow.Emoji + constants.markers.Space + constants.workknow.Tagline
     )
-    console.print(
-        constants.workknow.Website
-    )
+    console.print(constants.workknow.Website)
     console.print()
     # STEP: create the URL needed for accessing the repository's Action builds
     organization, repo = produce.parse_github_url(repo_url)
