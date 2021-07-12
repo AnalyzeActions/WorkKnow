@@ -7,15 +7,16 @@ from typing import Dict
 from typing import List
 from typing import Set
 from typing import Tuple
+from typing import Union
 
-from giturlparse import parse
+from giturlparse import parse  # type: ignore
 
 import pandas
 
 from workknow import constants
 
 
-def parse_github_url(github_url: str) -> Tuple[str, str]:
+def parse_github_url(github_url: str) -> Tuple[Union[str, None], Union[str, None]]:
     """Parse a GitHub URL using the giturlparse package returning names of organization and repository."""
     # the provided github_url is valid and can be parsed
     if parse(github_url).valid:
