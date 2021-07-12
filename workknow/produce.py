@@ -6,10 +6,28 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Set
+from typing import Tuple
+
+from giturlparse import parse
 
 import pandas
 
 from workknow import constants
+
+
+def parse_github_url(github_url: str) -> Tuple[str, str]:
+    """Parse a GitHub URL using the giturlparse package returning names of organization and repository."""
+    # the provided github_url is valid and can be parsed
+    if parse(github_url).valid:
+        # parse the parse-able github_url
+        github_url_parse = parse(github_url)
+        # extract the owner (i.e., organization) and repo fields
+        # and return them both in a tuple
+        organization = github_url_parse.owner
+        repository = github_url_parse.repo
+        return (organization, repository)
+    # the provided github_url was not parse-able so return None
+    return (None, None)
 
 
 def create_github_api_url(organization: str, repo: str) -> str:
