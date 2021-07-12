@@ -103,6 +103,8 @@ def create_commits_dataframe(
     subset_key_names = {
         constants.workflow.Head_Commit,
     }
-    commits_dataframe = create_subsetted_dataframe(subset_key_names, workflows_dictionary_list)
+    commits_dataframe = create_subsetted_dataframe(
+        subset_key_names, workflows_dictionary_list
+    )
     total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
     return total_commits_dataframe
