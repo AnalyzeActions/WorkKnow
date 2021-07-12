@@ -64,10 +64,9 @@ def create_subsetted_dataframe(
             }
             # add the list of chosen key-value pairs to the list of workflow details
             total_workflow_list.append(chosen_keys_values)
+    # return the list of dicts so that calling method can analyze it further
+    # or create a Pandas data frame out of it
     return total_workflow_list
-    # create a Pandas DataFrame from the list of dictionaries
-    # total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
-    # return total_workflow_dataframe
 
 
 def create_workflows_dataframe(
