@@ -44,7 +44,7 @@ def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
 
 def create_subsetted_dataframe(
     subset_key_names: Set, workflows_dictionary_list: List[Dict[Any, Any]]
-) -> pandas.DataFrame:
+) -> List[Dict[Any, Any]]:
     """Create a DataFrame of all of the relevant workflow data."""
     # create an empty list that will store dictionaries to be made into
     # rows of a Pandas DataFrame. This approach avoids the need to incrementally
