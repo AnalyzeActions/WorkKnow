@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 from typing import Tuple
 
+import pandas
 import typer
 
 from rich.console import Console
@@ -62,6 +63,9 @@ def analyze(
     )
     console.print(constants.workknow.Website)
     console.print()
+    # create empty lists of the data frames
+    repository_urls_dataframes_workflows = []
+    repository_urls_dataframes_commits = []
     # iterate through all of the repo_urls provided on the command-line
     for repo_url in repo_urls:
         # STEP: create the URL needed for accessing the repository's Action builds
@@ -92,18 +96,20 @@ def analyze(
             workflows_dataframe = produce.create_workflows_dataframe(
                 organization, repo, repo_url, json_responses
             )
+            repository_urls_dataframes_workflows.append(workflows_dataframe)
             # STEP: create the commit details DataFrame
             commits_dataframe = produce.create_commits_dataframe(
                 organization, repo, repo_url, json_responses
             )
+            repository_urls_dataframes_commits.append(commits_dataframe)
             # STEP: save the workflows DataFrame when saving is stipulated and
             # the results directory is valid for the user's file system
             if save and files.confirm_valid_directory(results_dir):
                 # save the workflows DataFrame
                 console.print(
-                    f":sparkles: Saving details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                    f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
-                console.print("\t... Saving the workflows file.")
+                console.print("\t... Saving the workflows data.")
                 files.save_dataframe(
                     results_dir,
                     organization,
@@ -112,7 +118,7 @@ def analyze(
                     workflows_dataframe,
                 )
                 # save the commits DataFrame
-                console.print("\t... Saving the commits file.")
+                console.print("\t... Saving the commits data.")
                 files.save_dataframe(
                     results_dir,
                     organization,
@@ -123,6 +129,35 @@ def analyze(
             else:
                 # explain that the save could not work correctly due to invalid results directory
                 console.print(
-                    f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                    f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
             console.print()
+        console.print(":runner: Creating combined data sets across all repositories.")
+        console.print()
+        all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
+        all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+        if save and files.confirm_valid_directory(results_dir):
+            # save the workflows DataFrame
+            console.print(
+                f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
+            )
+            # save the all workflows DataFrame
+            console.print("\t... Saving combined workflows data for all repositories.")
+            files.save_dataframe_all(
+                results_dir,
+                constants.filesystem.Workflows,
+                all_workflows_dataframe,
+            )
+            # save the commits DataFrame
+            console.print("\t... Saving combined commits data for all repositories.")
+            files.save_dataframe_all(
+                results_dir,
+                constants.filesystem.Commits,
+                all_commits_dataframe,
+            )
+        else:
+            # explain that the save could not work correctly due to invalid results directory
+            console.print(
+                f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+            )
+        console.print()
