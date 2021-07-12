@@ -1,5 +1,6 @@
 """Create content from containers and strings."""
 
+import collections
 import logging
 
 from typing import Any
@@ -143,3 +144,19 @@ def create_commits_dataframe(
     )
     total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
     return total_commits_dataframe
+
+
+def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
+    """Extract a list of urls from the provided Pandas DataFrame."""
+    url_column_series = repos_dataframe["url"]
+    url_column_list = url_column_series.tolist()
+    return url_column_list
+
+
+def flatten(iterable):
+    """Flatten a list of strings, ensuring preservation of non-list content."""
+    for el in iterable:
+        if isinstance(el, collections.Iterable) and not isinstance(el, str):
+            yield from flatten(el)
+        else:
+            yield el
