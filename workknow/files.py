@@ -1,11 +1,18 @@
 """Load and save files."""
 
 import logging
+
 from pathlib import Path
 
 import pandas
 
 from workknow import constants
+
+
+def read_csv_file(csv_data_file: Path) -> pandas.DataFrame:
+    """Read a CSV file and return it as a Pandas DataFrame."""
+    csv_file_data_frame = pandas.read_csv(str(csv_data_file))
+    return csv_file_data_frame
 
 
 def create_directory(directory: Path) -> None:
