@@ -89,9 +89,13 @@ def analyze(
             console.print()
             # pprint(json_responses[0][0])
             # STEP: create the workflows DataFrame
-            workflows_dataframe = produce.create_workflows_dataframe(json_responses)
+            workflows_dataframe = produce.create_workflows_dataframe(
+                organization, repo, repo_url, json_responses
+            )
             # STEP: create the commit details DataFrame
-            commits_dataframe = produce.create_commits_dataframe(json_responses)
+            commits_dataframe = produce.create_commits_dataframe(
+                organization, repo, repo_url, json_responses
+            )
             # STEP: save the workflows DataFrame when saving is stipulated and
             # the results directory is valid for the user's file system
             if save and files.confirm_valid_directory(results_dir):
