@@ -77,10 +77,10 @@ def analyze(
                 f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:\n"
             )
             # STEP: print debugging information in a summarized fashion
-            pprint(json_responses, max_length=3)
+            pprint(json_responses, max_length=constants.github.Maximum_Length_All)
             console.print()
             console.print(":lion_face: The first workflow record looks like:\n")
-            pprint(json_responses[0][0], max_length=25)
+            pprint(json_responses[0][0], max_length=constants.github.Maximum_Length_Record)
             logger.debug(json_responses[0][0])
             console.print()
             # pprint(json_responses[0][0])
