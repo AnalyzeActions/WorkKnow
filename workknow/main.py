@@ -1,5 +1,7 @@
 """Command-line interface for the workknow program."""
 
+import itertools
+
 from enum import Enum
 from logging import Logger
 from pathlib import Path
@@ -49,8 +51,9 @@ def setup(debug_level: DebugLevel) -> Tuple[Console, Logger]:
 @cli.command()
 def analyze(
     repo_urls: List[str],
-    debug_level: DebugLevel = DebugLevel.ERROR,
+    repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
+    debug_level: DebugLevel = DebugLevel.ERROR,
     save: bool = typer.Option(False),
 ):
     """Analyze GitHub Action history of repository at URL."""
@@ -66,8 +69,17 @@ def analyze(
     # create empty lists of the data frames
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
-    # iterate through all of the repo_urls provided on the command-line
-    for repo_url in repo_urls:
+    # read the CSV file and extract its data into a Pandas DataFrame
+    provided_urls_data_frame = files.read_csv_file(repos_csv_file)
+    provided_url_list = produce.extract_repo_urls_list(provided_urls_data_frame)
+    logger.debug(repo_urls)
+    repo_urls = list(repo_urls)
+    repo_urls.append(provided_url_list)
+    logger.debug(repo_urls)
+    merged_repo_urls = produce.flatten(repo_urls)
+    logger.debug(merged_repo_urls)
+    # iterate through all of the repo_urls provided on the command-line or in the CSV file
+    for repo_url in merged_repo_urls:
         # STEP: create the URL needed for accessing the repository's Action builds
         organization, repo = produce.parse_github_url(repo_url)
         if organization is not None and repo is not None:
