@@ -91,6 +91,9 @@ workflow = create_constants(
     Jobs_Url="jobs_url",
     Id="id",
     Name="name",
+    Organization="organization",
+    Repo="repo",
+    Repo_Url="repo_url",
     Status="status",
     Updated_At="updated_at",
 )
