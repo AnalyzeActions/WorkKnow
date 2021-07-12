@@ -25,7 +25,7 @@ environment = create_constants(
 
 # define the constants for environment variables
 filesystem = create_constants(
-    "filesystem", Csv_Extension=".csv", Dash="-", Workflows="Workflows"
+    "filesystem", Commits="Commits", Csv_Extension=".csv", Dash="-", Workflows="Workflows"
 )
 
 
@@ -80,6 +80,7 @@ workflow = create_constants(
     Conclusion="conclusion",
     Created_At="created_at",
     Event="event",
+    Head_Commit="head_commit",
     Head_Sha="head_sha",
     Jobs_Url="jobs_url",
     Id="id",
