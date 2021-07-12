@@ -92,7 +92,7 @@ def analyze(
             console.print(
                 f":sparkles: Saving details for {organization}/{repo} in the directory {str(results_dir).strip()}"
             )
-            console.print("\t... Save the workflows file.")
+            console.print("\t... Saving the workflows file.")
             files.save_dataframe(
                 results_dir,
                 organization,
@@ -101,7 +101,7 @@ def analyze(
                 workflows_dataframe,
             )
             # save the commits DataFrame
-            console.print("\t... Save the commits file.")
+            console.print("\t... Saving the commits file.")
             files.save_dataframe(
                 results_dir,
                 organization,
