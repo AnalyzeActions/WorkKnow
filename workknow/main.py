@@ -92,7 +92,7 @@ def analyze(
             console.print(
                 f":sparkles: Saving details for {organization}/{repo} in the directory {str(results_dir).strip()}"
             )
-            console.print("\t... Save the workflow file.")
+            console.print("\t... Save the workflows file.")
             files.save_dataframe(
                 results_dir,
                 organization,
