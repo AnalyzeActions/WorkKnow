@@ -26,6 +26,7 @@ environment = create_constants(
 # define the constants for environment variables
 filesystem = create_constants(
     "filesystem",
+    All="All",
     Commits="Commits",
     Csv_Extension=".csv",
     Dash="-",
