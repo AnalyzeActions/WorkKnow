@@ -62,7 +62,11 @@ def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
 
 
 def create_subsetted_list_dict(
-    subset_key_names: Set, workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    subset_key_names: Set,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> List[Dict[Any, Any]]:
     """Create a DataFrame of all of the relevant workflow data."""
     # create an empty list that will store dictionaries to be made into
@@ -81,6 +85,13 @@ def create_subsetted_list_dict(
                 for key, value in current_workflow_dictionary.items()
                 if key in subset_key_names
             }
+            # to ensure that the data set is self contained (and also to ensure that
+            # records for multiple projects can be stored in the same "All" DataFrame),
+            # include the organization name, repository name, and full repository URL
+            # inside of the dictionary before it is stored inside of the list
+            chosen_keys_values[constants.workflow.Organization] = organization
+            chosen_keys_values[constants.workflow.Repo] = repo
+            chosen_keys_values[constants.workflow.Repo_Url] = repo_url
             # add the list of chosen key-value pairs to the list of workflow details
             total_workflow_list.append(chosen_keys_values)
     # return the list of dicts so that calling method can analyze it further
@@ -89,7 +100,10 @@ def create_subsetted_list_dict(
 
 
 def create_workflows_dataframe(
-    workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all of the relevant workflow data."""
     # create a tuple of the key names that we want to retain from
@@ -106,14 +120,17 @@ def create_workflows_dataframe(
         constants.workflow.Jobs_Url,
     }
     total_workflow_list = create_subsetted_list_dict(
-        subset_key_names, workflows_dictionary_list
+        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
     )
     total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
     return total_workflow_dataframe
 
 
 def create_commits_dataframe(
-    workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all the relevant commit message data."""
     # create a tuple of the key names that we want to retain from
@@ -122,7 +139,7 @@ def create_commits_dataframe(
         constants.workflow.Head_Commit,
     }
     commits_dataframe = create_subsetted_list_dict(
-        subset_key_names, workflows_dictionary_list
+        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
     )
     total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
     return total_commits_dataframe
