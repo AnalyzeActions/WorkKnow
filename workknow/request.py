@@ -30,7 +30,7 @@ from workknow import constants
 #
 # Reference:
 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
-load_dotenv()
+# load_dotenv()
 
 
 def get_github_personal_access_token():
