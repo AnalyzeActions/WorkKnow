@@ -153,10 +153,16 @@ def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
     return url_column_list
 
 
-def flatten(iterable):
-    """Flatten a list of strings, ensuring preservation of non-list content."""
-    for el in iterable:
-        if isinstance(el, collections.Iterable) and not isinstance(el, str):
-            yield from flatten(el)
-        else:
-            yield el
+# def flatten(iterable: List[Any]) -> List[Any]:
+#     """Flatten a list of strings, ensuring preservation of non-list content."""
+#     print("first")
+#     print(iterable)
+#     final_list = []
+#     for element in iterable:
+#         if isinstance(element, collections.Iterable) and not isinstance(element, str):
+#             final_list.extend(flatten(element))
+#         else:
+#             final_list.append(element)
+#     print("final")
+#     print(final_list)
+#     return final_list
