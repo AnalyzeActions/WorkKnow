@@ -22,15 +22,6 @@ from workknow import constants
 # │   ]
 # }
 
-# use the python-dotenv package to load the .env file
-# (created by the user) that will contain the GitHub
-# personal access token that allows for API interactions
-# before the rate limit will be enforced
-#
-# Reference:
-# https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
-# load_dotenv()
-
 
 def get_github_personal_access_token():
     """Retrieve the GitHub personal access token from the environment."""
