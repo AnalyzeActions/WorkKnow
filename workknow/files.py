@@ -22,8 +22,17 @@ def create_directory(directory: Path) -> None:
     directory.mkdir(parents=True, exist_ok=True)
 
 
+def confirm_valid_file(file: Path) -> bool:
+    """Confirm that the provided file is a valid path."""
+    # determine if the file is not None and if it is a file
+    if file is not None:
+        if file.is_file():
+            return True
+    return False
+
+
 def confirm_valid_directory(directory: Path) -> bool:
-    """Confirm that the provided results directory is a valid path."""
+    """Confirm that the provided directory is a valid path."""
     # attempt to create the directory first if it does not already exist
     if directory is not None:
         create_directory(directory)
