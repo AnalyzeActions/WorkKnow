@@ -30,7 +30,7 @@ def download(
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
     save: bool = typer.Option(False),
 ):
-    """Analyze GitHub Action history of repository at URL."""
+    """Download the GitHub Action workflow history of repositories in URL list and CSV file."""
     # STEP: setup the console and the logger and then create a blank line for space
     console, logger = configure.setup(debug_level)
     # STEP: display the messages about the tool
