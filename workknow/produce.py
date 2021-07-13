@@ -1,12 +1,9 @@
 """Create content from containers and strings."""
 
-import collections
 import logging
 
 from typing import Any
 from typing import Dict
-from typing import Iterator
-from typing import Iterable
 from typing import List
 from typing import Set
 from typing import Tuple
@@ -149,7 +146,9 @@ def create_commits_dataframe(
     # nested in their structure, they must be normalized and then stored
     # inside of a Pandas DataFrame. That results in variables with longer,
     # hyphenated names that arise due to the flattening of nested dictionaries
-    total_commits_dataframe = pandas.json_normalize(commits_list, sep=constants.markers.Underscore)
+    total_commits_dataframe = pandas.json_normalize(
+        commits_list, sep=constants.markers.Underscore
+    )
     return total_commits_dataframe
 
 
