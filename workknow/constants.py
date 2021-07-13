@@ -105,12 +105,14 @@ markers = create_constants(
 rate = create_constants(
     "rate",
     Core="core",
+    Extra_Seconds=2,
     Limit="limit",
     Used="used",
     Remaining="remaining",
     Reset="reset",
     Resources="resources",
     Rate_Limit_Url="https://api.github.com/rate_limit",
+    Threshold=10,
 )
 
 
