@@ -81,7 +81,6 @@ def download(
             )
             logger.debug(json_responses[0][0])
             console.print()
-            # pprint(json_responses[0][0])
             # STEP: create the workflows DataFrame
             workflows_dataframe = produce.create_workflows_dataframe(
                 organization, repo, repo_url, json_responses
