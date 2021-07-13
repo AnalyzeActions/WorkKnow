@@ -5,6 +5,8 @@ import os
 
 from typing import List
 
+from rich.pretty import pprint
+
 import requests
 
 from workknow import constants
@@ -37,6 +39,25 @@ def get_workflow_runs(json_responses):
     # list of dictionaries, one for each run inside of GitHub Actions. This
     # will return the list so that it can be stored and analyzed.
     return json_responses[constants.github.Workflow_Runs]
+
+
+def get_rate_limit_details():
+    """Request a JSON response from the GitHub API about rate limits."""
+    # initialize the logging subsystem
+    logger = logging.getLogger(constants.logging.Rich)
+    # define the URL needed to access rate limiting data
+    github_api_url = constants.rate.Rate_Limit_Url
+    # access the person's GitHub personal access token so that
+    # the use of the tool is not rapidly rate limited
+    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # use requests to access the GitHub API with:
+    # --> provided GitHub URL that accesses a project's GitHub Actions log
+    # --> the parameters that currently specify the page limit and will specify the page
+    # --> the GitHub authentication information with the personal access token
+    response = requests.get(github_api_url, auth=github_authentication)
+    response_json_dict = response.json()
+    logger.debug(response_json_dict)
+    return response_json_dict[constants.rate.Resources][constants.rate.Core]
 
 
 def request_json_from_github(github_api_url: str) -> List:
