@@ -30,6 +30,13 @@ environment = create_constants(
 )
 
 
+# define the files constants
+files = create_constants(
+    "file",
+    Env=".env",
+)
+
+
 # define the constants for environment variables
 filesystem = create_constants(
     "filesystem",
