@@ -1,7 +1,5 @@
 """Command-line interface for the workknow program."""
 
-import itertools
-
 from enum import Enum
 from logging import Logger
 from pathlib import Path
@@ -74,7 +72,7 @@ def analyze(
     provided_url_list = produce.extract_repo_urls_list(provided_urls_data_frame)
     logger.debug(repo_urls)
     repo_urls = list(repo_urls)
-    repo_urls.append(provided_url_list)
+    repo_urls.extend(provided_url_list)
     logger.debug(repo_urls)
     merged_repo_urls = produce.flatten(repo_urls)
     logger.debug(merged_repo_urls)
@@ -144,32 +142,32 @@ def analyze(
                     f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
             console.print()
-        console.print(":runner: Creating combined data sets across all repositories.")
-        console.print()
-        all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
-        all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
-        if save and files.confirm_valid_directory(results_dir):
-            # save the workflows DataFrame
-            console.print(
-                f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
-            )
-            # save the all workflows DataFrame
-            console.print("\t... Saving combined workflows data for all repositories.")
-            files.save_dataframe_all(
-                results_dir,
-                constants.filesystem.Workflows,
-                all_workflows_dataframe,
-            )
-            # save the commits DataFrame
-            console.print("\t... Saving combined commits data for all repositories.")
-            files.save_dataframe_all(
-                results_dir,
-                constants.filesystem.Commits,
-                all_commits_dataframe,
-            )
-        else:
-            # explain that the save could not work correctly due to invalid results directory
-            console.print(
-                f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
-            )
-        console.print()
+    console.print(":runner: Creating combined data sets across all repositories.")
+    console.print()
+    all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
+    all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+    if save and files.confirm_valid_directory(results_dir):
+        # save the workflows DataFrame
+        console.print(
+            f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
+        )
+        # save the all workflows DataFrame
+        console.print("\t... Saving combined workflows data for all repositories.")
+        files.save_dataframe_all(
+            results_dir,
+            constants.filesystem.Workflows,
+            all_workflows_dataframe,
+        )
+        # save the commits DataFrame
+        console.print("\t... Saving combined commits data for all repositories.")
+        files.save_dataframe_all(
+            results_dir,
+            constants.filesystem.Commits,
+            all_commits_dataframe,
+        )
+    else:
+        # explain that the save could not work correctly due to invalid results directory
+        console.print(
+            f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+        )
+    console.print()
