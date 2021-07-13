@@ -40,7 +40,7 @@ def download(
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
     # STEP: read the CSV file and extract its data into a Pandas DataFrame
-    merged_repo_urls = repo_urls
+    # merged_repo_urls = repo_urls
     # there is a valid CSV file of repository data
     if files.confirm_valid_file(repos_csv_file):
         # read the CSV file and produce a Pandas DataFrame out of it
@@ -55,12 +55,12 @@ def download(
         # add the URLs extracted from the CSV file into the repo_urls list
         repo_urls.extend(provided_url_list)
         # since extending can create nested lists, make sure they are flattened
-        merged_repo_urls = produce.flatten(repo_urls)
+        # merged_repo_urls = produce.flatten(repo_urls)
         # display debugging information about the data frames
         logger.debug(repo_urls)
-        logger.debug(merged_repo_urls)
+        # logger.debug(merged_repo_urls)
     # iterate through all of the repo_urls provided on the command-line or in the CSV file
-    for repo_url in merged_repo_urls:
+    for repo_url in repo_urls:
         # STEP: create the URL needed for accessing the repository's Action builds
         organization, repo = produce.parse_github_url(repo_url)
         if organization is not None and repo is not None:
