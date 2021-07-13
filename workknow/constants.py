@@ -108,6 +108,7 @@ rate = create_constants(
     Used="used",
     Remaining="remaining",
     Reset="reset",
+    Resources="resources",
     Rate_Limit_Url="https://api.github.com/rate_limit",
 )
 
