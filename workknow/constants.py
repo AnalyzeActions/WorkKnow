@@ -82,7 +82,15 @@ logging = create_constants(
 )
 
 # define the constants for markers
-markers = create_constants("markers", Space=" ", Underscore="_")
+markers = create_constants(
+    "markers",
+    Empty=b"",
+    Indent="  ",
+    Newline="\n",
+    Nothing="",
+    Space=" ",
+    Underscore="_",
+)
 
 
 # define the constants for workflow
