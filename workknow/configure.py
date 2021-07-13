@@ -1,12 +1,19 @@
 """Configure logging and console output."""
 
+from logging import Logger
+
 import logging
 import logging.config
 
+from typing import Tuple
+
+
+from rich.console import Console
 from rich.logging import RichHandler
 from rich.traceback import install
 
 from workknow import constants
+from workknow import debug
 
 
 def configure_tracebacks() -> None:
@@ -34,3 +41,16 @@ def configure_logging(
     # create a global logger and then make it available with the "Rich" name
     logger = logging.getLogger(constants.logging.Rich)
     return logger
+
+
+def setup(debug_level: debug.DebugLevel) -> Tuple[Console, Logger]:
+    """Perform the setup steps and return a Console for terminal-based display."""
+    # configure the use of rich for improved terminal output:
+    # --> rich-based tracebacks to enable better debugging on program crash
+    configure_tracebacks()
+    # --> rich-based logging to improve display of all program console output
+    logger = configure_logging(debug_level.value)
+    # --> rich-based console to display messages and features in terminal window
+    console = Console()
+    logger.debug("Setting up the console and the logger")
+    return console, logger

@@ -6,10 +6,29 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Set
+from typing import Tuple
+from typing import Union
+
+from giturlparse import parse  # type: ignore
 
 import pandas
 
 from workknow import constants
+
+
+def parse_github_url(github_url: str) -> Tuple[Union[str, None], Union[str, None]]:
+    """Parse a GitHub URL using the giturlparse package returning names of organization and repository."""
+    # the provided github_url is valid and can be parsed
+    if parse(github_url).valid:
+        # parse the parse-able github_url
+        github_url_parse = parse(github_url)
+        # extract the owner (i.e., organization) and repo fields
+        # and return them both in a tuple
+        organization = github_url_parse.owner
+        repository = github_url_parse.repo
+        return (organization, repository)
+    # the provided github_url was not parse-able so return None
+    return (None, None)
 
 
 def create_github_api_url(organization: str, repo: str) -> str:
@@ -43,7 +62,11 @@ def count_individual_builds(json_responses: List[Dict[Any, Any]]) -> int:
 
 
 def create_subsetted_list_dict(
-    subset_key_names: Set, workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    subset_key_names: Set,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> List[Dict[Any, Any]]:
     """Create a DataFrame of all of the relevant workflow data."""
     # create an empty list that will store dictionaries to be made into
@@ -62,6 +85,13 @@ def create_subsetted_list_dict(
                 for key, value in current_workflow_dictionary.items()
                 if key in subset_key_names
             }
+            # to ensure that the data set is self contained (and also to ensure that
+            # records for multiple projects can be stored in the same "All" DataFrame),
+            # include the organization name, repository name, and full repository URL
+            # inside of the dictionary before it is stored inside of the list
+            chosen_keys_values[constants.workflow.Organization] = organization
+            chosen_keys_values[constants.workflow.Repo] = repo
+            chosen_keys_values[constants.workflow.Repo_Url] = repo_url
             # add the list of chosen key-value pairs to the list of workflow details
             total_workflow_list.append(chosen_keys_values)
     # return the list of dicts so that calling method can analyze it further
@@ -70,7 +100,10 @@ def create_subsetted_list_dict(
 
 
 def create_workflows_dataframe(
-    workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all of the relevant workflow data."""
     # create a tuple of the key names that we want to retain from
@@ -87,14 +120,17 @@ def create_workflows_dataframe(
         constants.workflow.Jobs_Url,
     }
     total_workflow_list = create_subsetted_list_dict(
-        subset_key_names, workflows_dictionary_list
+        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
     )
     total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
     return total_workflow_dataframe
 
 
 def create_commits_dataframe(
-    workflows_dictionary_list: List[Dict[Any, Any]]
+    organization: str,
+    repo: str,
+    repo_url: str,
+    workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all the relevant commit message data."""
     # create a tuple of the key names that we want to retain from
@@ -102,8 +138,29 @@ def create_commits_dataframe(
     subset_key_names = {
         constants.workflow.Head_Commit,
     }
-    commits_dataframe = create_subsetted_list_dict(
-        subset_key_names, workflows_dictionary_list
+    # create a subsetted list given the key names
+    commits_list = create_subsetted_list_dict(
+        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
     )
-    total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
+    # Since the commits list of dictionaries contains dictionaries that are
+    # nested in their structure, they must be normalized and then stored
+    # inside of a Pandas DataFrame. That results in variables with longer,
+    # hyphenated names that arise due to the flattening of nested dictionaries
+    total_commits_dataframe = pandas.json_normalize(
+        commits_list, sep=constants.markers.Underscore
+    )
     return total_commits_dataframe
+
+
+def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
+    """Extract a list of urls from the provided Pandas DataFrame."""
+    # create an empty list of URLs to return if the DataFrame of repositories
+    # does not have the correct "url" column name or is otherwise malformed
+    url_column_list = []
+    # confirm that the provided DataFrame contains the required column called "url"
+    if constants.data.Url in repos_dataframe.columns:
+        # extract the data in the "url" column from the entire DataFrame
+        url_column_series = repos_dataframe[constants.data.Url]
+        # convert the series arising from the "url" column to a list
+        url_column_list = url_column_series.tolist()
+    return url_column_list

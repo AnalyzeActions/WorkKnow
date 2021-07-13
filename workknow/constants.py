@@ -16,6 +16,13 @@ def create_constants(name, *args, **kwargs):
     return new_constants(*itertools.chain(args, kwargs.values()))
 
 
+# define the constants for markers
+data = create_constants(
+    "data",
+    Url="url",
+)
+
+
 # define the constants for environment variables
 environment = create_constants(
     "environment",
@@ -26,6 +33,7 @@ environment = create_constants(
 # define the constants for environment variables
 filesystem = create_constants(
     "filesystem",
+    All="All",
     Commits="Commits",
     Csv_Extension=".csv",
     Dash="-",
@@ -39,6 +47,8 @@ github = create_constants(
     Actions="actions/runs",
     Api="api.github.com/repos/",
     Https="https://",
+    Maximum_Length_All=3,
+    Maximum_Length_Record=25,
     Next="next",
     Page="page",
     Page_Start=2,
@@ -72,10 +82,7 @@ logging = create_constants(
 )
 
 # define the constants for markers
-markers = create_constants(
-    "markers",
-    Space=" ",
-)
+markers = create_constants("markers", Space=" ", Underscore="_")
 
 
 # define the constants for workflow
@@ -89,6 +96,9 @@ workflow = create_constants(
     Jobs_Url="jobs_url",
     Id="id",
     Name="name",
+    Organization="organization",
+    Repo="repo",
+    Repo_Url="repo_url",
     Status="status",
     Updated_At="updated_at",
 )
@@ -101,4 +111,5 @@ workknow = create_constants(
     Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Https="https://",
     Separator="/",
+    Website="https://github.com/AnalyzeActions/WorkKnow",
 )
