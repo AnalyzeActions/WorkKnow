@@ -1,12 +1,16 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
+import datetime
 import logging
 import os
+import time
 
+from typing import Dict
 from typing import List
 
-from rich.pretty import pprint
+from rich.console import Console
 
+import pytz
 import requests
 
 from workknow import constants
@@ -60,6 +64,43 @@ def get_rate_limit_details():
     return response_json_dict[constants.rate.Resources][constants.rate.Core]
 
 
+def utc_to_time(naive, timezone):
+    """Convert a UTC time zone that is naive to a locally situation timezone."""
+    return naive.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
+
+
+def get_rate_limit_wait_time(rate_limit_dict: Dict[str, int]) -> int:
+    """Determine the amount of time needed for waiting because of rate limit."""
+    # initialize the logging subsystem
+    console = Console()
+    logger = logging.getLogger(constants.logging.Rich)
+    # extract reset time from the response from the GitHub API
+    reset_time_in_utc_epoch_seconds = rate_limit_dict[constants.rate.Reset]
+    # extract the local time zone to help with display of debugging information
+    local_time_zone = os.getenv(constants.environment.Timezone)
+    current_timezone = pytz.timezone(local_time_zone)
+    # convert the epoch seconds to a UTC-zoned datetime
+    reset_datetime = datetime.datetime.utcfromtimestamp(reset_time_in_utc_epoch_seconds)
+    # convert the UTC-zoned datetime to a local-zone datetime
+    reset_datetime_local = utc_to_time(reset_datetime, current_timezone.zone)
+    # display debugging information
+    logger.debug(reset_time_in_utc_epoch_seconds)
+    logger.debug(reset_datetime)
+    logger.debug(reset_datetime_local)
+    # calculate the number of seconds needed to sleep until the reset happens for GitHub's API
+    current_time = datetime.datetime.now(datetime.timezone.utc)
+    current_time_utc_timestamp = current_time.timestamp()
+    sleep_time_seconds = reset_time_in_utc_epoch_seconds - current_time_utc_timestamp
+    logger.debug(current_time_utc_timestamp)
+    logger.debug(sleep_time_seconds)
+    # the program is in danger of being rate limited, which will cause a crash, and
+    # thus it is better to sleep for the remainder of the period until the reset
+    if rate_limit_dict[constants.rate.Remaining] < constants.rate.Threshold:
+        logger.debug(sleep_time_seconds)
+        console.print(f":sleeping_face: Sleeping for {sleep_time_seconds} to wait until the GitHub API resets the rate limits")
+        time.sleep(sleep_time_seconds + constants.rate.Extra_Seconds)
+
+
 def request_json_from_github(github_api_url: str) -> List:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
@@ -98,5 +139,9 @@ def request_json_from_github(github_api_url: str) -> List:
         json_responses.append(get_workflow_runs(response.json()))
         # go to the next page in the pagination results list
         page = page + 1
+        # check if the program is about to exceed GitHub's rate limit and then
+        # sleep the program until the reset time has elapsed
+        rate_limit_dict = get_rate_limit_details()
+        get_rate_limit_wait_time(rate_limit_dict)
     # return the list of workflow runs dictionaries
     return json_responses
