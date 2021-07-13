@@ -9,12 +9,14 @@ def display_tool_details(
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
     """Display the details about the tool."""
-    # STEP: setup the console and the logger and then create a blank line for space
+    # setup the console and the logger and then create a blank line for space
     console, logger = configure.setup(debug_level)
-    # STEP: display the messages about the tool
+    # display the messages about the tool
     console.print()
+    # --> display the tagline for the tool
     console.print(
         constants.workknow.Emoji + constants.markers.Space + constants.workknow.Tagline
     )
+    # --> display the web site for the tool
     console.print(constants.workknow.Website)
     console.print()
