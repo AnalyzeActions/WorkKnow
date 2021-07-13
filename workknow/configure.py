@@ -52,5 +52,5 @@ def setup(debug_level: debug.DebugLevel) -> Tuple[Console, Logger]:
     logger = configure_logging(debug_level.value)
     # --> rich-based console to display messages and features in terminal window
     console = Console()
-    logger.debug("Finished setting up the console and the logger")
+    logger.debug("Setting up the console and the logger")
     return console, logger
