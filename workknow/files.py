@@ -11,6 +11,7 @@ from workknow import constants
 
 def read_csv_file(csv_data_file: Path) -> pandas.DataFrame:
     """Read a CSV file and return it as a Pandas DataFrame."""
+    # read a tabular data set set stored in a CSV file
     csv_file_data_frame = pandas.read_csv(str(csv_data_file))
     return csv_file_data_frame
 
