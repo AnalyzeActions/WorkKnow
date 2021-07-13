@@ -1,7 +1,5 @@
 """Command-line interface for the workknow program."""
 
-from enum import Enum
-from logging import Logger
 from pathlib import Path
 
 from typing import List
@@ -10,61 +8,35 @@ from typing import Tuple
 import pandas
 import typer
 
-from rich.console import Console
 from rich.pretty import pprint
 
 from workknow import configure
 from workknow import constants
+from workknow import debug
+from workknow import display
 from workknow import files
 from workknow import produce
 from workknow import request
 
 
+# create a Typer object to supper the command-line interface
 cli = typer.Typer()
 
 
-class DebugLevel(str, Enum):
-    """The predefined levels for debugging."""
-
-    DEBUG = constants.logging.Debug
-    INFO = constants.logging.Info
-    WARNING = constants.logging.Warning
-    ERROR = constants.logging.Error
-    CRITICAL = constants.logging.Critical
-
-
-def setup(debug_level: DebugLevel) -> Tuple[Console, Logger]:
-    """Perform the setup steps and return a Console for terminal-based display."""
-    # configure the use of rich for improved terminal output:
-    # --> rich-based tracebacks to enable better debugging on program crash
-    configure.configure_tracebacks()
-    # --> rich-based logging to improve display of all program console output
-    logger = configure.configure_logging(debug_level.value)
-    # --> rich-based console to display messages and features in terminal window
-    console = Console()
-    logger.debug("Finished setting up the console and the logger")
-    return console, logger
-
-
 @cli.command()
-def analyze(
+def download(
     repo_urls: List[str],
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
-    debug_level: DebugLevel = DebugLevel.ERROR,
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
     save: bool = typer.Option(False),
 ):
     """Analyze GitHub Action history of repository at URL."""
     # STEP: setup the console and the logger and then create a blank line for space
-    console, logger = setup(debug_level)
+    console, logger = configure.setup(debug_level)
     # STEP: display the messages about the tool
-    console.print()
-    console.print(
-        constants.workknow.Emoji + constants.markers.Space + constants.workknow.Tagline
-    )
-    console.print(constants.workknow.Website)
-    console.print()
-    # create empty lists of the data frames
+    display.display_tool_details(debug_level)
+    # STEP: create empty lists of the data frames
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
     # read the CSV file and extract its data into a Pandas DataFrame
@@ -176,3 +148,10 @@ def analyze(
             f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
     console.print()
+
+
+@cli.command()
+def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
+    """Analyze already the downloaded data."""
+    # setup the console and the logger instance
+    console, logger = configure.setup(debug_level)
