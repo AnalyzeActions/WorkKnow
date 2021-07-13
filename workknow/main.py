@@ -13,6 +13,7 @@ from workknow import configure
 from workknow import constants
 from workknow import debug
 from workknow import display
+from workknow import environment
 from workknow import files
 from workknow import produce
 from workknow import request
@@ -27,12 +28,15 @@ def download(
     repo_urls: List[str],
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
-    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+    env_file: Path = typer.Option(None),
     save: bool = typer.Option(False),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
     """Download the GitHub Action workflow history of repositories in URL list and CSV file."""
     # STEP: setup the console and the logger and then create a blank line for space
     console, logger = configure.setup(debug_level)
+    # STEP: load the execution environment to support GitHub API access
+    environment.load_environment(env_file, logger)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
     # STEP: create empty lists of the data frames
