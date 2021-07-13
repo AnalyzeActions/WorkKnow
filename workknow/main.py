@@ -39,15 +39,26 @@ def download(
     # STEP: create empty lists of the data frames
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
-    # read the CSV file and extract its data into a Pandas DataFrame
-    provided_urls_data_frame = files.read_csv_file(repos_csv_file)
-    provided_url_list = produce.extract_repo_urls_list(provided_urls_data_frame)
-    logger.debug(repo_urls)
-    repo_urls = list(repo_urls)
-    repo_urls.extend(provided_url_list)
-    logger.debug(repo_urls)
-    merged_repo_urls = produce.flatten(repo_urls)
-    logger.debug(merged_repo_urls)
+    # STEP: read the CSV file and extract its data into a Pandas DataFrame
+    merged_repo_urls = repo_urls
+    # there is a valid CSV file of repository data
+    if files.confirm_valid_file(repos_csv_file):
+        # read the CSV file and produce a Pandas DataFrame out of it
+        provided_urls_data_frame = files.read_csv_file(repos_csv_file)
+        # extract the repository URLs from the data frame;
+        # note that the (documented) assumption is that the CSV file
+        # must have a column called "url" that contains the URLs and
+        # that the WorkKnow will ignore all other data inside of the CSV file
+        provided_url_list = produce.extract_repo_urls_list(provided_urls_data_frame)
+        # since Typer seems to convert repo_urls into a tuple, convert it to a list
+        repo_urls = list(repo_urls)
+        # add the URLs extracted from the CSV file into the repo_urls list
+        repo_urls.extend(provided_url_list)
+        # since extending can create nested lists, make sure they are flattened
+        merged_repo_urls = produce.flatten(repo_urls)
+        # display debugging information about the data frames
+        logger.debug(repo_urls)
+        logger.debug(merged_repo_urls)
     # iterate through all of the repo_urls provided on the command-line or in the CSV file
     for repo_url in merged_repo_urls:
         # STEP: create the URL needed for accessing the repository's Action builds
