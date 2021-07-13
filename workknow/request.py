@@ -1,12 +1,18 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
+import datetime
 import logging
 import os
+import sys
+import time
 
+from typing import Dict
 from typing import List
 
+from rich.console import Console
+
+import pytz
 import requests
-from dotenv import load_dotenv
 
 from workknow import constants
 
@@ -23,33 +29,101 @@ from workknow import constants
 # │   ]
 # }
 
-# use the python-dotenv package to load the .env file
-# (created by the user) that will contain the GitHub
-# personal access token that allows for API interactions
-# before the rate limit will be enforced
-#
-# Reference:
-# https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
-load_dotenv()
 
-
-def get_github_personal_access_token():
+def get_github_personal_access_token() -> str:
     """Retrieve the GitHub personal access token from the environment."""
     # extract the GITHUB_ACCESS_TOKEN environment variable; note that this
     # only works because of the fact that load_dotenv was previously called
-    github_personal_access_token = os.getenv(constants.environment.Github)
+    github_personal_access_token = os.getenv(constants.environment.Github, default="")
     return github_personal_access_token
 
 
-def get_workflow_runs(json_responses):
-    """Get the list of workflow run information for a JSON-deri ed dictionary."""
+def get_local_timezone() -> str:
+    """Retrieve the user's local time zone from the environment."""
+    # extract the GITHUB_ACCESS_TOKEN environment variable; note that this
+    # only works because of the fact that load_dotenv was previously called
+    local_timezone = os.getenv(constants.environment.Timezone, default="")
+    return local_timezone
+
+
+def get_workflow_runs(json_responses, console):
+    """Get the list of workflow run information for a JSON-derived dictionary."""
     # this dictionary has a key called "workflow_runs" that has as its value a
     # list of dictionaries, one for each run inside of GitHub Actions. This
     # will return the list so that it can be stored and analyzed.
-    return json_responses[constants.github.Workflow_Runs]
+    if constants.github.Workflow_Runs in json_responses:
+        return json_responses[constants.github.Workflow_Runs]
+    # the workflow runs data is not available and this means that the GitHub REST
+    # API did not return any viable data, likely due to the fact that the program
+    # is rate limited. It can no longer proceed without error, so exit.
+    console.print(":grimacing_face: No workflow data provided by the GitHub API.")
+    console.print("Sorry, WorkKnow is probably rate limited. Exiting now!")
+    console.print()
+    sys.exit(1)
 
 
-def request_json_from_github(github_api_url: str) -> List:
+def get_rate_limit_details():
+    """Request a JSON response from the GitHub API about rate limits."""
+    # initialize the logging subsystem
+    logger = logging.getLogger(constants.logging.Rich)
+    # define the URL needed to access rate limiting data
+    github_api_url = constants.rate.Rate_Limit_Url
+    # access the person's GitHub personal access token so that
+    # the use of the tool is not rapidly rate limited
+    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # use requests to access the GitHub API with:
+    # --> provided GitHub URL that accesses a project's GitHub Actions log
+    # --> the parameters that currently specify the page limit and will specify the page
+    # --> the GitHub authentication information with the personal access token
+    response = requests.get(github_api_url, auth=github_authentication)
+    response_json_dict = response.json()
+    logger.debug(response_json_dict)
+    return response_json_dict[constants.rate.Resources][constants.rate.Core]
+
+
+def utc_to_time(naive, timezone):
+    """Convert a UTC time zone that is naive to a locally situation timezone."""
+    return naive.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
+
+
+def get_rate_limit_wait_time(rate_limit_dict: Dict[str, int]) -> int:
+    """Determine the amount of time needed for waiting because of rate limit."""
+    console = Console()
+    # initialize the logging subsystem
+    logger = logging.getLogger(constants.logging.Rich)
+    # extract reset time from the response from the GitHub API
+    reset_time_in_utc_epoch_seconds = rate_limit_dict[constants.rate.Reset]
+    # extract the local time zone to help with display of debugging information
+    local_time_zone = get_local_timezone()
+    current_timezone = pytz.timezone(local_time_zone)
+    # convert the epoch seconds to a UTC-zoned datetime
+    reset_datetime = datetime.datetime.utcfromtimestamp(reset_time_in_utc_epoch_seconds)
+    # convert the UTC-zoned datetime to a local-zone datetime
+    reset_datetime_local = utc_to_time(reset_datetime, current_timezone.zone)
+    # display debugging information
+    logger.debug(reset_time_in_utc_epoch_seconds)
+    logger.debug(reset_datetime)
+    logger.debug(reset_datetime_local)
+    # calculate the number of seconds needed to sleep until the reset happens for GitHub's API
+    current_time = datetime.datetime.now(datetime.timezone.utc)
+    current_time_utc_timestamp = current_time.timestamp()
+    sleep_time_seconds = reset_time_in_utc_epoch_seconds - current_time_utc_timestamp
+    logger.debug(current_time_utc_timestamp)
+    logger.debug(sleep_time_seconds)
+    # the program is in danger of being rate limited, which will cause a crash, and
+    # thus it is better to sleep for the remainder of the period until the reset
+    total_sleep_time_elapsed = sleep_time_seconds + constants.rate.Extra_Seconds
+    if rate_limit_dict[constants.rate.Remaining] < constants.rate.Threshold:
+        logger.debug(sleep_time_seconds)
+        console.print(
+            f":sleeping_face: Sleeping for {sleep_time_seconds} seconds while waiting for the GitHub API to reset the rate limits"
+        )
+        console.print(f"WorkKnow will continue to sleep until {reset_datetime_local}")
+        time.sleep(total_sleep_time_elapsed)
+    return total_sleep_time_elapsed
+
+
+def request_json_from_github(github_api_url: str, console: Console) -> List:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
     logger = logging.getLogger(constants.logging.Rich)
@@ -69,11 +143,15 @@ def request_json_from_github(github_api_url: str) -> List:
     json_responses = []
     # extract the JSON document (it is a dict) and then extract from that the workflow runs list
     # finally, append the list of workflow runs to the running list of response details
-    json_responses.append(get_workflow_runs(response.json()))
+    json_responses.append(get_workflow_runs(response.json(), console))
     logger.debug(response.headers)
     # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
     # and thus the next page that we will need to extract (if needed) is 2
     page = constants.github.Page_Start
+    # check if the program is about to exceed GitHub's rate limit and then
+    # sleep the program until the reset time has elapsed
+    rate_limit_dict = get_rate_limit_details()
+    get_rate_limit_wait_time(rate_limit_dict)
     # continue to extract data from the pages as long as the "next" field is evident
     while constants.github.Next in response.links.keys():
         # update the "page" variable in the URL to go to the next page
@@ -84,8 +162,12 @@ def request_json_from_github(github_api_url: str) -> List:
         )
         logger.debug(response.headers)
         # again extract the specific workflow runs list and append it to running response details
-        json_responses.append(get_workflow_runs(response.json()))
+        json_responses.append(get_workflow_runs(response.json(), console))
         # go to the next page in the pagination results list
         page = page + 1
+        # check if the program is about to exceed GitHub's rate limit and then
+        # sleep the program until the reset time has elapsed
+        rate_limit_dict = get_rate_limit_details()
+        get_rate_limit_wait_time(rate_limit_dict)
     # return the list of workflow runs dictionaries
     return json_responses

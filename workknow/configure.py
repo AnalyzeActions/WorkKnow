@@ -7,7 +7,6 @@ import logging.config
 
 from typing import Tuple
 
-
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.traceback import install

@@ -25,8 +25,14 @@ data = create_constants(
 
 # define the constants for environment variables
 environment = create_constants(
-    "environment",
-    Github="GITHUB_ACCESS_TOKEN",
+    "environment", Github="GITHUB_ACCESS_TOKEN", Timezone="LOCAL_TIMEZONE"
+)
+
+
+# define the files constants
+files = create_constants(
+    "files",
+    Env=".env",
 )
 
 
@@ -82,7 +88,30 @@ logging = create_constants(
 )
 
 # define the constants for markers
-markers = create_constants("markers", Space=" ", Underscore="_")
+markers = create_constants(
+    "markers",
+    Empty=b"",
+    Indent="  ",
+    Newline="\n",
+    Nothing="",
+    Space=" ",
+    Underscore="_",
+)
+
+
+# define the constants for rate limiting
+rate = create_constants(
+    "rate",
+    Core="core",
+    Extra_Seconds=2,
+    Limit="limit",
+    Used="used",
+    Remaining="remaining",
+    Reset="reset",
+    Resources="resources",
+    Rate_Limit_Url="https://api.github.com/rate_limit",
+    Threshold=10,
+)
 
 
 # define the constants for workflow

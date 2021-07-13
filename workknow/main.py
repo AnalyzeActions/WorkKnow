@@ -13,6 +13,7 @@ from workknow import configure
 from workknow import constants
 from workknow import debug
 from workknow import display
+from workknow import environment
 from workknow import files
 from workknow import produce
 from workknow import request
@@ -27,17 +28,23 @@ def download(
     repo_urls: List[str],
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
-    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+    env_file: Path = typer.Option(None),
     save: bool = typer.Option(False),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
     """Download the GitHub Action workflow history of repositories in URL list and CSV file."""
     # STEP: setup the console and the logger and then create a blank line for space
     console, logger = configure.setup(debug_level)
+    # STEP: load the execution environment to support GitHub API access
+    environment.load_environment(env_file, logger)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
     # STEP: create empty lists of the data frames
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
+    # STEP: get any rate limit details and stop using the program
+    # if it is in danger of being rate limited and not having data
+    request.get_rate_limit_details()
     # STEP: read the CSV file and extract its data into a Pandas DataFrame
     # there is a valid CSV file of repository data
     if files.confirm_valid_file(repos_csv_file):
@@ -66,7 +73,7 @@ def download(
             console.print(github_api_url, style="link " + github_api_url)
             console.print()
             # STEP: access the JSON file that contains the build history
-            json_responses = request.request_json_from_github(github_api_url)
+            json_responses = request.request_json_from_github(github_api_url, console)
             console.print(
                 f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:\n"
             )
@@ -119,6 +126,11 @@ def download(
                     f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
             console.print()
+            # before going on to the next GitHub repository, ensure that the program
+            # is not about to be rate limited, which will cause a crash. If a rate
+            # limit is imminent then sleep for the time remaining until GitHub resets.
+            rate_limit_dict = request.get_rate_limit_details()
+            request.get_rate_limit_wait_time(rate_limit_dict)
     # finished processing all of the individual repositories and now ready to create
     # the "combined" data sets that include data for every repository subject to analysis
     console.print(":runner: Creating combined data sets across all repositories.")
@@ -153,6 +165,7 @@ def download(
             f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
         )
     console.print()
+    request.get_rate_limit_details()
 
 
 @cli.command()
