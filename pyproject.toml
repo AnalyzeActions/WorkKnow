@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "WorkKnow"
 version = "0.1.0"
-description = "Surface the Story of GitHub Actions Builds"
+description = "WorkKnow: Know Your GitHub Actions Workflows!"
 authors = ["Gregory M. Kapfhammer <gkapfham@allegheny.edu>"]
 readme = "README.md"
 
