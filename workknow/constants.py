@@ -16,6 +16,13 @@ def create_constants(name, *args, **kwargs):
     return new_constants(*itertools.chain(args, kwargs.values()))
 
 
+# define the constants for markers
+data = create_constants(
+    "data",
+    Url="url",
+)
+
+
 # define the constants for environment variables
 environment = create_constants(
     "environment",
@@ -75,10 +82,7 @@ logging = create_constants(
 )
 
 # define the constants for markers
-markers = create_constants(
-    "markers",
-    Space=" ",
-)
+markers = create_constants("markers", Space=" ", Underscore="_")
 
 
 # define the constants for workflow
