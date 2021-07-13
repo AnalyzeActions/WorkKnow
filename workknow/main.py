@@ -52,8 +52,6 @@ def download(
         repo_urls = list(repo_urls)
         # add the URLs extracted from the CSV file into the repo_urls list
         repo_urls.extend(provided_url_list)
-        # since extending can create nested lists, make sure they are flattened
-        # merged_repo_urls = produce.flatten(repo_urls)
         # display debugging information about the data frames
         logger.debug(repo_urls)
     # iterate through all of the repo_urls provided on the command-line or in the CSV file
