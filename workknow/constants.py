@@ -25,9 +25,7 @@ data = create_constants(
 
 # define the constants for environment variables
 environment = create_constants(
-    "environment",
-    Github="GITHUB_ACCESS_TOKEN",
-    Timezone="LOCAL_TIMEZONE"
+    "environment", Github="GITHUB_ACCESS_TOKEN", Timezone="LOCAL_TIMEZONE"
 )
 
 
