@@ -100,6 +100,18 @@ markers = create_constants(
 )
 
 
+# define the constants for rate limiting
+rate = create_constants(
+    "rate",
+    Core="core",
+    Limit="limit",
+    Used="used",
+    Remaining="remaining",
+    Reset="reset",
+    Rate_Limit_Url="https://api.github.com/rate_limit",
+)
+
+
 # define the constants for workflow
 workflow = create_constants(
     "workflow",
