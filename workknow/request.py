@@ -6,7 +6,6 @@ import os
 from typing import List
 
 import requests
-from dotenv import load_dotenv
 
 from workknow import constants
 
