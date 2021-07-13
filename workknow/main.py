@@ -61,7 +61,7 @@ def download(
         if organization is not None and repo is not None:
             github_api_url = produce.create_github_api_url(organization, repo)
             console.print(
-                ":runner: Analyzing the workflow history of the GitHub repository at:"
+                ":runner: Downloading the workflow history of the GitHub repository at:"
             )
             console.print(github_api_url, style="link " + github_api_url)
             console.print()
