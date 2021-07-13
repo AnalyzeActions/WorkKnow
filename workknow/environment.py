@@ -9,6 +9,14 @@ from dotenv import load_dotenv
 
 from workknow import constants
 
+# Uses the python-dotenv package to load the .env file
+# (created by the user) that will contain the GitHub
+# personal access token that allows for API interactions
+# before the rate limit will be enforced.
+#
+# Reference:
+# https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting
+
 
 def load_environment(env_file: Path, logger: Logger) -> None:
     """Load the environment using the dotenv package."""
