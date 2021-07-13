@@ -142,10 +142,15 @@ def analyze(
                     f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
             console.print()
+    # finished processing all of the individual repositories and now ready to create
+    # the "combined" data sets that include data for every repository subject to analysis
     console.print(":runner: Creating combined data sets across all repositories.")
     console.print()
+    # combine all of the individual DataFrames for the workflow data
     all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
+    # combine all of the individual DataFrames for the commit data
     all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+    # save all of the results in the file system if the save parameter is specified
     if save and files.confirm_valid_directory(results_dir):
         # save the workflows DataFrame
         console.print(
