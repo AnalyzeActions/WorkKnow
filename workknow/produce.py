@@ -5,6 +5,8 @@ import logging
 
 from typing import Any
 from typing import Dict
+from typing import Iterator
+from typing import Iterable
 from typing import List
 from typing import Set
 from typing import Tuple
@@ -139,17 +141,29 @@ def create_commits_dataframe(
     subset_key_names = {
         constants.workflow.Head_Commit,
     }
-    commits_dataframe = create_subsetted_list_dict(
+    # create a subsetted list given the key names
+    commits_list = create_subsetted_list_dict(
         organization, repo, repo_url, subset_key_names, workflows_dictionary_list
     )
-    total_commits_dataframe = pandas.json_normalize(commits_dataframe, sep="_")
+    # Since the commits list of dictionaries contains dictionaries that are
+    # nested in their structure, they must be normalized and then stored
+    # inside of a Pandas DataFrame. That results in variables with longer,
+    # hyphenated names that arise due to the flattening of nested dictionaries
+    total_commits_dataframe = pandas.json_normalize(commits_list, sep=constants.markers.Underscore)
     return total_commits_dataframe
 
 
 def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
     """Extract a list of urls from the provided Pandas DataFrame."""
-    url_column_series = repos_dataframe["url"]
-    url_column_list = url_column_series.tolist()
+    # create an empty list of URLs to return if the DataFrame of repositories
+    # does not have the correct "url" column name or is otherwise malformed
+    url_column_list = []
+    # confirm that the provided DataFrame contains the required column called "url"
+    if constants.data.Url in repos_dataframe.columns:
+        # extract the data in the "url" column from the entire DataFrame
+        url_column_series = repos_dataframe[constants.data.Url]
+        # convert the series arising from the "url" column to a list
+        url_column_list = url_column_series.tolist()
     return url_column_list
 
 
