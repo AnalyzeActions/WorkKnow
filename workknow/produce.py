@@ -24,8 +24,8 @@ def parse_github_url(github_url: str) -> Tuple[Union[str, None], Union[str, None
         github_url_parse = parse(github_url)
         # extract the owner (i.e., organization) and repo fields
         # and return them both in a tuple
-        organization = github_url_parse.owner
-        repository = github_url_parse.repo
+        organization = github_url_parse.owner  # type: ignore
+        repository = github_url_parse.repo     # type: ignore
         return (organization, repository)
     # the provided github_url was not parse-able so return None
     return (None, None)
@@ -152,7 +152,7 @@ def create_commits_dataframe(
     return total_commits_dataframe
 
 
-def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
+def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[Union[str, Any]]:
     """Extract a list of urls from the provided Pandas DataFrame."""
     # create an empty list of URLs to return if the DataFrame of repositories
     # does not have the correct "url" column name or is otherwise malformed
@@ -162,5 +162,6 @@ def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[str]:
         # extract the data in the "url" column from the entire DataFrame
         url_column_series = repos_dataframe[constants.data.Url]
         # convert the series arising from the "url" column to a list
-        url_column_list = url_column_series.tolist()
-    return url_column_list
+        if url_column_series is not None:
+            url_column_list = url_column_series.tolist()
+    return list(url_column_list)
