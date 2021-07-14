@@ -10,7 +10,7 @@ def display_tool_details(
 ):
     """Display the details about the tool."""
     # setup the console and the logger and then create a blank line for space
-    console, logger = configure.setup(debug_level)
+    console, _ = configure.setup(debug_level)
     # display the messages about the tool
     console.print()
     # --> display the tagline for the tool
