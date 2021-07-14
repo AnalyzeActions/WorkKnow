@@ -1,5 +1,7 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
+from urllib import parse
+
 import datetime
 import logging
 import os
@@ -10,6 +12,10 @@ from typing import Dict
 from typing import List
 
 from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
 
 import pytz
 import requests
@@ -123,6 +129,20 @@ def get_rate_limit_wait_time(rate_limit_dict: Dict[str, int]) -> int:
     return total_sleep_time_elapsed
 
 
+def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
+    """Extract the number of the last page from the links provided by the GitHub API."""
+    logger = logging.getLogger(constants.logging.Rich)
+    last_page = 0
+    if "last" in response_links_dict:
+        last_dict = response_links_dict["last"]
+        last_url = last_dict["url"]
+        logger.debug(last_url)
+        query_dict = dict(parse.parse_qsl(parse.urlsplit(last_url).query))
+        logger.debug(query_dict)
+        last_page = int(query_dict["page"])
+    return last_page
+
+
 def request_json_from_github(github_api_url: str, console: Console) -> List:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
@@ -152,22 +172,38 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
     # sleep the program until the reset time has elapsed
     rate_limit_dict = get_rate_limit_details()
     get_rate_limit_wait_time(rate_limit_dict)
+    # extract the index of the last page in order to support progress bar creation
+    last_page_index = extract_last_page(response.links)
     # continue to extract data from the pages as long as the "next" field is evident
-    while constants.github.Next in response.links.keys():
-        # update the "page" variable in the URL to go to the next page
-        # otherwise, make sure to use all of the same parameters as the first request
-        github_params[constants.github.Page] = str(page)
-        response = requests.get(
-            github_api_url, params=github_params, auth=github_authentication
-        )
-        logger.debug(response.headers)
-        # again extract the specific workflow runs list and append it to running response details
-        json_responses.append(get_workflow_runs(response.json(), console))
-        # go to the next page in the pagination results list
-        page = page + 1
-        # check if the program is about to exceed GitHub's rate limit and then
-        # sleep the program until the reset time has elapsed
-        rate_limit_dict = get_rate_limit_details()
-        get_rate_limit_wait_time(rate_limit_dict)
-    # return the list of workflow runs dictionaries
-    return json_responses
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        "complete",
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining"
+    ) as progress:
+        download_pages_task = progress.add_task("Download", total=last_page_index - 1)
+        while constants.github.Next in response.links.keys():
+            # update the "page" variable in the URL to go to the next page
+            # otherwise, make sure to use all of the same parameters as the first request
+            github_params[constants.github.Page] = str(page)
+            response = requests.get(
+                github_api_url, params=github_params, auth=github_authentication
+            )
+            logger.debug(response.headers)
+            # again extract the specific workflow runs list and append it to running response details
+            json_responses.append(get_workflow_runs(response.json(), console))
+            # go to the next page in the pagination results list
+            page = page + 1
+            # check if the program is about to exceed GitHub's rate limit and then
+            # sleep the program until the reset time has elapsed
+            rate_limit_dict = get_rate_limit_details()
+            get_rate_limit_wait_time(rate_limit_dict)
+            progress.update(download_pages_task, advance=1)
+        # return the list of workflow runs dictionaries
+        return json_responses
