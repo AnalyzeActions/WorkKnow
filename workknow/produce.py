@@ -25,7 +25,7 @@ def parse_github_url(github_url: str) -> Tuple[Union[str, None], Union[str, None
         # extract the owner (i.e., organization) and repo fields
         # and return them both in a tuple
         organization = github_url_parse.owner  # type: ignore
-        repository = github_url_parse.repo     # type: ignore
+        repository = github_url_parse.repo  # type: ignore
         return (organization, repository)
     # the provided github_url was not parse-able so return None
     return (None, None)
