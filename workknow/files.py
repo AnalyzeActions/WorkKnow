@@ -11,9 +11,18 @@ from workknow import constants
 
 def read_csv_file(csv_data_file: Path) -> pandas.DataFrame:
     """Read a CSV file and return it as a Pandas DataFrame."""
-    # read a tabular data set set stored in a CSV file
-    csv_file_data_frame = pandas.read_csv(str(csv_data_file))
-    return pandas.DataFrame(csv_file_data_frame)
+    # create an empty DataFrame for the situation in which
+    # the program attempts to read a CSV file that does not
+    # have any data in it and thus an exception is thrown
+    data_frame_csv = pandas.DataFrame()
+    try:
+        # try to read a tabular data set set stored in a CSV file
+        csv_file_data_frame = pandas.read_csv(str(csv_data_file))
+        # there was no exception and thus it is fine to return the DataFrame
+        return pandas.DataFrame(csv_file_data_frame)
+    # the CSV file was empty and thus we must return an empty DataFrame
+    except pandas.errors.EmptyDataError:
+        return data_frame_csv
 
 
 def create_directory(directory: Path) -> None:
