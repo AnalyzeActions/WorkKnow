@@ -176,10 +176,10 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
     last_page_index = extract_last_page(response.links)
     # continue to extract data from the pages as long as the "next" field is evident
     with Progress(
-        "[progress.description]{task.description}",
+        constants.progress.Task_Format,
         BarColumn(),
-        "[progress.percentage]{task.percentage:>3.0f}%",
-        "completed",
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
         "•",
         TimeElapsedColumn(),
         "elapsed",
