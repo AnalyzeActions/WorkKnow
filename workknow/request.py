@@ -139,7 +139,7 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
         logger.debug(last_url)
         query_dict = dict(parse.parse_qsl(parse.urlsplit(last_url).query))
         logger.debug(query_dict)
-        last_page = int(query_dict["page"])
+        last_page = int(query_dict[constants.github.Page])
     return last_page
 
 
@@ -179,13 +179,13 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
         "[progress.description]{task.description}",
         BarColumn(),
         "[progress.percentage]{task.percentage:>3.0f}%",
-        "complete",
+        "completed",
         "•",
         TimeElapsedColumn(),
         "elapsed",
         "•",
         TimeRemainingColumn(),
-        "remaining"
+        "remaining",
     ) as progress:
         download_pages_task = progress.add_task("Download", total=last_page_index - 1)
         while constants.github.Next in response.links.keys():
