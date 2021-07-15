@@ -184,4 +184,4 @@ def download(
 def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
     """Analyze already the downloaded data."""
     # setup the console and the logger instance
-    console, logger = configure.setup(debug_level)
+    _, _ = configure.setup(debug_level)
