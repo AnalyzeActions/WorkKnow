@@ -158,14 +158,18 @@ def download(
             f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
         )
         # save the all workflows DataFrame
-        console.print("\t... Saving combined workflows data for all repositories")
+        console.print(
+            f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+        )
         files.save_dataframe_all(
             results_dir,
             constants.filesystem.Workflows,
             all_workflows_dataframe,
         )
         # save the commits DataFrame
-        console.print("\t... Saving combined commits data for all repositories")
+        console.print(
+            f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+        )
         files.save_dataframe_all(
             results_dir,
             constants.filesystem.Commits,
