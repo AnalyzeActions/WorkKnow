@@ -58,7 +58,7 @@ def create_github_release(
                 )
             github_repository.update_file(
                 result_file_name_prefixed,
-                "Update WorkKnow Data " + semver,
+                "Update WorkKnow Data " + semver + " for " + result_file_name_prefixed,
                 results_files_contents[result_file_name],
                 contents.sha,  # type: ignore
                 branch="master",
@@ -67,7 +67,7 @@ def create_github_release(
         else:
             github_repository.create_file(
                 result_file_name_prefixed,
-                "Add WorkKnow Data " + semver,
+                "Add WorkKnow Data " + semver + " for " + result_file_name_prefixed,
                 results_files_contents[result_file_name],
             )
             logger.debug(result_file_name + " CREATED")
