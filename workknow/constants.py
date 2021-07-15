@@ -41,6 +41,7 @@ filesystem = create_constants(
     "filesystem",
     All="All",
     Commits="Commits",
+    Counts="Counts",
     Csv_Extension=".csv",
     Dash="-",
     Workflows="Workflows",
@@ -130,6 +131,7 @@ rate = create_constants(
 # define the constants for workflow
 workflow = create_constants(
     "workflow",
+    Actions_Url="actions_url",
     Conclusion="conclusion",
     Created_At="created_at",
     Event="event",
@@ -143,6 +145,7 @@ workflow = create_constants(
     Repo_Url="repo_url",
     Status="status",
     Updated_At="updated_at",
+    Workflow_Record_Count="workflow_record_count",
 )
 
 
