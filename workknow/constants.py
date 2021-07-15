@@ -156,8 +156,9 @@ workflow = create_constants(
 workknow = create_constants(
     "workknow",
     Emoji=":light_bulb:",
-    Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Https="https://",
+    Name="WorkKnow",
     Separator="/",
+    Tagline="WorkKnow: Know Your GitHub Actions Workflows!",
     Website="https://github.com/AnalyzeActions/WorkKnow",
 )
