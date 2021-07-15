@@ -175,7 +175,7 @@ def create_workflow_record_count_dictionary(
     workflow_count_dictionary[constants.workflow.Actions_Url] = str(github_api_url)
     # store the count of all the workflow records for this repository
     workflow_count_dictionary[
-        constants.workflow.Workflow_Record_Count
+        constants.workflow.Workflow_Build_Count
     ] = workflows_count_for_repo
     return workflow_count_dictionary
 

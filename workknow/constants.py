@@ -145,7 +145,7 @@ workflow = create_constants(
     Repo_Url="repo_url",
     Status="status",
     Updated_At="updated_at",
-    Workflow_Record_Count="workflow_record_count",
+    Workflow_Build_Count="workflow_build_count",
 )
 
 
