@@ -16,6 +16,7 @@ from workknow import display
 from workknow import environment
 from workknow import files
 from workknow import produce
+from workknow import release
 from workknow import request
 
 
@@ -213,10 +214,25 @@ def download(
 
 
 @cli.command()
-def upload(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
-    """Upload the already the downloaded data."""
-    # setup the console and the logger instance
-    _, _ = configure.setup(debug_level)
+def upload(
+    github_organization: str,
+    github_repository: str,
+    semver: str,
+    results_dir: Path,
+    env_file: Path = typer.Option(None),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+):
+    """Upload to a GitHub release the data in the results directory."""
+    # STEP: setup the console and the logger instance
+    console, logger = configure.setup(debug_level)
+    # STEP: load the execution environment to support GitHub API access
+    environment.load_environment(env_file, logger)
+    # STEP: display the messages about the tool
+    display.display_tool_details(debug_level)
+    # STEP: perform the release
+    release.create_github_release(
+        github_organization, github_repository, semver, results_dir
+    )
 
 
 @cli.command()
