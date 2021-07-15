@@ -133,7 +133,7 @@ def save_dataframe(
 
 
 def create_results_zip_file_list(results_directory: Path) -> List[str]:
-    """Create a .zip file of all of the .csv files in the provided results directory."""
+    """Create a list of the .csv files in the provided results directory."""
     console = configure.setup_console()
     results_files_generator = results_directory.glob("*.csv")
     results_file_list = []
@@ -141,3 +141,32 @@ def create_results_zip_file_list(results_directory: Path) -> List[str]:
         results_file_list.append(str(results_file))
     console.print(results_file_list)
     return results_file_list
+
+
+def create_results_zip_file(
+    results_directory: Path, results_file_list: List[str]
+) -> None:
+    """Save a .zip file in the results directory of all the provided .csv files."""
+    print(
+        str(results_directory)
+        + constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.workknow.Name
+        + constants.filesystem.Dash
+        + constants.filesystem.Results
+        + constants.filesystem.Zip_Extension
+    )
+    with zipfile.ZipFile(
+        str(results_directory)
+        + constants.filesystem.Slash
+        + constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.workknow.Name
+        + constants.filesystem.Dash
+        + constants.filesystem.Results
+        + constants.filesystem.Zip_Extension,
+        "w",
+    ) as results_zip_file:
+        for results_file_name in results_file_list:
+            pathlib_path_file = Path(results_file_name)
+            results_zip_file.write(results_file_name, pathlib_path_file.name)
