@@ -95,6 +95,7 @@ markers = create_constants(
     Newline="\n",
     Nothing="",
     Space=" ",
+    Tab="\t",
     Underscore="_",
 )
 
