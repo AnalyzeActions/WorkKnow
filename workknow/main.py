@@ -87,7 +87,8 @@ def download(
                 console.print()
                 console.print(":lion_face: The first workflow record looks like:\n")
                 pprint(
-                    json_responses[0][0], max_length=constants.github.Maximum_Length_Record
+                    json_responses[0][0],
+                    max_length=constants.github.Maximum_Length_Record,
                 )
                 logger.debug(json_responses[0][0])
                 console.print()
