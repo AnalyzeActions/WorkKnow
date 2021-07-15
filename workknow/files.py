@@ -1,8 +1,11 @@
 """Load and save files."""
 
 import logging
+import zipfile
 
 from pathlib import Path
+
+from typing import List
 
 import pandas
 
@@ -127,3 +130,14 @@ def save_dataframe(
     # convert the pathlib Path object to a string and then use
     # Pandas to save the file to the textualized path as a CSV file
     repo_data.to_csv(str(resolved_complete_file_path))
+
+
+def create_results_zip_file_list(results_directory: Path) -> List[str]:
+    """Create a .zip file of all of the .csv files in the provided results directory."""
+    console = configure.setup_console()
+    results_files_generator = results_directory.glob("*.csv")
+    results_file_list = []
+    for results_file in results_files_generator:
+        results_file_list.append(str(results_file))
+    console.print(results_file_list)
+    return results_file_list
