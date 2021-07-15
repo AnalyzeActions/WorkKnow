@@ -42,8 +42,18 @@ def configure_logging(
     return logger
 
 
-def setup(debug_level: debug.DebugLevel) -> Tuple[Console, Logger]:
+def setup_console() -> Console:
     """Perform the setup steps and return a Console for terminal-based display."""
+    # configure the use of rich for improved terminal output:
+    # --> rich-based tracebacks to enable better debugging on program crash
+    configure_tracebacks()
+    # --> rich-based console to display messages and features in terminal window
+    console = Console()
+    return console
+
+
+def setup(debug_level: debug.DebugLevel) -> Tuple[Console, Logger]:
+    """Perform the setup steps and return a Console and a Logger for terminal-based display."""
     # configure the use of rich for improved terminal output:
     # --> rich-based tracebacks to enable better debugging on program crash
     configure_tracebacks()

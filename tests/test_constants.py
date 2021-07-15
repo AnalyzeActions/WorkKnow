@@ -22,20 +22,20 @@ def test_logging_constant_defined():
 def test_logging_constant_cannot_redefine():
     """Check cannot redefine the variables in the logging constant."""
     with pytest.raises(AttributeError):
-        constants.logging.Debug = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Debug = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Info = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Info = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Warning = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Warning = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Error = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Error = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Critical = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Critical = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Critical = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Critical = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Default_Logging_Level = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Default_Logging_Level = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Format = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Format = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore
     with pytest.raises(AttributeError):
-        constants.logging.Rich = CANNOT_SET_CONSTANT_VARIABLE
+        constants.logging.Rich = CANNOT_SET_CONSTANT_VARIABLE  # type: ignore

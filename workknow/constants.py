@@ -99,6 +99,18 @@ markers = create_constants(
 )
 
 
+# define the constants for progress bars
+progress = create_constants(
+    "progress",
+    Bullet="•",
+    Completed="completed",
+    Elapsed="elapsed",
+    Percentage_Format="[progress.percentage]{task.percentage:>3.0f}%",
+    Remaining="remaining",
+    Task_Format="[progress.description]{task.description}",
+)
+
+
 # define the constants for rate limiting
 rate = create_constants(
     "rate",
