@@ -29,6 +29,7 @@ def download(
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
     env_file: Path = typer.Option(None),
+    peek: bool = typer.Option(False),
     save: bool = typer.Option(False),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
@@ -74,18 +75,28 @@ def download(
             console.print()
             # STEP: access the JSON file that contains the build history
             json_responses = request.request_json_from_github(github_api_url, console)
-            console.print(
-                f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:\n"
-            )
-            # STEP: print debugging information in a summarized fashion
-            pprint(json_responses, max_length=constants.github.Maximum_Length_All)
-            console.print()
-            console.print(":lion_face: The first workflow record looks like:\n")
-            pprint(
-                json_responses[0][0], max_length=constants.github.Maximum_Length_Record
-            )
-            logger.debug(json_responses[0][0])
-            console.print()
+            # STEP: print some details about the completed download
+            # --> display a peek into the downloaded data structure
+            if peek:
+                console.print()
+                console.print(
+                    f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:\n"
+                )
+                # STEP: print debugging information in a summarized fashion
+                pprint(json_responses, max_length=constants.github.Maximum_Length_All)
+                console.print()
+                console.print(":lion_face: The first workflow record looks like:\n")
+                pprint(
+                    json_responses[0][0], max_length=constants.github.Maximum_Length_Record
+                )
+                logger.debug(json_responses[0][0])
+                console.print()
+            # --> the program should not display a peek into the downloaded data structure
+            else:
+                console.print()
+                console.print(
+                    f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records\n"
+                )
             # STEP: create the workflows DataFrame
             workflows_dataframe = produce.create_workflows_dataframe(
                 organization, repo, repo_url, json_responses
