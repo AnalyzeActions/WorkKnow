@@ -46,6 +46,7 @@ filesystem = create_constants(
     Dash="-",
     Slash="/",
     Results="Results",
+    Wildcard="*",
     Workflows="Workflows",
     Zip_Extension=".zip",
 )
