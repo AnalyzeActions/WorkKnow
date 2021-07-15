@@ -74,14 +74,17 @@ def create_github_release(
 
 
 def get_blob_content(repo, branch, path_name):
-    # first get the branch reference
+    """Extract the blob content's using an extracted SHA-1 hash."""
+    # Reference:
+    # https://github.com/PyGithub/PyGithub/issues/661
+    # get the branch reference for the Github instance in repo
     ref = repo.get_git_ref(f"heads/{branch}")
-    # then get the tree
+    # get the tree of the entire Git repository
     tree = repo.get_git_tree(ref.object.sha, recursive="/" in path_name).tree
     # look for path in tree
     sha = [x.sha for x in tree if x.path == path_name]
     if not sha:
-        # well, not found..
+        # the SHA hash was not found, so return None
         return None
-    # we have sha
+    # return the contents of the blob based on the hash value
     return repo.get_git_blob(sha[0])
