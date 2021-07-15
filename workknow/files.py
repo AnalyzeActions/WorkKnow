@@ -144,7 +144,8 @@ def create_results_zip_file_list(results_directory: Path) -> List[str]:
 def create_results_zip_file(
     results_directory: Path, results_file_list: List[str]
 ) -> None:
-    """Save a .zip file in the results directory of all the provided .csv files in the results directory."""
+    """Save a .zip file in the results directory of all the provided .csv files found in the results directory."""
+    # create a context for the .zip file in the variable results_zip_file
     with zipfile.ZipFile(
         str(results_directory)
         + constants.filesystem.Slash
@@ -156,6 +157,15 @@ def create_results_zip_file(
         + constants.filesystem.Zip_Extension,
         "w",
     ) as results_zip_file:
+        # iterate through each of the file names in the list of file names
         for results_file_name in results_file_list:
+            # create a Pathlib-based Path out of the results_file_name
+            # since that will allow for the extraction of only the name
+            # of the file and thus ensure that the .zip file does not
+            # contain inside of it the full directory structure associated
+            # with where the results files are currently located
             pathlib_path_file = Path(results_file_name)
+            # review of the arguments to write:
+            # --> Parameter 1: the name of the file as found on current file system
+            # --> Parameter 2: the name of the file as it will be stored in the .zip file
             results_zip_file.write(results_file_name, pathlib_path_file.name)
