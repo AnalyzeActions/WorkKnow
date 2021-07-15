@@ -152,6 +152,34 @@ def create_commits_dataframe(
     return total_commits_dataframe
 
 
+def create_workflow_record_count_dictionary(
+    organization: str,
+    repo: str,
+    repo_url: str,
+    github_api_url: str,
+    workflows_dictionary_list: List[Dict[Any, Any]],
+) -> Dict[str, Union[str, int]]:
+    """Create a dictionary of all the counts of records returned for a GitHub project's workflows."""
+    # create the empty dictionary that will store the relevant meta-data and the record count
+    workflow_count_dictionary: Dict[str, Union[str, int]] = {}
+    # count the individual builds for a given GitHub repository's workflows
+    workflows_count_for_repo = count_individual_builds(workflows_dictionary_list)
+    # store all of the meta-data about this project:
+    # --> GitHub organization name
+    # --> GitHub repository name
+    # --> GitHub repository URL
+    # --> GitHub API URL used to access workflow data
+    workflow_count_dictionary[constants.workflow.Organization] = str(organization)
+    workflow_count_dictionary[constants.workflow.Repo] = str(repo)
+    workflow_count_dictionary[constants.workflow.Repo_Url] = str(repo_url)
+    workflow_count_dictionary[constants.workflow.Actions_Url] = str(github_api_url)
+    # store the count of all the workflow records for this repository
+    workflow_count_dictionary[
+        constants.workflow.Workflow_Record_Count
+    ] = workflows_count_for_repo
+    return workflow_count_dictionary
+
+
 def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[Union[str, Any]]:
     """Extract a list of urls from the provided Pandas DataFrame."""
     # create an empty list of URLs to return if the DataFrame of repositories
