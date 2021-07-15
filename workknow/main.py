@@ -196,6 +196,13 @@ def download(
             constants.filesystem.Commits,
             all_commits_dataframe,
         )
+        # save a .zip file of all of the CSV files in the results directory
+        console.print()
+        console.print(
+            f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
+        )
+        results_file_list = files.create_results_zip_file_list(results_dir)
+        files.create_results_zip_file(results_dir, results_file_list)
     else:
         # explain that the save could not work correctly due to invalid results directory
         console.print(

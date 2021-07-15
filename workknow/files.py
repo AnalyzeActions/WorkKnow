@@ -1,8 +1,11 @@
 """Load and save files."""
 
 import logging
+import zipfile
 
 from pathlib import Path
+
+from typing import List
 
 import pandas
 
@@ -127,3 +130,42 @@ def save_dataframe(
     # convert the pathlib Path object to a string and then use
     # Pandas to save the file to the textualized path as a CSV file
     repo_data.to_csv(str(resolved_complete_file_path))
+
+
+def create_results_zip_file_list(results_directory: Path) -> List[str]:
+    """Create a list of the .csv files in the provided results directory."""
+    results_files_generator = results_directory.glob("*.csv")
+    results_file_list = []
+    for results_file in results_files_generator:
+        results_file_list.append(str(results_file))
+    return results_file_list
+
+
+def create_results_zip_file(
+    results_directory: Path, results_file_list: List[str]
+) -> None:
+    """Save a .zip file in the results directory of all the provided .csv files found in the results directory."""
+    # create a context for the .zip file in the variable results_zip_file
+    with zipfile.ZipFile(
+        str(results_directory)
+        + constants.filesystem.Slash
+        + constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.workknow.Name
+        + constants.filesystem.Dash
+        + constants.filesystem.Results
+        + constants.filesystem.Zip_Extension,
+        "w",
+    ) as results_zip_file:
+        # iterate through each of the file names in the list of file names
+        for results_file_name in results_file_list:
+            # create a Pathlib-based Path out of the results_file_name
+            # since that will allow for the extraction of only the name
+            # of the file and thus ensure that the .zip file does not
+            # contain inside of it the full directory structure associated
+            # with where the results files are currently located
+            pathlib_path_file = Path(results_file_name)
+            # review of the arguments to write:
+            # --> Parameter 1: the name of the file as found on current file system
+            # --> Parameter 2: the name of the file as it will be stored in the .zip file
+            results_zip_file.write(results_file_name, pathlib_path_file.name)
