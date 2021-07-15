@@ -160,7 +160,9 @@ def download(
     # combine all of the individual DataFrames for the commit data
     all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
     # combine all of the dictionaries in the list to create DataFrame of workflow record data
-    all_workflow_record_counts_dataframe = pandas.DataFrame(repo_url_workflow_record_list)
+    all_workflow_record_counts_dataframe = pandas.DataFrame(
+        repo_url_workflow_record_list
+    )
     # save all of the results in the file system if the save parameter is specified
     if save and files.confirm_valid_directory(results_dir):
         # save the workflows DataFrame
