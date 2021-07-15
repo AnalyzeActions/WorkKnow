@@ -213,7 +213,18 @@ def download(
 
 
 @cli.command()
+def upload(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
+    """Upload the already the downloaded data."""
+    # setup the console and the logger instance
+    _, _ = configure.setup(debug_level)
+
+
+@cli.command()
 def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
     """Analyze already the downloaded data."""
     # setup the console and the logger instance
-    _, _ = configure.setup(debug_level)
+    console, _ = configure.setup(debug_level)
+    # STEP: display the messages about the tool
+    display.display_tool_details(debug_level)
+    console.print(":person_shrugging: Sorry, this feature does not yet exist.")
+    console.print()
