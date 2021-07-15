@@ -44,7 +44,10 @@ filesystem = create_constants(
     Counts="Counts",
     Csv_Extension=".csv",
     Dash="-",
+    Slash="/",
+    Results="Results",
     Workflows="Workflows",
+    Zip_Extension=".zip",
 )
 
 
