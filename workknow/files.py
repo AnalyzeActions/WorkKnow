@@ -134,28 +134,17 @@ def save_dataframe(
 
 def create_results_zip_file_list(results_directory: Path) -> List[str]:
     """Create a list of the .csv files in the provided results directory."""
-    console = configure.setup_console()
     results_files_generator = results_directory.glob("*.csv")
     results_file_list = []
     for results_file in results_files_generator:
         results_file_list.append(str(results_file))
-    console.print(results_file_list)
     return results_file_list
 
 
 def create_results_zip_file(
     results_directory: Path, results_file_list: List[str]
 ) -> None:
-    """Save a .zip file in the results directory of all the provided .csv files."""
-    print(
-        str(results_directory)
-        + constants.filesystem.All
-        + constants.filesystem.Dash
-        + constants.workknow.Name
-        + constants.filesystem.Dash
-        + constants.filesystem.Results
-        + constants.filesystem.Zip_Extension
-    )
+    """Save a .zip file in the results directory of all the provided .csv files in the results directory."""
     with zipfile.ZipFile(
         str(results_directory)
         + constants.filesystem.Slash
