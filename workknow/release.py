@@ -5,6 +5,7 @@ from pathlib import Path
 import logging
 
 from github import Github
+from github import GithubException
 
 from workknow import constants
 from workknow import request
@@ -39,21 +40,45 @@ def create_github_release(
     for results_file in results_files:
         logger.debug(results_file)
         try:
-            results_file_contents = results_file.read_text()
+            results_file_contents = results_file.read_text()  # type: ignore
         except UnicodeDecodeError:
-            results_file_contents = results_file.read_bytes()
+            results_file_contents = results_file.read_bytes()  # type: ignore
         results_files_contents[str(results_file.name)] = results_file_contents
     logger.debug(results_files)
     results_files_names = [result_file.name for result_file in results_files]
     logger.debug(results_files_names)
     for result_file_name in results_files_names:
         if result_file_name in all_files:
-            contents = github_repository.get_contents(result_file_name)
+            try:
+                contents = github_repository.get_contents(result_file_name)
+            except GithubException:
+                contents = get_blob_content(github_repository, "master", result_file_name)
+            github_repository.update_file(
+                result_file_name,
+                "Update WorkKnow Data" + semver,
+                results_files_contents[result_file_name],
+                contents.sha,
+                branch="master",
+            )
             logger.debug(result_file_name + " UPDATED")
         else:
             github_repository.create_file(
                 result_file_name,
-                "Add WorkKnow Data.",
+                "Add WorkKnow Data" + semver,
                 results_files_contents[result_file_name],
             )
             logger.debug(result_file_name + " CREATED")
+
+
+def get_blob_content(repo, branch, path_name):
+    # first get the branch reference
+    ref = repo.get_git_ref(f'heads/{branch}')
+    # then get the tree
+    tree = repo.get_git_tree(ref.object.sha, recursive='/' in path_name).tree
+    # look for path in tree
+    sha = [x.sha for x in tree if x.path == path_name]
+    if not sha:
+        # well, not found..
+        return None
+    # we have sha
+    return repo.get_git_blob(sha[0])
