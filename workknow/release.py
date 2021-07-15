@@ -11,11 +11,13 @@ from workknow import constants
 from workknow import request
 
 
-def create_github_release(
+def perform_github_upload(
     organization: str, repository: str, semver: str, results_dir: Path
 ) -> None:
     """Create a new release on GitHub of all files in the results directory."""
+    # create a logger
     logger = logging.getLogger(constants.logging.Rich)
+    # extract the github_access_token for use during upload process
     github_access_token = request.get_github_personal_access_token()
     github = Github(github_access_token)
     github_repository_name = organization + constants.github.Separator + repository
