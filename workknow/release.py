@@ -53,7 +53,9 @@ def create_github_release(
             try:
                 contents = github_repository.get_contents(result_file_name)
             except GithubException:
-                contents = get_blob_content(github_repository, "master", result_file_name)
+                contents = get_blob_content(
+                    github_repository, "master", result_file_name
+                )
             github_repository.update_file(
                 result_file_name_prefixed,
                 "Update WorkKnow Data " + semver,
@@ -73,9 +75,9 @@ def create_github_release(
 
 def get_blob_content(repo, branch, path_name):
     # first get the branch reference
-    ref = repo.get_git_ref(f'heads/{branch}')
+    ref = repo.get_git_ref(f"heads/{branch}")
     # then get the tree
-    tree = repo.get_git_tree(ref.object.sha, recursive='/' in path_name).tree
+    tree = repo.get_git_tree(ref.object.sha, recursive="/" in path_name).tree
     # look for path in tree
     sha = [x.sha for x in tree if x.path == path_name]
     if not sha:
