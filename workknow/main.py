@@ -62,6 +62,7 @@ def download(
         repo_urls.extend(provided_url_list)
         # display debugging information about the data frames
         logger.debug(repo_urls)
+    repo_url_workflow_record_list = []
     # iterate through all of the repo_urls provided on the command-line or in the CSV file
     for repo_url in repo_urls:
         # STEP: create the URL needed for accessing the repository's Action builds
@@ -75,12 +76,19 @@ def download(
             console.print()
             # STEP: access the JSON file that contains the build history
             json_responses = request.request_json_from_github(github_api_url, console)
+            # STEP: collect data about the number of workflow records in the JSON responses
+            repo_url_workflow_record_dict = (
+                produce.create_workflow_record_count_dictionary(
+                    organization, repo, repo_url, github_api_url, json_responses
+                )
+            )
+            repo_url_workflow_record_list.append(repo_url_workflow_record_dict)
             # STEP: print some details about the completed download
             # --> display a peek into the downloaded data structure
             if peek:
                 console.print()
                 console.print(
-                    f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that look like:\n"
+                    f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that each look like:\n"
                 )
                 # STEP: print debugging information in a summarized fashion
                 pprint(json_responses, max_length=constants.github.Maximum_Length_All)
@@ -151,11 +159,22 @@ def download(
     all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
     # combine all of the individual DataFrames for the commit data
     all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+    # combine all of the dictionaries in the list to create DataFrame of workflow record data
+    all_workflow_record_counts_dataframe = pandas.DataFrame(repo_url_workflow_record_list)
     # save all of the results in the file system if the save parameter is specified
     if save and files.confirm_valid_directory(results_dir):
         # save the workflows DataFrame
         console.print(
             f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
+        )
+        # save the all records count DataFrame
+        console.print(
+            f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
+        )
+        files.save_dataframe_all(
+            results_dir,
+            constants.filesystem.Counts,
+            all_workflow_record_counts_dataframe,
         )
         # save the all workflows DataFrame
         console.print(
