@@ -174,7 +174,7 @@ def download(
     else:
         # explain that the save could not work correctly due to invalid results directory
         console.print(
-            f"Could not save workflow and commit details for {organization}/{repo} in the directory {str(results_dir).strip()}"
+            f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
         )
     console.print()
     request.get_rate_limit_details()
