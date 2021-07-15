@@ -115,7 +115,7 @@ def download(
                 console.print(
                     f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                 )
-                console.print("\t... Saving the workflows data.")
+                console.print("\t... Saving the workflows data")
                 files.save_dataframe(
                     results_dir,
                     organization,
@@ -124,7 +124,7 @@ def download(
                     workflows_dataframe,
                 )
                 # save the commits DataFrame
-                console.print("\t... Saving the commits data.")
+                console.print("\t... Saving the commits data")
                 files.save_dataframe(
                     results_dir,
                     organization,
@@ -145,7 +145,7 @@ def download(
             request.get_rate_limit_wait_time(rate_limit_dict)
     # finished processing all of the individual repositories and now ready to create
     # the "combined" data sets that include data for every repository subject to analysis
-    console.print(":runner: Creating combined data sets across all repositories.")
+    console.print(":runner: Creating combined data sets across all repositories")
     console.print()
     # combine all of the individual DataFrames for the workflow data
     all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
@@ -158,14 +158,14 @@ def download(
             f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
         )
         # save the all workflows DataFrame
-        console.print("\t... Saving combined workflows data for all repositories.")
+        console.print("\t... Saving combined workflows data for all repositories")
         files.save_dataframe_all(
             results_dir,
             constants.filesystem.Workflows,
             all_workflows_dataframe,
         )
         # save the commits DataFrame
-        console.print("\t... Saving combined commits data for all repositories.")
+        console.print("\t... Saving combined commits data for all repositories")
         files.save_dataframe_all(
             results_dir,
             constants.filesystem.Commits,
