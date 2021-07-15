@@ -215,8 +215,7 @@ def download(
 
 @cli.command()
 def upload(
-    github_organization: str,
-    github_repository: str,
+    repo_url: str,
     semver: str,
     results_dir: Path,
     env_file: Path = typer.Option(None),
@@ -229,10 +228,19 @@ def upload(
     environment.load_environment(env_file, logger)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
-    # STEP: perform the release
-    release.create_github_release(
-        github_organization, github_repository, semver, results_dir
-    )
+    # extract the organization and the repository from the repository URL
+    github_organization, github_repository = produce.parse_github_url(repo_url)
+    if github_organization is not None and github_repository is not None:
+        # STEP: perform the upload to GitHub repository
+        console.print(
+            f":runner: Uploading all workflow history data to the GitHub repository at: {repo_url}"
+        )
+        release.perform_github_upload(
+            github_organization, github_repository, semver, results_dir
+        )
+    else:
+        console.print(f":grimacing_face: Unable to access GitHub repository at {repo_url}")
+
 
 
 @cli.command()
