@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas
 
+from workknow import configure
 from workknow import constants
 
 
@@ -29,7 +30,16 @@ def create_directory(directory: Path) -> None:
     """Create a directory if it does not exist and don't fail if it does."""
     # create the complete file path, making all parent directories
     # if needed and not failing if the directory already exists
-    directory.mkdir(parents=True, exist_ok=True)
+    console = configure.setup_console()
+    # attempt to create the directory
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+    # permission errors developed, this means that it is not possible to
+    # create the directory and thus the program cannot save its results;
+    # display diagnostic information about what exception happened
+    except PermissionError:
+        console.print(":grimacing_face: Unable to save in the provided directory")
+        console.print()
 
 
 def confirm_valid_file(file: Path) -> bool:
