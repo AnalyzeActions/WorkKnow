@@ -48,23 +48,24 @@ def create_github_release(
     results_files_names = [result_file.name for result_file in results_files]
     logger.debug(results_files_names)
     for result_file_name in results_files_names:
+        result_file_name_prefixed = "results/" + result_file_name
         if result_file_name in all_files:
             try:
                 contents = github_repository.get_contents(result_file_name)
             except GithubException:
                 contents = get_blob_content(github_repository, "master", result_file_name)
             github_repository.update_file(
-                result_file_name,
-                "Update WorkKnow Data" + semver,
+                result_file_name_prefixed,
+                "Update WorkKnow Data " + semver,
                 results_files_contents[result_file_name],
-                contents.sha,
+                contents.sha,  # type: ignore
                 branch="master",
             )
             logger.debug(result_file_name + " UPDATED")
         else:
             github_repository.create_file(
-                result_file_name,
-                "Add WorkKnow Data" + semver,
+                result_file_name_prefixed,
+                "Add WorkKnow Data " + semver,
                 results_files_contents[result_file_name],
             )
             logger.debug(result_file_name + " CREATED")
