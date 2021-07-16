@@ -230,17 +230,23 @@ def upload(
     display.display_tool_details(debug_level)
     # extract the organization and the repository from the repository URL
     github_organization, github_repository = produce.parse_github_url(repo_url)
+    # STEP: perform the upload to GitHub repository
+    # the extract github_organization and github_repository are correct
+    # and it is possible to move onto the uploading to GitHub step
     if github_organization is not None and github_repository is not None:
-        # STEP: perform the upload to GitHub repository
+        # display diagnostic message in the console
         console.print(
             f":runner: Uploading all workflow history data to the GitHub repository at: {repo_url}"
         )
+        # create a blank line before the progress bar created by perform_github_upload
+        console.print()
         release.perform_github_upload(
             github_organization, github_repository, semver, results_dir
         )
+        # create a blank line after the progress bar created by perform_github_upload
+        console.print()
     else:
         console.print(f":grimacing_face: Unable to access GitHub repository at {repo_url}")
-
 
 
 @cli.command()
