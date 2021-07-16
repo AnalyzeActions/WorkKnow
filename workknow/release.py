@@ -2,6 +2,12 @@
 
 from pathlib import Path
 
+from rich.console import Console
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
+
 import logging
 
 from github import Github
@@ -27,9 +33,9 @@ def perform_github_upload(
     all_files = []
     contents = github_repository.get_contents("")
     while contents:
-        file_content = contents.pop(0)
+        file_content = contents.pop(0)  # type: ignore
         if file_content.type == "dir":
-            contents.extend(github_repository.get_contents(file_content.path))
+            contents.extend(github_repository.get_contents(file_content.path))  # type: ignore
         else:
             file = file_content
             all_files.append(
@@ -49,30 +55,44 @@ def perform_github_upload(
     logger.debug(results_files)
     results_files_names = [result_file.name for result_file in results_files]
     logger.debug(results_files_names)
-    for result_file_name in results_files_names:
-        result_file_name_prefixed = "results/" + result_file_name
-        if result_file_name in all_files:
-            try:
-                contents = github_repository.get_contents(result_file_name)
-            except GithubException:
-                contents = get_blob_content(
-                    github_repository, "master", result_file_name
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        upload_pages_task = progress.add_task("Upload", total=len(results_files_names))
+        for result_file_name in results_files_names:
+            # result_file_name_prefixed = "results/" + result_file_name
+            if result_file_name in all_files:
+                try:
+                    contents = github_repository.get_contents(result_file_name)
+                except GithubException:
+                    contents = get_blob_content(
+                        github_repository, "main", result_file_name
+                    )
+                github_repository.update_file(
+                    result_file_name,
+                    "Update WorkKnow Data " + semver + " for " + result_file_name,
+                    results_files_contents[result_file_name],
+                    contents.sha,  # type: ignore
+                    branch="main",
                 )
-            github_repository.update_file(
-                result_file_name_prefixed,
-                "Update WorkKnow Data " + semver + " for " + result_file_name_prefixed,
-                results_files_contents[result_file_name],
-                contents.sha,  # type: ignore
-                branch="master",
-            )
-            logger.debug(result_file_name + " UPDATED")
-        else:
-            github_repository.create_file(
-                result_file_name_prefixed,
-                "Add WorkKnow Data " + semver + " for " + result_file_name_prefixed,
-                results_files_contents[result_file_name],
-            )
-            logger.debug(result_file_name + " CREATED")
+                logger.debug(result_file_name + " UPDATED")
+            else:
+                github_repository.create_file(
+                    result_file_name,
+                    "Add WorkKnow Data " + semver + " for " + result_file_name,
+                    results_files_contents[result_file_name],
+                )
+                logger.debug(result_file_name + " CREATED")
+            progress.update(upload_pages_task, advance=1)
 
 
 def get_blob_content(repo, branch, path_name):
