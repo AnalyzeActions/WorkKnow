@@ -246,7 +246,9 @@ def upload(
         # create a blank line after the progress bar created by perform_github_upload
         console.print()
     else:
-        console.print(f":grimacing_face: Unable to access GitHub repository at {repo_url}")
+        console.print(
+            f":grimacing_face: Unable to access GitHub repository at {repo_url}"
+        )
 
 
 @cli.command()
