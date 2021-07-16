@@ -241,7 +241,7 @@ def upload(
         # create a blank line before the progress bar created by perform_github_upload
         console.print()
         release.perform_github_upload(
-            github_organization, github_repository, semver, results_dir
+            repo_url, github_organization, github_repository, semver, results_dir
         )
         # create a blank line after the progress bar created by perform_github_upload
         console.print()
