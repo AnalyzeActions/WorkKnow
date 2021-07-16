@@ -76,6 +76,8 @@ def perform_github_upload(
         "remaining",
     ) as progress:
         upload_pages_task = progress.add_task("Upload", total=len(results_files_names))
+        # create a default value for the last commit's SHA-1 value, which from
+        # the perspective of PyGitHub and the GitHub API is returned as a string
         commit_sha = ""
         # iterate through all of the files that need to be uploaded and EITHER
         # --> Add them to the repository for the first time OR
