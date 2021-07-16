@@ -163,7 +163,9 @@ def perform_github_upload(
         # semver for the release, which will cause the program to crash and enter a
         # state from which it is not possible to recover
         console.print()
-        console.print(":grimacing_face: Unable to create a tagged release through the GitHub API")
+        console.print(
+            ":grimacing_face: Unable to create a tagged release through the GitHub API"
+        )
         console.print(
             "Did you use a unique semantic version number (i.e., semver) for the release?"
             + constants.markers.Newline
