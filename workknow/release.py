@@ -76,7 +76,7 @@ def perform_github_upload(
         "remaining",
     ) as progress:
         upload_pages_task = progress.add_task("Upload", total=len(results_files_names))
-        commit_sha = 0
+        commit_sha = ""
         # iterate through all of the files that need to be uploaded and EITHER
         # --> Add them to the repository for the first time OR
         # --> Update them in the repository if they already exist
