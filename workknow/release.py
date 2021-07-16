@@ -20,7 +20,7 @@ from workknow import request
 
 
 def perform_github_upload(
-    organization: str, repository: str, semver: str, results_dir: Path
+    repo_url: str, organization: str, repository: str, semver: str, results_dir: Path
 ) -> None:
     """Create a new release on GitHub of all files in the results directory."""
     # create a logger
@@ -109,6 +109,10 @@ def perform_github_upload(
     )
     # create a GitHub release that will produce a .zip and .tar.gz file of all the
     # contents of the repository at the specific tag of the provided semver
+    console.print()
+    console.print(
+        f":runner: Creating a tagged release of the data in the repository at: {repo_url}"
+    )
     try:
         github_repository.create_git_tag_and_release(
             semver,
