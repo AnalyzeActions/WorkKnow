@@ -134,7 +134,6 @@ def perform_github_upload(
         sys.exit(1)
 
 
-
 def get_blob_content(repo, branch, path_name):
     """Extract the blob content's using an extracted SHA-1 hash."""
     # Reference:
