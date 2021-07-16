@@ -2,15 +2,18 @@
 
 from pathlib import Path
 
+import logging
+
 from rich.progress import BarColumn
 from rich.progress import Progress
 from rich.progress import TimeRemainingColumn
 from rich.progress import TimeElapsedColumn
 
-import logging
-
 from github import Github
 from github import GithubException
+from github import InputGitAuthor
+
+from github_binary_upload import publish_release_from_tag
 
 from workknow import constants
 from workknow import request
@@ -67,6 +70,7 @@ def perform_github_upload(
         "remaining",
     ) as progress:
         upload_pages_task = progress.add_task("Upload", total=len(results_files_names))
+        commit_sha = 0
         for result_file_name in results_files_names:
             # result_file_name_prefixed = "results/" + result_file_name
             if result_file_name in all_files:
@@ -76,7 +80,7 @@ def perform_github_upload(
                     contents = get_blob_content(
                         github_repository, "main", result_file_name
                     )
-                github_repository.update_file(
+                update_dict = github_repository.update_file(
                     result_file_name,
                     "Update WorkKnow Data " + semver + " for " + result_file_name,
                     results_files_contents[result_file_name],
@@ -84,14 +88,21 @@ def perform_github_upload(
                     branch="main",
                 )
                 logger.debug(result_file_name + " UPDATED")
+                commit_sha = update_dict["commit"].sha
+                print(commit_sha)
             else:
-                github_repository.create_file(
+                create_dict = github_repository.create_file(
                     result_file_name,
                     "Add WorkKnow Data " + semver + " for " + result_file_name,
                     results_files_contents[result_file_name],
                 )
+                commit_sha = create_dict["commit"].sha
+                print(commit_sha)
                 logger.debug(result_file_name + " CREATED")
             progress.update(upload_pages_task, advance=1)
+    input_git_author = InputGitAuthor("Gregory M. Kapfhammer", "gkapfham@allegheny.edu", "2014-11-07T22:01:45Z")
+    github_repository.create_git_tag_and_release("v0.1.0", "Tag Message", "Release Name", "Release Message", str(commit_sha), "Type", input_git_author, False, False)
+    # publish_release_from_tag("AnalyzeActions/WorkKnow-Data", )
 
 
 def get_blob_content(repo, branch, path_name):
