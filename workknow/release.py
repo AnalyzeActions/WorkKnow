@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-from rich.console import Console
 from rich.progress import BarColumn
 from rich.progress import Progress
 from rich.progress import TimeRemainingColumn
