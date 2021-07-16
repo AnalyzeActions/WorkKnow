@@ -16,6 +16,7 @@ from workknow import display
 from workknow import environment
 from workknow import files
 from workknow import produce
+from workknow import release
 from workknow import request
 
 
@@ -213,7 +214,49 @@ def download(
 
 
 @cli.command()
+def upload(
+    repo_url: str,
+    semver: str,
+    results_dir: Path,
+    env_file: Path = typer.Option(None),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+):
+    """Upload to a GitHub release the data in the results directory."""
+    # STEP: setup the console and the logger instance
+    console, logger = configure.setup(debug_level)
+    # STEP: load the execution environment to support GitHub API access
+    environment.load_environment(env_file, logger)
+    # STEP: display the messages about the tool
+    display.display_tool_details(debug_level)
+    # extract the organization and the repository from the repository URL
+    github_organization, github_repository = produce.parse_github_url(repo_url)
+    # STEP: perform the upload to GitHub repository
+    # the extract github_organization and github_repository are correct
+    # and it is possible to move onto the uploading to GitHub step
+    if github_organization is not None and github_repository is not None:
+        # display diagnostic message in the console
+        console.print(
+            f":runner: Uploading all workflow history data to the GitHub repository at: {repo_url}"
+        )
+        # create a blank line before the progress bar created by perform_github_upload
+        console.print()
+        release.perform_github_upload(
+            repo_url, github_organization, github_repository, semver, results_dir
+        )
+        # create a blank line after the progress bar created by perform_github_upload
+        console.print()
+    else:
+        console.print(
+            f":grimacing_face: Unable to access GitHub repository at {repo_url}"
+        )
+
+
+@cli.command()
 def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
     """Analyze already the downloaded data."""
     # setup the console and the logger instance
-    _, _ = configure.setup(debug_level)
+    console, _ = configure.setup(debug_level)
+    # STEP: display the messages about the tool
+    display.display_tool_details(debug_level)
+    console.print(":person_shrugging: Sorry, this feature does not yet exist.")
+    console.print()
