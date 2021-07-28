@@ -221,7 +221,9 @@ def download(
         request.get_rate_limit_details()
     # there were no valid repository URLs provided on the command-line so workflow analysis could not proceed
     else:
-        console.print(":grimacing_face: Did not find any GitHub repositories for workflow analysis!")
+        console.print(
+            ":grimacing_face: Did not find any GitHub repositories for workflow analysis!"
+        )
         console.print()
 
 
