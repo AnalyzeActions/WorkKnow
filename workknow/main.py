@@ -224,6 +224,12 @@ def download(
         console.print(
             ":grimacing_face: Did not find any GitHub repositories for workflow analysis!"
         )
+        console.print(
+            "Did you provide at least one repository URL?"
+            + constants.markers.Newline
+            + constants.markers.Newline
+            + ":sad_but_relieved_face: Exiting now!"
+        )
         console.print()
 
 
