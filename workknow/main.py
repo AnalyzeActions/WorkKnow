@@ -169,11 +169,17 @@ def download(
             if files.confirm_valid_directory(results_dir):
                 # finished processing all of the individual repositories and now ready to create
                 # the "combined" data sets that include data for every repository subject to analysis
-                console.print(":runner: Creating combined data sets across all repositories")
+                console.print(
+                    ":runner: Creating combined data sets across all repositories"
+                )
                 # combine all of the individual DataFrames for the workflow data
-                all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
+                all_workflows_dataframe = pandas.concat(
+                    repository_urls_dataframes_workflows
+                )
                 # combine all of the individual DataFrames for the commit data
-                all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+                all_commits_dataframe = pandas.concat(
+                    repository_urls_dataframes_commits
+                )
                 # combine all of the dictionaries in the list to create DataFrame of workflow record data
                 all_workflow_record_counts_dataframe = pandas.DataFrame(
                     repo_url_workflow_record_list
