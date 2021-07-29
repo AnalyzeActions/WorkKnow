@@ -100,5 +100,5 @@ jobs:
             PYTHONIOENCODING: ${{secrets.PYTHONIOENCODING}}
           run: |
             echo $GITHUB_WORKSPACE
-            cat "%GITHUB_WORKSPACE%\csv\analyze_actions_projects.csv"
+            cat "\csv\analyze_actions_projects.csv"
             poetry run workknow download --repos-csv-file "%GITHUB_WORKSPACE%\csv\analyze_actions_projects.csv" --debug-level DEBUG
