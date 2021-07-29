@@ -87,6 +87,6 @@ jobs:
             LOCAL_TIMEZONE: ${{secrets.LOCAL_TIMEZONE}}
             PYTHONIOENCODING: ${{secrets.PYTHONIOENCODING}}
           run: |
-            cat /github/workspace/csv/analyze_actions_projects.csv
             echo $GITHUB_WORKSPACE
+            cat /github/workspace/csv/analyze_actions_projects.csv
             poetry run workknow download --repos-csv-file /github/workspace/csv/analyze_actions_projects.csv --debug-level DEBUG
