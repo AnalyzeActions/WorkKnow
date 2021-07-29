@@ -81,7 +81,7 @@ jobs:
           run: |
             poetry run workknow download --repo-urls https://github.com/AnalyzeActions/WorkKnow --debug-level DEBUG
         # Run the program using repo(s) in a CSV file
-        - name: Run WorkKnow with Command-line URL
+        - name: Run WorkKnow with CSV file URL
           env:
             PERSONAL_GITHUB_ACCESS_TOKEN: ${{secrets.PERSONAL_GITHUB_ACCESS_TOKEN}}
             LOCAL_TIMEZONE: ${{secrets.LOCAL_TIMEZONE}}
