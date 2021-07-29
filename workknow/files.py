@@ -42,6 +42,15 @@ def create_directory(directory: Path) -> None:
     # display diagnostic information about what exception happened
     except PermissionError:
         console.print(":grimacing_face: Unable to save in the provided directory")
+        console.print(
+            constants.markers.Space
+            + constants.markers.Space
+            + constants.markers.Space
+            + "Did you specify a valid results directory?"
+            + constants.markers.Newline
+            + constants.markers.Newline
+            + ":sad_but_relieved_face: Exiting now!"
+        )
         console.print()
 
 
