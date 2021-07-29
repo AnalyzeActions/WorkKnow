@@ -30,6 +30,7 @@ def download(
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
     env_file: Path = typer.Option(None),
+    combine: bool = typer.Option(False),
     peek: bool = typer.Option(False),
     save: bool = typer.Option(False),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
@@ -163,20 +164,20 @@ def download(
                 # limit is imminent then sleep for the time remaining until GitHub resets.
                 rate_limit_dict = request.get_rate_limit_details()
                 request.get_rate_limit_wait_time(rate_limit_dict)
-        # finished processing all of the individual repositories and now ready to create
-        # the "combined" data sets that include data for every repository subject to analysis
-        console.print(":runner: Creating combined data sets across all repositories")
-        # combine all of the individual DataFrames for the workflow data
-        all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
-        # combine all of the individual DataFrames for the commit data
-        all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
-        # combine all of the dictionaries in the list to create DataFrame of workflow record data
-        all_workflow_record_counts_dataframe = pandas.DataFrame(
-            repo_url_workflow_record_list
-        )
         # save all of the results in the file system if the save parameter is specified
-        if save:
+        if combine and save:
             if files.confirm_valid_directory(results_dir):
+                # finished processing all of the individual repositories and now ready to create
+                # the "combined" data sets that include data for every repository subject to analysis
+                console.print(":runner: Creating combined data sets across all repositories")
+                # combine all of the individual DataFrames for the workflow data
+                all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
+                # combine all of the individual DataFrames for the commit data
+                all_commits_dataframe = pandas.concat(repository_urls_dataframes_commits)
+                # combine all of the dictionaries in the list to create DataFrame of workflow record data
+                all_workflow_record_counts_dataframe = pandas.DataFrame(
+                    repo_url_workflow_record_list
+                )
                 console.print()
                 # save the workflows DataFrame
                 console.print(
@@ -286,6 +287,15 @@ def upload(
         console.print(
             f":grimacing_face: Unable to access GitHub repository at {repo_url}"
         )
+
+
+@cli.command()
+def summarize(
+    results_dir: Path = typer.Option(None),
+    save: bool = typer.Option(False),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+):
+    """Summarize the downloaded GitHub Action workflow history for all projects in a specified directory."""
 
 
 @cli.command()
