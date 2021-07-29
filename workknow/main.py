@@ -9,6 +9,7 @@ import typer
 
 from rich.pretty import pprint
 
+from workknow import combine
 from workknow import configure
 from workknow import constants
 from workknow import debug
@@ -315,6 +316,11 @@ def summarize(
         console.print(
             f":runner: Combining workflow histories for CSV files stored in {csv_dir}"
         )
+        console.print()
+        (
+            data_frame_commits_list,
+            data_frame_workflows_list,
+        ) = combine.summarize_files_in_directory(csv_dir)
 
 
 @cli.command()
