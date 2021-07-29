@@ -169,7 +169,10 @@ def perform_github_upload(
             ":grimacing_face: Unable to create a tagged release through the GitHub API"
         )
         console.print(
-            "Did you use a unique semantic version number (i.e., semver) for the release?"
+            constants.markers.Space
+            + constants.markers.Space
+            + constants.markers.Space
+            + "Did you use a unique semantic version number (i.e., semver) for the release?"
             + constants.markers.Newline
             + constants.markers.Newline
             + ":sad_but_relieved_face: Exiting now!"
