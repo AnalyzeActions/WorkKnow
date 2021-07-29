@@ -151,12 +151,12 @@ def download(
                             constants.filesystem.Commits,
                             commits_dataframe,
                         )
-                else:
-                    # explain that the save could not work correctly due to invalid results directory
-                    console.print(
-                        f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
-                    )
-                    console.print()
+                    else:
+                        # explain that the save could not work correctly due to invalid results directory
+                        console.print(
+                            f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                        )
+                        console.print()
                 # before going on to the next GitHub repository, ensure that the program
                 # is not about to be rate limited, which will cause a crash. If a rate
                 # limit is imminent then sleep for the time remaining until GitHub resets.
