@@ -174,8 +174,8 @@ def download(
             repo_url_workflow_record_list
         )
         # save all of the results in the file system if the save parameter is specified
-        if files.confirm_valid_directory(results_dir):
-            if save:
+        if save:
+            if files.confirm_valid_directory(results_dir):
                 console.print()
                 # save the workflows DataFrame
                 console.print(
