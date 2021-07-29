@@ -127,28 +127,30 @@ def download(
                 repository_urls_dataframes_commits.append(commits_dataframe)
                 # STEP: save the workflows DataFrame when saving is stipulated and
                 # the results directory is valid for the user's file system
-                if save and files.confirm_valid_directory(results_dir):
+                # if save and files.confirm_valid_directory(results_dir):
+                if files.confirm_valid_directory(results_dir):
                     # save the workflows DataFrame
-                    console.print(
-                        f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
-                    )
-                    console.print("\t... Saving the workflows data")
-                    files.save_dataframe(
-                        results_dir,
-                        organization,
-                        repo,
-                        constants.filesystem.Workflows,
-                        workflows_dataframe,
-                    )
-                    # save the commits DataFrame
-                    console.print("\t... Saving the commits data")
-                    files.save_dataframe(
-                        results_dir,
-                        organization,
-                        repo,
-                        constants.filesystem.Commits,
-                        commits_dataframe,
-                    )
+                    if save:
+                        console.print(
+                            f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                        )
+                        console.print("\t... Saving the workflows data")
+                        files.save_dataframe(
+                            results_dir,
+                            organization,
+                            repo,
+                            constants.filesystem.Workflows,
+                            workflows_dataframe,
+                        )
+                        # save the commits DataFrame
+                        console.print("\t... Saving the commits data")
+                        files.save_dataframe(
+                            results_dir,
+                            organization,
+                            repo,
+                            constants.filesystem.Commits,
+                            commits_dataframe,
+                        )
                 else:
                     # explain that the save could not work correctly due to invalid results directory
                     console.print(
