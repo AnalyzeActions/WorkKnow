@@ -215,11 +215,21 @@ def download(
                 )
                 results_file_list = files.create_results_zip_file_list(results_dir)
                 files.create_results_zip_file(results_dir, results_file_list)
-        else:
-            # explain that the save could not work correctly due to invalid results directory
-            console.print(
-                f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
-            )
+            else:
+                console.print()
+                # explain that the save could not work correctly due to invalid results directory
+                console.print(
+                    f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
+                )
+                console.print(
+                    constants.markers.Space
+                    + constants.markers.Space
+                    + constants.markers.Space
+                    + "Did you specify a valid results directory?"
+                    + constants.markers.Newline
+                    + constants.markers.Newline
+                    + ":sad_but_relieved_face: Exiting now!"
+                )
         console.print()
         request.get_rate_limit_details()
     # there were no valid repository URLs provided on the command-line so workflow analysis could not proceed
@@ -228,7 +238,10 @@ def download(
             ":grimacing_face: Did not find any GitHub repositories for workflow analysis!"
         )
         console.print(
-            "Did you provide at least one repository URL?"
+            constants.markers.Space
+            + constants.markers.Space
+            + constants.markers.Space
+            + "Did you provide at least one repository URL?"
             + constants.markers.Newline
             + constants.markers.Newline
             + ":sad_but_relieved_face: Exiting now!"
