@@ -74,6 +74,7 @@ def download(
             organization, repo = produce.parse_github_url(repo_url)
             if organization is not None and repo is not None:
                 github_api_url = produce.create_github_api_url(organization, repo)
+                console.print()
                 console.print(
                     ":runner: Downloading the workflow history of the GitHub repository at:"
                 )
