@@ -19,4 +19,3 @@ def display_tool_details(
     )
     # --> display the web site for the tool
     console.print(constants.workknow.Website)
-    console.print()
