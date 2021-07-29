@@ -128,9 +128,9 @@ def download(
                 # STEP: save the workflows DataFrame when saving is stipulated and
                 # the results directory is valid for the user's file system
                 # if save and files.confirm_valid_directory(results_dir):
-                if files.confirm_valid_directory(results_dir):
+                if save:
                     # save the workflows DataFrame
-                    if save:
+                    if files.confirm_valid_directory(results_dir):
                         console.print(
                             f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                         )
