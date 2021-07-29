@@ -77,5 +77,6 @@ jobs:
           env:
             PERSONAL_GITHUB_ACCESS_TOKEN: ${{secrets.PERSONAL_GITHUB_ACCESS_TOKEN}}
             LOCAL_TIMEZONE: ${{secrets.LOCAL_TIMEZONE}}
+            PYTHONIOENCODING: ${{secrets.PYTHONIOENCODING}}
           run: |
             poetry run workknow download --repo-urls https://github.com/AnalyzeActions/WorkKnow --results-dir ~/temp/workknow/ --debug-level DEBUG
