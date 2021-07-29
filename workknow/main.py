@@ -128,9 +128,9 @@ def download(
                 repository_urls_dataframes_commits.append(commits_dataframe)
                 # STEP: save the workflows DataFrame when saving is stipulated and
                 # the results directory is valid for the user's file system
-                # if save and files.confirm_valid_directory(results_dir):
+                # save the workflows DataFrame
                 if save:
-                    # save the workflows DataFrame
+                    # the directory is valid so attempt a save to file system
                     if files.confirm_valid_directory(results_dir):
                         console.print(
                             f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
