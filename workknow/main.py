@@ -156,7 +156,7 @@ def download(
                     console.print(
                         f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
                     )
-                console.print()
+                    console.print()
                 # before going on to the next GitHub repository, ensure that the program
                 # is not about to be rate limited, which will cause a crash. If a rate
                 # limit is imminent then sleep for the time remaining until GitHub resets.
@@ -165,7 +165,6 @@ def download(
         # finished processing all of the individual repositories and now ready to create
         # the "combined" data sets that include data for every repository subject to analysis
         console.print(":runner: Creating combined data sets across all repositories")
-        console.print()
         # combine all of the individual DataFrames for the workflow data
         all_workflows_dataframe = pandas.concat(repository_urls_dataframes_workflows)
         # combine all of the individual DataFrames for the commit data
@@ -177,6 +176,7 @@ def download(
         # save all of the results in the file system if the save parameter is specified
         if files.confirm_valid_directory(results_dir):
             if save:
+                console.print()
                 # save the workflows DataFrame
                 console.print(
                     f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
