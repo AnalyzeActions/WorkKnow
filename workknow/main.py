@@ -311,24 +311,33 @@ def summarize(
     environment.load_environment(env_file, logger)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
-    # the directory is valid so attempt to load each file and summarize
+    # STEP: the directory is valid so attempt to load each file and summarize
     if files.confirm_valid_directory(csv_dir):
+        # display a diagnostic message to indicate that WorkKnow will create
+        # the summarized data files and then save them to the results directory
         console.print()
         console.print(
             f":runner: Combining workflow histories for CSV files stored in {csv_dir}"
         )
         console.print()
+        # summarize all of the files that are found in the CSV file directory
         (
             data_frame_commits,
             data_frame_workflows,
         ) = combine.summarize_files_in_directory(csv_dir)
+        # save the summarized data files to the disk in the results directory
         if save:
+            # the results directory is a valid directory that can store the files
             if files.confirm_valid_directory(results_dir):
+                # save the Pandas DataFrame that contains the commits data;
+                # the name of the file is "All-Commits.csv"
                 files.save_dataframe_all(
                     results_dir,
                     constants.filesystem.Commits,
                     data_frame_commits,
                 )
+                # save the Pandas DataFrame that contains the workflow data;
+                # the name of the file is "All-Commits.csv"
                 files.save_dataframe_all(
                     results_dir,
                     constants.filesystem.Workflows,
