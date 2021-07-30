@@ -335,7 +335,7 @@ def combine(
         # save the summarized data files to the disk in the results directory
         if save:
             console.print(
-                f":sparkles: Combine summarized commit and workflow histories in {results_dir}"
+                f":sparkles: Saving combined commit and workflow histories in {results_dir}"
             )
             console.print()
             # the results directory is a valid directory that can store the files
