@@ -317,7 +317,7 @@ def summarize(
         # the summarized data files and then save them to the results directory
         console.print()
         console.print(
-            f":runner: Combining workflow histories for CSV files stored in {csv_dir}"
+            f":runner: Combining commit and workflow histories for CSV files stored in {csv_dir}"
         )
         console.print()
         # summarize all of the files that are found in the CSV file directory
@@ -327,6 +327,10 @@ def summarize(
         ) = combine.summarize_files_in_directory(csv_dir)
         # save the summarized data files to the disk in the results directory
         if save:
+            console.print(
+                f":runner: Saving combined commit and workflow histories in {results_dir}"
+            )
+            console.print()
             # the results directory is a valid directory that can store the files
             if files.confirm_valid_directory(results_dir):
                 # save the Pandas DataFrame that contains the commits data;
