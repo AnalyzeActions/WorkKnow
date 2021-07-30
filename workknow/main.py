@@ -322,9 +322,11 @@ def combine(
         console.print()
         # summarize all of the files that are found in the CSV file directory
         (
+            data_frame_counts,
             data_frame_commits,
             data_frame_workflows,
         ) = concatenate.combine_files_in_directory(csv_dir)
+        logger.debug(data_frame_counts)
         # save the combined data files to the disk in the results directory
         if save:
             console.print(
