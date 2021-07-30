@@ -12,7 +12,9 @@ import pandas
 from workknow import constants
 
 
-def summarize_files_in_directory(csv_directory: Path) -> Tuple[List[pandas.DataFrame], List[pandas.DataFrame]]:
+def summarize_files_in_directory(
+    csv_directory: Path,
+) -> Tuple[pandas.DataFrame, pandas.DataFrame]:
     """Summarize all of the CSV files inside of a directory."""
     logger = logging.getLogger(constants.logging.Rich)
     data_frame_list_commits: List[pandas.DataFrame] = []
@@ -29,7 +31,10 @@ def summarize_files_in_directory(csv_directory: Path) -> Tuple[List[pandas.DataF
         csv_file_data_frame = pandas.read_csv(str(csv_file))
         data_frame_list_workflows.append(csv_file_data_frame)
     logger.debug(len(data_frame_list_workflows))
-    return (data_frame_list_commits, data_frame_list_workflows)
+    return (
+        pandas.concat(data_frame_list_commits),
+        pandas.concat(data_frame_list_workflows),
+    )
 
 
 def summarize_data_frames(data_frame_list: List[pandas.DataFrame]) -> pandas.DataFrame:
