@@ -18,10 +18,10 @@ from workknow import configure
 from workknow import constants
 
 
-def summarize_files_in_directory(
+def combine_files_in_directory(
     csv_directory: Path,
 ) -> Tuple[pandas.DataFrame, pandas.DataFrame]:
-    """Summarize all of the CSV files inside of a directory."""
+    """Combine all of the CSV files inside of a directory."""
     logger = logging.getLogger(constants.logging.Rich)
     console = configure.setup_console()
     data_frame_list_commits: List[pandas.DataFrame] = []
@@ -51,7 +51,7 @@ def summarize_files_in_directory(
             csv_file_data_frame = pandas.read_csv(str(csv_file))
             data_frame_list_commits.append(csv_file_data_frame)
             progress.update(task, advance=1)
-        commits_data_frame = pandas.concat(data_frame_list_commits)
+        commits_data_frame = combine_data_frames(data_frame_list_commits)
         progress.update(task, advance=1)
     logger.debug(len(data_frame_list_commits))
     # extract all of the workflow-based CSV files
@@ -81,7 +81,7 @@ def summarize_files_in_directory(
             csv_file_data_frame = pandas.read_csv(str(csv_file))
             data_frame_list_workflows.append(csv_file_data_frame)
             progress.update(task, advance=1)
-        workflows_data_frame = pandas.concat(data_frame_list_workflows)
+        workflows_data_frame = combine_data_frames(data_frame_list_workflows)
         progress.update(task, advance=1)
     logger.debug(len(data_frame_list_workflows))
     console.print()
@@ -91,8 +91,8 @@ def summarize_files_in_directory(
     )
 
 
-def summarize_data_frames(data_frame_list: List[pandas.DataFrame]) -> pandas.DataFrame:
-    """Summarize all of the data frames in the list to a single data frame."""
+def combine_data_frames(data_frame_list: List[pandas.DataFrame]) -> pandas.DataFrame:
+    """Combine all of the data frames in the list to a single data frame."""
     # concatenate together all of the data frames in the list into a
     # single data frame, useful for summarization or saving to file system
     return pandas.concat(data_frame_list)
