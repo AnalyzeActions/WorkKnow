@@ -324,8 +324,8 @@ def combine(
         (
             data_frame_commits,
             data_frame_workflows,
-        ) = concatenate.summarize_files_in_directory(csv_dir)
-        # save the summarized data files to the disk in the results directory
+        ) = concatenate.combine_files_in_directory(csv_dir)
+        # save the combined data files to the disk in the results directory
         if save:
             console.print(
                 f":sparkles: Saving combined commit and workflow histories in {results_dir}"
