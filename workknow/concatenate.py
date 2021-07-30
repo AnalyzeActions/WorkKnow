@@ -4,6 +4,7 @@ import logging
 
 from pathlib import Path
 
+from typing import Dict
 from typing import List
 from typing import Tuple
 
@@ -26,6 +27,8 @@ def combine_files_in_directory(
     console = configure.setup_console()
     data_frame_list_commits: List[pandas.DataFrame] = []
     data_frame_list_workflows: List[pandas.DataFrame] = []
+    data_frame_list_counts: List[pandas.DataFrame] = []
+    all_counts_dictionary = {}
     commits_data_frame = None
     # extract all of the commits-based CSV files
     with Progress(
@@ -79,6 +82,7 @@ def combine_files_in_directory(
         ):
             logger.debug(csv_file)
             csv_file_data_frame = pandas.read_csv(str(csv_file))
+            workflow_count_dictionary = create_counts_dictionary(csv_file_data_frame)
             data_frame_list_workflows.append(csv_file_data_frame)
             progress.update(task, advance=1)
         workflows_data_frame = combine_data_frames(data_frame_list_workflows)
@@ -89,6 +93,29 @@ def combine_files_in_directory(
         commits_data_frame,
         workflows_data_frame,
     )
+
+
+def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str, str]:
+    """Create a counts dictionary based on attributes and size of workflow data."""
+    console = configure.setup_console()
+    logger = logging.getLogger(constants.logging.Rich)
+    counts_dictionary = {}
+    number_rows = len(workflows_data_frame)
+    counts_dictionary[constants.workflow.Workflow_Build_Count] = number_rows
+    counts_dictionary[constants.workflow.Organization] = extract_data(
+        workflows_data_frame, constants.workflow.Organization
+    )
+    logger.debug(counts_dictionary)
+    return counts_dictionary
+
+
+def extract_data(workflows_data_frame: pandas.DataFrame, attribute: str) -> str:
+    """Extract a specific attribute from a data frame if it exists."""
+    if constants.workflow.Organization in workflows_data_frame:
+        return (
+            workflows_data_frame[constants.workflow.Organization].unique().tolist()[0]
+        )
+    return constants.markers.Empty
 
 
 def combine_data_frames(data_frame_list: List[pandas.DataFrame]) -> pandas.DataFrame:
