@@ -111,7 +111,7 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
 
 def extract_data(workflows_data_frame: pandas.DataFrame, attribute: str) -> str:
     """Extract a specific attribute from a data frame if it exists."""
-    if constants.workflow.Organization in workflows_data_frame:
+    if attribute in workflows_data_frame:
         return (
             workflows_data_frame[constants.workflow.Organization].unique().tolist()[0]
         )
