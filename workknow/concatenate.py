@@ -21,15 +21,16 @@ from workknow import constants
 
 def combine_files_in_directory(
     csv_directory: Path,
-) -> Tuple[pandas.DataFrame, pandas.DataFrame]:
+) -> Tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]:
     """Combine all of the CSV files inside of a directory."""
     logger = logging.getLogger(constants.logging.Rich)
     console = configure.setup_console()
     data_frame_list_commits: List[pandas.DataFrame] = []
     data_frame_list_workflows: List[pandas.DataFrame] = []
     data_frame_list_counts: List[pandas.DataFrame] = []
-    all_counts_dictionary = {}
+    workflows_data_frame = None
     commits_data_frame = None
+    counts_data_frame = None
     # extract all of the commits-based CSV files
     with Progress(
         constants.progress.Task_Format,
@@ -83,13 +84,17 @@ def combine_files_in_directory(
             logger.debug(csv_file)
             csv_file_data_frame = pandas.read_csv(str(csv_file))
             workflow_count_dictionary = create_counts_dictionary(csv_file_data_frame)
+            # workflow_count_data_frame = pandas.DataFrame.from_dict(workflow_count_dictionary)
+            data_frame_list_counts.append(workflow_count_dictionary)
             data_frame_list_workflows.append(csv_file_data_frame)
             progress.update(task, advance=1)
         workflows_data_frame = combine_data_frames(data_frame_list_workflows)
+        counts_data_frame = pandas.DataFrame(data_frame_list_counts)
         progress.update(task, advance=1)
     logger.debug(len(data_frame_list_workflows))
     console.print()
     return (
+        counts_data_frame,
         commits_data_frame,
         workflows_data_frame,
     )
@@ -104,6 +109,9 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
     counts_dictionary[constants.workflow.Workflow_Build_Count] = number_rows
     counts_dictionary[constants.workflow.Organization] = extract_data(
         workflows_data_frame, constants.workflow.Organization
+    )
+    counts_dictionary[constants.workflow.Repo] = extract_data(
+        workflows_data_frame, constants.workflow.Repo
     )
     logger.debug(counts_dictionary)
     return counts_dictionary
