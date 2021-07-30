@@ -1,4 +1,4 @@
-"""Summarize data in CSV files."""
+"""Combine data in CSV files in provided directories and create Pandas DataFrames."""
 
 import logging
 
