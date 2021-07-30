@@ -1,5 +1,7 @@
 """Command-line interface for the workknow program."""
 
+import time
+
 from pathlib import Path
 
 from typing import List
@@ -9,7 +11,12 @@ import typer
 
 from rich.pretty import pprint
 
-from workknow import combine
+from rich.progress import BarColumn
+from rich.progress import Progress
+from rich.progress import TimeRemainingColumn
+from rich.progress import TimeElapsedColumn
+
+from workknow import concatenate
 from workknow import configure
 from workknow import constants
 from workknow import debug
@@ -297,14 +304,14 @@ def upload(
 
 
 @cli.command()
-def summarize(
+def combine(
     csv_dir: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
     env_file: Path = typer.Option(None),
     save: bool = typer.Option(False),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
-    """Summarize the downloaded GitHub Action workflow history for all projects in a specified directory."""
+    """Combine the downloaded GitHub Action workflow and commit history for all projects in a specified directory."""
     # STEP: setup the console and the logger and then create a blank line for space
     console, logger = configure.setup(debug_level)
     # STEP: load the execution environment to support GitHub API access
@@ -324,21 +331,27 @@ def summarize(
         (
             data_frame_commits,
             data_frame_workflows,
-        ) = combine.summarize_files_in_directory(csv_dir)
+        ) = concatenate.summarize_files_in_directory(csv_dir)
         # save the summarized data files to the disk in the results directory
         if save:
             console.print(
-                f":runner: Saving combined commit and workflow histories in {results_dir}"
+                f":sparkles: Combine summarized commit and workflow histories in {results_dir}"
             )
             console.print()
             # the results directory is a valid directory that can store the files
             if files.confirm_valid_directory(results_dir):
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined commit count data for all repositories"
+                )
                 # save the Pandas DataFrame that contains the commits data;
                 # the name of the file is "All-Commits.csv"
                 files.save_dataframe_all(
                     results_dir,
                     constants.filesystem.Commits,
                     data_frame_commits,
+                )
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
                 )
                 # save the Pandas DataFrame that contains the workflow data;
                 # the name of the file is "All-Commits.csv"
@@ -347,6 +360,7 @@ def summarize(
                     constants.filesystem.Workflows,
                     data_frame_workflows,
                 )
+                console.print()
 
 
 @cli.command()
