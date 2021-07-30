@@ -299,6 +299,7 @@ def upload(
 @cli.command()
 def summarize(
     csv_dir: Path = typer.Option(None),
+    results_dir: Path = typer.Option(None),
     env_file: Path = typer.Option(None),
     save: bool = typer.Option(False),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
@@ -318,9 +319,21 @@ def summarize(
         )
         console.print()
         (
-            data_frame_commits_list,
-            data_frame_workflows_list,
+            data_frame_commits,
+            data_frame_workflows,
         ) = combine.summarize_files_in_directory(csv_dir)
+        if save:
+            if files.confirm_valid_directory(results_dir):
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Commits,
+                    data_frame_commits,
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Workflows,
+                    data_frame_workflows,
+                )
 
 
 @cli.command()
