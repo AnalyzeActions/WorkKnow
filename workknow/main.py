@@ -1,7 +1,5 @@
 """Command-line interface for the workknow program."""
 
-import time
-
 from pathlib import Path
 
 from typing import List
@@ -10,11 +8,6 @@ import pandas
 import typer
 
 from rich.pretty import pprint
-
-from rich.progress import BarColumn
-from rich.progress import Progress
-from rich.progress import TimeRemainingColumn
-from rich.progress import TimeElapsedColumn
 
 from workknow import concatenate
 from workknow import configure
