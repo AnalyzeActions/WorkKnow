@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import Union
 
 import pandas
 
@@ -27,7 +28,7 @@ def combine_files_in_directory(
     console = configure.setup_console()
     data_frame_list_commits: List[pandas.DataFrame] = []
     data_frame_list_workflows: List[pandas.DataFrame] = []
-    data_frame_list_counts: List[pandas.DataFrame] = []
+    data_frame_list_counts: List[Dict[str, Union[str, int]]] = []
     workflows_data_frame = None
     commits_data_frame = None
     counts_data_frame = None
@@ -100,12 +101,14 @@ def combine_files_in_directory(
     )
 
 
-def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str, str]:
+def create_counts_dictionary(
+    workflows_data_frame: pandas.DataFrame,
+) -> Dict[str, Union[str, int]]:
     """Create a counts dictionary based on attributes and size of workflow data."""
     logger = logging.getLogger(constants.logging.Rich)
     # create an empty dictionary to populate as long as this project has
     # workflows that were recorded by GitHub
-    counts_dictionary = {}
+    counts_dictionary: Dict[str, Union[str, int]] = {}
     # extract the number of rows in the DataFrame, which corresponds
     # to the number of workflow builds run in GitHub Actions
     number_rows = len(workflows_data_frame)
@@ -135,7 +138,7 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
 def extract_data(workflows_data_frame: pandas.DataFrame, attribute: str) -> str:
     """Extract a specific attribute from a data frame if it exists."""
     if attribute in workflows_data_frame:
-        return workflows_data_frame[attribute].unique().tolist()[0]
+        return workflows_data_frame[attribute].unique().tolist()[0]  # type: ignore
     return constants.markers.Empty
 
 
