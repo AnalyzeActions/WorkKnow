@@ -84,8 +84,8 @@ def combine_files_in_directory(
             logger.debug(csv_file)
             csv_file_data_frame = pandas.read_csv(str(csv_file))
             workflow_count_dictionary = create_counts_dictionary(csv_file_data_frame)
-            # workflow_count_data_frame = pandas.DataFrame.from_dict(workflow_count_dictionary)
-            data_frame_list_counts.append(workflow_count_dictionary)
+            if len(workflow_count_dictionary) != 0:
+                data_frame_list_counts.append(workflow_count_dictionary)
             data_frame_list_workflows.append(csv_file_data_frame)
             progress.update(task, advance=1)
         workflows_data_frame = combine_data_frames(data_frame_list_workflows)
@@ -106,14 +106,15 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
     logger = logging.getLogger(constants.logging.Rich)
     counts_dictionary = {}
     number_rows = len(workflows_data_frame)
-    counts_dictionary[constants.workflow.Workflow_Build_Count] = number_rows
-    counts_dictionary[constants.workflow.Organization] = extract_data(
-        workflows_data_frame, constants.workflow.Organization
-    )
-    counts_dictionary[constants.workflow.Repo] = extract_data(
-        workflows_data_frame, constants.workflow.Repo
-    )
-    logger.debug(counts_dictionary)
+    if number_rows != 0:
+        counts_dictionary[constants.workflow.Workflow_Build_Count] = number_rows
+        counts_dictionary[constants.workflow.Organization] = extract_data(
+            workflows_data_frame, constants.workflow.Organization
+        )
+        counts_dictionary[constants.workflow.Repo] = extract_data(
+            workflows_data_frame, constants.workflow.Repo
+        )
+        logger.debug(counts_dictionary)
     return counts_dictionary
 
 
