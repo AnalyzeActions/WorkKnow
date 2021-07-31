@@ -122,6 +122,12 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
         counts_dictionary[constants.workflow.Repo_Url] = extract_data(
             workflows_data_frame, constants.workflow.Repo_Url
         )
+        counts_dictionary[constants.workflow.Actions_Url] = extract_data(
+            workflows_data_frame, constants.workflow.Actions_Url
+        )
+        counts_dictionary[constants.workflow.Actions_Url] = extract_data(
+            workflows_data_frame, constants.workflow.Actions_Url
+        )
         logger.debug(counts_dictionary)
     return counts_dictionary
 
@@ -129,9 +135,7 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
 def extract_data(workflows_data_frame: pandas.DataFrame, attribute: str) -> str:
     """Extract a specific attribute from a data frame if it exists."""
     if attribute in workflows_data_frame:
-        return (
-            workflows_data_frame[attribute].unique().tolist()[0]
-        )
+        return workflows_data_frame[attribute].unique().tolist()[0]
     return constants.markers.Empty
 
 
