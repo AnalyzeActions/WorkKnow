@@ -169,7 +169,7 @@ def download(
                 rate_limit_dict = request.get_rate_limit_details()
                 request.get_rate_limit_wait_time(rate_limit_dict)
         # save all of the results in the file system if the save parameter is specified
-        if combine and save:
+        if save:
             if files.confirm_valid_directory(results_dir):
                 # finished processing all of the individual repositories and now ready to create
                 # the "combined" data sets that include data for every repository subject to analysis
@@ -190,11 +190,12 @@ def download(
                     repo_url_workflow_record_list
                 )
                 console.print()
-                # save the workflows DataFrame
+                # save the all records count DataFrame
+                # note that it is acceptable to save this
+                # DataFrame since it is always smaller in size
                 console.print(
                     f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
                 )
-                # save the all records count DataFrame
                 console.print(
                     f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
                 )
@@ -203,31 +204,36 @@ def download(
                     constants.filesystem.Counts,
                     all_workflow_record_counts_dataframe,
                 )
-                # save the all workflows DataFrame
-                console.print(
-                    f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
-                )
-                files.save_dataframe_all(
-                    results_dir,
-                    constants.filesystem.Workflows,
-                    all_workflows_dataframe,
-                )
-                # save the commits DataFrame
-                console.print(
-                    f"{constants.markers.Tab}... Saving combined commits data for all repositories"
-                )
-                files.save_dataframe_all(
-                    results_dir,
-                    constants.filesystem.Commits,
-                    all_commits_dataframe,
-                )
-                # save a .zip file of all of the CSV files in the results directory
-                console.print()
-                console.print(
-                    f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
-                )
-                results_file_list = files.create_results_zip_file_list(results_dir)
-                files.create_results_zip_file(results_dir, results_file_list)
+                # combine the individual data files into the (very very) large data files that include
+                # details about each of the repositories; note that the --combine argument will create
+                # data files that cannot be automatically uploaded to a GitHub repository due to the
+                # fact that they are going to be over 100 MB in size and thus require GitHub LFS
+                if combine:
+                    # save the all workflows DataFrame
+                    console.print(
+                        f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+                    )
+                    files.save_dataframe_all(
+                        results_dir,
+                        constants.filesystem.Workflows,
+                        all_workflows_dataframe,
+                    )
+                    # save the all commits DataFrame
+                    console.print(
+                        f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                    )
+                    files.save_dataframe_all(
+                        results_dir,
+                        constants.filesystem.Commits,
+                        all_commits_dataframe,
+                    )
+                    # save a .zip file of all of the CSV files in the results directory
+                    console.print()
+                    console.print(
+                        f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
+                    )
+                    results_file_list = files.create_results_zip_file_list(results_dir)
+                    files.create_results_zip_file(results_dir, results_file_list)
             else:
                 console.print()
                 # explain that the save could not work correctly due to invalid results directory
