@@ -68,7 +68,7 @@ def create_subsetted_list_dict(
     subset_key_names: Set,
     workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> List[Dict[Any, Any]]:
-    """Create a DataFrame of all of the relevant workflow data."""
+    """Create a list of dictionaries of all of the relevant workflow data."""
     # create an empty list that will store dictionaries to be made into
     # rows of a Pandas DataFrame. This approach avoids the need to incrementally
     # add rows to a Pandas DataFrame, which is known to be inefficient.
