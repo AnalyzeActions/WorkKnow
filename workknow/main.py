@@ -104,13 +104,14 @@ def download(
                     pprint(
                         json_responses, max_length=constants.github.Maximum_Length_All
                     )
-                    console.print()
-                    console.print(":lion_face: The first workflow record looks like:\n")
-                    pprint(
-                        json_responses[0][0],
-                        max_length=constants.github.Maximum_Length_Record,
-                    )
-                    logger.debug(json_responses[0][0])
+                    if produce.count_individual_builds(json_responses) != 0:
+                        console.print()
+                        console.print(":lion_face: The first workflow record looks like:\n")
+                        pprint(
+                            json_responses[0][0],
+                            max_length=constants.github.Maximum_Length_Record,
+                        )
+                        logger.debug(json_responses[0][0])
                     console.print()
                 # --> the program should not display a peek into the downloaded data structure
                 else:
@@ -170,6 +171,7 @@ def download(
             if files.confirm_valid_directory(results_dir):
                 # finished processing all of the individual repositories and now ready to create
                 # the "combined" data sets that include data for every repository subject to analysis
+                console.print()
                 console.print(
                     ":runner: Creating combined data sets across all repositories"
                 )
