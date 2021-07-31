@@ -340,24 +340,34 @@ def combine(
             # the results directory is a valid directory that can store the files
             if files.confirm_valid_directory(results_dir):
                 console.print(
-                    f"{constants.markers.Tab}... Saving combined commit count data for all repositories"
+                    f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
                 )
                 # save the Pandas DataFrame that contains the commits data;
-                # the name of the file is "All-Commits.csv"
+                # the name of the file is "All-Counts.csv"
                 files.save_dataframe_all(
                     results_dir,
-                    constants.filesystem.Commits,
-                    data_frame_commits,
+                    constants.filesystem.Counts,
+                    data_frame_counts,
                 )
                 console.print(
                     f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
                 )
                 # save the Pandas DataFrame that contains the workflow data;
-                # the name of the file is "All-Commits.csv"
+                # the name of the file is "All-Workflows.csv"
                 files.save_dataframe_all(
                     results_dir,
                     constants.filesystem.Workflows,
                     data_frame_workflows,
+                )
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                )
+                # save the Pandas DataFrame that contains the workflow data;
+                # the name of the file is "All-Commits.csv"
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Commits,
+                    data_frame_commits,
                 )
                 console.print()
 
