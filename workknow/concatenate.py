@@ -102,10 +102,15 @@ def combine_files_in_directory(
 
 def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str, str]:
     """Create a counts dictionary based on attributes and size of workflow data."""
-    console = configure.setup_console()
     logger = logging.getLogger(constants.logging.Rich)
+    # create an empty dictionary to populate as long as this project has
+    # workflows that were recorded by GitHub
     counts_dictionary = {}
+    # extract the number of rows in the DataFrame, which corresponds
+    # to the number of workflow builds run in GitHub Actions
     number_rows = len(workflows_data_frame)
+    # if the project has some rows then there are attributes that we can
+    # extract and store in the dictionary that this function returns
     if number_rows != 0:
         counts_dictionary[constants.workflow.Workflow_Build_Count] = number_rows
         counts_dictionary[constants.workflow.Organization] = extract_data(
@@ -113,6 +118,9 @@ def create_counts_dictionary(workflows_data_frame: pandas.DataFrame) -> Dict[str
         )
         counts_dictionary[constants.workflow.Repo] = extract_data(
             workflows_data_frame, constants.workflow.Repo
+        )
+        counts_dictionary[constants.workflow.Repo_Url] = extract_data(
+            workflows_data_frame, constants.workflow.Repo_Url
         )
         logger.debug(counts_dictionary)
     return counts_dictionary
