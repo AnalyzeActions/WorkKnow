@@ -64,6 +64,7 @@ def get_workflow_runs(json_responses, console):
     # the workflow runs data is not available and this means that the GitHub REST
     # API did not return any viable data, likely due to the fact that the program
     # is rate limited. It can no longer proceed without error, so exit.
+    console.print()
     console.print(":grimacing_face: No workflow data provided by the GitHub API")
     console.print(
         "WorkKnow may be rate limited or the repository may not exist"
