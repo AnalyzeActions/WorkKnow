@@ -171,13 +171,6 @@ def request_json_from_github_with_caution(
     github_api_url: str, github_params, github_authentication, progress
 ) -> Tuple[bool, requests.Response]:
     """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
-    # initialize the logging subsystem
-    # console = configure.setup_console()
-    # access the person's GitHub personal access token so that
-    # the use of the tool is not rapidly rate limited
-    # github_authentication = (constants.github.User, get_github_personal_access_token())
-    # request the maximum of number of entries per page
-    # github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
