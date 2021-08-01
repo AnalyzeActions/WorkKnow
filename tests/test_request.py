@@ -19,6 +19,6 @@ def test_simple():
         json={"message": "server error"},
         status=502,
     )
-    (valid, json_responses) = request.request_json_from_github(github_api_url, console)
+    (valid, json_responses_list) = request.request_json_from_github(github_api_url, console, 3)
     assert valid is False
-    assert json_responses == {"message": "server error"}
+    assert json_responses_list == []
