@@ -155,6 +155,18 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
     return last_page
 
 
+def calculate_sleep(backoff_factor: int, number_of_retries: int) -> int:
+    """Calculate the amount of sleep required based on an exponential back-off calculation."""
+    return backoff_factor * (2 ** (number_of_retries - 1))
+
+
+def human_readable_boolean(answer: bool) -> str:
+    """Produce a human-readable Yes or No for a boolean True or False."""
+    if answer:
+        return "Yes"
+    return "No"
+
+
 def request_json_from_github_with_caution(
     github_api_url: str, github_params, github_authentication, progress
 ) -> Tuple[bool, requests.Response]:
@@ -173,8 +185,9 @@ def request_json_from_github_with_caution(
     response = requests.get(
         github_api_url, params=github_params, auth=github_authentication
     )
-    response_retries_count = 0
+    response_retries_count = 1
     current_response_status_code = response.status_code
+    attempted_retries = False
     if response.status_code != constants.github.Success_Response:
         progress.console.print()
         progress.console.print(
@@ -185,28 +198,38 @@ def request_json_from_github_with_caution(
         )
         while (
             current_response_status_code != constants.github.Success_Response
-            and response_retries_count < constants.github.Maximum_Request_Retries
+            and response_retries_count <= constants.github.Maximum_Request_Retries
         ):
             progress.console.print(
-                f"{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds} seconds"
+                f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds} seconds"
             )
-            time.sleep(constants.github.Wait_In_Seconds)
+            sleep_time_in_seconds = calculate_sleep(
+                constants.github.Wait_In_Seconds, response_retries_count
+            )
+            time.sleep(sleep_time_in_seconds)
             progress.console.print(
-                f"{constants.markers.Tab}...Attempting to access GitHub API at {github_api_url}"
+                f"{constants.markers.Tab}{constants.markers.Tab}...Attempt {response_retries_count} to access GitHub API at {github_api_url}"
             )
             response = requests.get(
                 github_api_url, params=github_params, auth=github_authentication
             )
             current_response_status_code = response.status_code
             response_retries_count = response_retries_count + 1
+            attempted_retries = True
     if current_response_status_code != constants.github.Success_Response:
         valid = False
     else:
         valid = True
+    if attempted_retries:
+        progress.console.print(
+            f"{constants.markers.Tab}...After {response_retries_count} retries, did the retry procedure work correctly? {human_readable_boolean(valid)}"
+        )
     return (valid, response)
 
 
-def request_json_from_github(github_api_url: str, console: Console) -> Tuple[bool, List]:
+def request_json_from_github(
+    github_api_url: str, console: Console
+) -> Tuple[bool, List]:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
     logger = logging.getLogger(constants.logging.Rich)
@@ -260,7 +283,9 @@ def request_json_from_github(github_api_url: str, console: Console) -> Tuple[boo
             # extract the index of the last page in order to support progress bar creation
             last_page_index = extract_last_page(response.links)
             # continue to extract data from the pages as long as the "next" field is evident
-            download_pages_task = progress.add_task("Download", total=last_page_index - 1)
+            download_pages_task = progress.add_task(
+                "Complete Download", total=last_page_index - 1
+            )
             while constants.github.Next in response.links.keys():
                 # update the "page" variable in the URL to go to the next page
                 # otherwise, make sure to use all of the same parameters as the first request
