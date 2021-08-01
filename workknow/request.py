@@ -301,6 +301,7 @@ def request_json_from_github(
             download_pages_task = progress.add_task(
                 "Complete Download", total=last_page_index - 1
             )
+            # there is another page and thus WorkKnow should iterate and download it
             while constants.github.Next in response.links.keys():
                 # update the "page" variable in the URL to go to the next page
                 # otherwise, make sure to use all of the same parameters as the first request
@@ -309,6 +310,9 @@ def request_json_from_github(
                     github_api_url, github_params, github_authentication, progress
                 )
                 logger.debug(response.headers)
+                # the response from the GitHub API was valid, which means that it either returned
+                # correctly the first time or, alternatively, waiting in an exponential back-off
+                # fashion ultimately resulted in the download completing with success
                 if valid:
                     # again extract the specific workflow runs list and append it to running response details
                     json_responses.append(get_workflow_runs(response.json(), console))
