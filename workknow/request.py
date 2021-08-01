@@ -168,7 +168,11 @@ def human_readable_boolean(answer: bool) -> str:
 
 
 def request_json_from_github_with_caution(
-    github_api_url: str, github_params, github_authentication, progress
+    github_api_url: str,
+    github_params,
+    github_authentication,
+    progress,
+    maximum_retries: int = constants.github.Maximum_Request_Retries,
 ) -> Tuple[bool, requests.Response]:
     """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
     # use requests to access the GitHub API with:
@@ -202,7 +206,7 @@ def request_json_from_github_with_caution(
         # no diagnostic output appears above the progress bar unless needed
         attempted_retries = True
         progress.console.print(
-            f"{constants.markers.Tab}...Will attempt {constants.github.Maximum_Request_Retries} retries"
+            f"{constants.markers.Tab}...Will attempt {maximum_retries} retries"
         )
         # keep retrying as long as:
         # --> the loop has not retried the maximum number of times
@@ -210,7 +214,7 @@ def request_json_from_github_with_caution(
         sleep_time_in_seconds = constants.github.Wait_In_Seconds
         while (
             current_response_status_code != constants.github.Success_Response
-            and response_retries_count <= constants.github.Maximum_Request_Retries
+            and response_retries_count <= maximum_retries
         ):
             # perform an exponential back-off calculation to determine how long to sleep
             sleep_time_in_seconds = calculate_backoff_sleep_time(
@@ -218,7 +222,7 @@ def request_json_from_github_with_caution(
             )
             progress.console.print(
                 f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {sleep_time_in_seconds} seconds"
-            )            # sleep for the calculated period of time
+            )  # sleep for the calculated period of time
             # the sleep schedule for the defaults is: 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256 seconds
             time.sleep(sleep_time_in_seconds)
             progress.console.print(
@@ -241,7 +245,9 @@ def request_json_from_github_with_caution(
 
 
 def request_json_from_github(
-    github_api_url: str, console: Console
+    github_api_url: str,
+    console: Console,
+    maximum_retries=constants.github.Maximum_Request_Retries,
 ) -> Tuple[bool, List]:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
@@ -273,7 +279,11 @@ def request_json_from_github(
         # perform the download of the first page, using the cautious approach
         download_first_page = progress.add_task("Initial Download", total=1)
         (valid, response) = request_json_from_github_with_caution(
-            github_api_url, github_params, github_authentication, progress
+            github_api_url,
+            github_params,
+            github_authentication,
+            progress,
+            maximum_retries,
         )
         # since the goal is to only download a single page, advance the progress bar
         # for this task, thereby signalling completion of this stage
