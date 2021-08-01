@@ -174,30 +174,30 @@ def request_json_from_github_with_caution(
         github_api_url, params=github_params, auth=github_authentication
     )
     response_retries_count = 0
+    current_response_status_code = response.status_code
     if response.status_code != constants.github.Success_Response:
         console.print(
-            f":grimacing_face: Unable to access GitHub API at {github_api_url}"
+            f":grimacing_face: Unable to access GitHub API at {github_api_url} due to error code {current_response_status_code}"
         )
         console.print(
             f"{constants.markers.Tab}...Will attempt {constants.github.Maximum_Request_Retries} retries"
         )
-    current_response_status_code = response.status_code
-    while (
-        current_response_status_code != constants.github.Success_Response
-        and response_retries_count < constants.github.Request_Retries
-    ):
-        console.print(
-            f"{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds}"
-        )
-        time.sleep(constants.github.Wait_In_Seconds)
-        console.print(
-            f"{constants.markers.Tab}...Attempting to access GitHub API at {github_api_url}"
-        )
-        response = requests.get(
-            github_api_url, params=github_params, auth=github_authentication
-        )
-        current_response_status_code = response.status_code
-        response_retries_count = response_retries_count + 1
+        while (
+            current_response_status_code != constants.github.Success_Response
+            and response_retries_count < constants.github.Request_Retries
+        ):
+            console.print(
+                f"{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds}"
+            )
+            time.sleep(constants.github.Wait_In_Seconds)
+            console.print(
+                f"{constants.markers.Tab}...Attempting to access GitHub API at {github_api_url}"
+            )
+            response = requests.get(
+                github_api_url, params=github_params, auth=github_authentication
+            )
+            current_response_status_code = response.status_code
+            response_retries_count = response_retries_count + 1
     if current_response_status_code != constants.github.Success_Response:
         valid = False
     else:
