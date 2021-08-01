@@ -189,14 +189,24 @@ def request_json_from_github_with_caution(
     current_response_status_code = response.status_code
     # indicate that an attempt at a retry has not yet happened
     attempted_retries = False
+    # the response code indicates that there was no success for this
+    # interaction with the GitHub API and thus we must retry in an
+    # exponential back-off fashion up to a maximum number of retries
     if response.status_code != constants.github.Success_Response:
         progress.console.print()
         progress.console.print(
             f":grimacing_face: Unable to access GitHub API at {github_api_url} due to error code {current_response_status_code}"
         )
+        # at least one retry is going to happen, so set this
+        # to True to indicate that this took place, ensuring that
+        # no diagnostic output appears above the progress bar unless needed
+        attempted_retries = True
         progress.console.print(
             f"{constants.markers.Tab}...Will attempt {constants.github.Maximum_Request_Retries} retries"
         )
+        # keep retrying as long as:
+        # --> the loop has not retried the maximum number of times
+        # --> the status code from the GitHub server is not a success response
         while (
             current_response_status_code != constants.github.Success_Response
             and response_retries_count <= constants.github.Maximum_Request_Retries
@@ -204,9 +214,12 @@ def request_json_from_github_with_caution(
             progress.console.print(
                 f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds} seconds"
             )
+            # perform an exponential back-off calculation to determine how long to sleep
             sleep_time_in_seconds = calculate_sleep(
                 constants.github.Wait_In_Seconds, response_retries_count
             )
+            # sleep for the calculated period of time
+            # the sleep schedule for the defaults is: 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256 seconds
             time.sleep(sleep_time_in_seconds)
             progress.console.print(
                 f"{constants.markers.Tab}{constants.markers.Tab}...Attempt {response_retries_count} to access GitHub API at {github_api_url}"
@@ -216,7 +229,6 @@ def request_json_from_github_with_caution(
             )
             current_response_status_code = response.status_code
             response_retries_count = response_retries_count + 1
-            attempted_retries = True
     if current_response_status_code != constants.github.Success_Response:
         valid = False
     else:
@@ -242,10 +254,10 @@ def request_json_from_github(
         "User-Agent": "gkapfham",
         constants.github.Per_Page: constants.github.Per_Page_Maximum,
     }
-    # use requests to access the GitHub API with:
-    # --> provided GitHub URL that accesses a project's GitHub Actions log
-    # --> the parameters that currently specify the page limit and will specify the page
-    # --> the GitHub authentication information with the personal access token
+    # use a progress bar to designate the requesting of JSON data from
+    # the GitHub API; this will be divided into two phases:
+    # --> Phase 1: Initial download of the first page
+    # --> Phase 2: Download of all remaining pages by following links
     with Progress(
         constants.progress.Task_Format,
         BarColumn(),
@@ -258,17 +270,19 @@ def request_json_from_github(
         TimeRemainingColumn(),
         "remaining",
     ) as progress:
+        # perform the download of the first page, using the cautious approach
         download_first_page = progress.add_task("Initial Download", total=1)
         (valid, response) = request_json_from_github_with_caution(
             github_api_url, github_params, github_authentication, progress
         )
+        # since the goal is to only download a single page, advance the progress bar
+        # for this task, thereby signalling completion of this stage
         progress.advance(download_first_page)
-        # response = requests.get(
-        # github_api_url, params=github_params, auth=github_authentication
-        # )
-        # logger.error(f"{response.status_code} <--> {valid}")
         # create an empty list that can store all of the JSON responses for workflow runs
         json_responses = []
+        # the response from the GitHub API was valid, which means that it either returned
+        # correctly the first time or, alternatively, waiting in an exponential back-off
+        # fashion ultimately resulted in the download completing with success
         if valid:
             # extract the JSON document (it is a dict) and then extract from that the workflow runs list;
             # finally, append the list of workflow runs to the running list of response details
@@ -294,11 +308,7 @@ def request_json_from_github(
                 (valid, response) = request_json_from_github_with_caution(
                     github_api_url, github_params, github_authentication, progress
                 )
-                # response = requests.get(
-                #     github_api_url, params=github_params, auth=github_authentication
-                # )
                 logger.debug(response.headers)
-                # logger.error(response.status_code)
                 if valid:
                     # again extract the specific workflow runs list and append it to running response details
                     json_responses.append(get_workflow_runs(response.json(), console))
