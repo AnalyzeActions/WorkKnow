@@ -65,13 +65,16 @@ github = create_constants(
     Https="https://",
     Maximum_Length_All=3,
     Maximum_Length_Record=25,
+    Maxumum_Request_Retries=10,
     Next="next",
     Page="page",
     Page_Start=2,
     Per_Page="per_page",
     Per_Page_Maximum="100",
     Separator="/",
+    Success_Response=200,
     User="User",
+    Wait_In_Seconds=10,
     Workflow_Runs="workflow_runs",
 )
 
