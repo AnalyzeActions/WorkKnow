@@ -155,7 +155,7 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
     return last_page
 
 
-def calculate_sleep(backoff_factor: int, number_of_retries: int) -> int:
+def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) -> int:
     """Calculate the amount of sleep required based on an exponential back-off calculation."""
     return backoff_factor * (2 ** (number_of_retries - 1))
 
@@ -207,18 +207,18 @@ def request_json_from_github_with_caution(
         # keep retrying as long as:
         # --> the loop has not retried the maximum number of times
         # --> the status code from the GitHub server is not a success response
+        sleep_time_in_seconds = constants.github.Wait_In_Seconds
         while (
             current_response_status_code != constants.github.Success_Response
             and response_retries_count <= constants.github.Maximum_Request_Retries
         ):
-            progress.console.print(
-                f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds} seconds"
-            )
             # perform an exponential back-off calculation to determine how long to sleep
-            sleep_time_in_seconds = calculate_sleep(
+            sleep_time_in_seconds = calculate_backoff_sleep_time(
                 constants.github.Wait_In_Seconds, response_retries_count
             )
-            # sleep for the calculated period of time
+            progress.console.print(
+                f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {sleep_time_in_seconds} seconds"
+            )            # sleep for the calculated period of time
             # the sleep schedule for the defaults is: 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256 seconds
             time.sleep(sleep_time_in_seconds)
             progress.console.print(
