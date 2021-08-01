@@ -156,16 +156,16 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
 
 
 def request_json_from_github_with_caution(
-    github_api_url: str, console: Console
+    github_api_url: str, github_params, github_authentication, progress
 ) -> Tuple[bool, requests.Response]:
     """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
     # initialize the logging subsystem
-    console = configure.setup_console()
+    # console = configure.setup_console()
     # access the person's GitHub personal access token so that
     # the use of the tool is not rapidly rate limited
-    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # github_authentication = (constants.github.User, get_github_personal_access_token())
     # request the maximum of number of entries per page
-    github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
+    # github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
@@ -176,21 +176,22 @@ def request_json_from_github_with_caution(
     response_retries_count = 0
     current_response_status_code = response.status_code
     if response.status_code != constants.github.Success_Response:
-        console.print(
+        progress.console.print()
+        progress.console.print(
             f":grimacing_face: Unable to access GitHub API at {github_api_url} due to error code {current_response_status_code}"
         )
-        console.print(
+        progress.console.print(
             f"{constants.markers.Tab}...Will attempt {constants.github.Maximum_Request_Retries} retries"
         )
         while (
             current_response_status_code != constants.github.Success_Response
-            and response_retries_count < constants.github.Request_Retries
+            and response_retries_count < constants.github.Maximum_Request_Retries
         ):
-            console.print(
-                f"{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds}"
+            progress.console.print(
+                f"{constants.markers.Tab}...Waiting for {constants.github.Wait_In_Seconds} seconds"
             )
             time.sleep(constants.github.Wait_In_Seconds)
-            console.print(
+            progress.console.print(
                 f"{constants.markers.Tab}...Attempting to access GitHub API at {github_api_url}"
             )
             response = requests.get(
@@ -205,7 +206,7 @@ def request_json_from_github_with_caution(
     return (valid, response)
 
 
-def request_json_from_github(github_api_url: str, console: Console) -> List:
+def request_json_from_github(github_api_url: str, console: Console) -> Tuple[bool, List]:
     """Request the JSON response from the GitHub API."""
     # initialize the logging subsystem
     logger = logging.getLogger(constants.logging.Rich)
@@ -218,26 +219,6 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
     # --> the GitHub authentication information with the personal access token
-    response = requests.get(
-        github_api_url, params=github_params, auth=github_authentication
-    )
-    logger.error(response.status_code)
-    # create an empty list that can store all of the JSON responses for workflow runs
-    json_responses = []
-    # extract the JSON document (it is a dict) and then extract from that the workflow runs list
-    # finally, append the list of workflow runs to the running list of response details
-    json_responses.append(get_workflow_runs(response.json(), console))
-    logger.debug(response.headers)
-    # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
-    # and thus the next page that we will need to extract (if needed) is 2
-    page = constants.github.Page_Start
-    # check if the program is about to exceed GitHub's rate limit and then
-    # sleep the program until the reset time has elapsed
-    rate_limit_dict = get_rate_limit_details()
-    get_rate_limit_wait_time(rate_limit_dict)
-    # extract the index of the last page in order to support progress bar creation
-    last_page_index = extract_last_page(response.links)
-    # continue to extract data from the pages as long as the "next" field is evident
     with Progress(
         constants.progress.Task_Format,
         BarColumn(),
@@ -250,24 +231,54 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
         TimeRemainingColumn(),
         "remaining",
     ) as progress:
-        download_pages_task = progress.add_task("Download", total=last_page_index - 1)
-        while constants.github.Next in response.links.keys():
-            # update the "page" variable in the URL to go to the next page
-            # otherwise, make sure to use all of the same parameters as the first request
-            github_params[constants.github.Page] = str(page)
-            response = requests.get(
-                github_api_url, params=github_params, auth=github_authentication
-            )
-            logger.debug(response.headers)
-            logger.error(response.status_code)
-            # again extract the specific workflow runs list and append it to running response details
+        download_first_page = progress.add_task("Initial Download", total=1)
+        (valid, response) = request_json_from_github_with_caution(
+            github_api_url, github_params, github_authentication, progress
+        )
+        progress.advance(download_first_page)
+        # response = requests.get(
+        # github_api_url, params=github_params, auth=github_authentication
+        # )
+        # logger.error(f"{response.status_code} <--> {valid}")
+        # create an empty list that can store all of the JSON responses for workflow runs
+        json_responses = []
+        if valid:
+            # extract the JSON document (it is a dict) and then extract from that the workflow runs list;
+            # finally, append the list of workflow runs to the running list of response details
             json_responses.append(get_workflow_runs(response.json(), console))
-            # go to the next page in the pagination results list
-            page = page + 1
+            logger.debug(response.headers)
+            # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
+            # and thus the next page that we will need to extract (if needed) is 2
+            page = constants.github.Page_Start
             # check if the program is about to exceed GitHub's rate limit and then
             # sleep the program until the reset time has elapsed
             rate_limit_dict = get_rate_limit_details()
             get_rate_limit_wait_time(rate_limit_dict)
-            progress.update(download_pages_task, advance=1)
-        # return the list of workflow runs dictionaries
-        return json_responses
+            # extract the index of the last page in order to support progress bar creation
+            last_page_index = extract_last_page(response.links)
+            # continue to extract data from the pages as long as the "next" field is evident
+            download_pages_task = progress.add_task("Download", total=last_page_index - 1)
+            while constants.github.Next in response.links.keys():
+                # update the "page" variable in the URL to go to the next page
+                # otherwise, make sure to use all of the same parameters as the first request
+                github_params[constants.github.Page] = str(page)
+                (valid, response) = request_json_from_github_with_caution(
+                    github_api_url, github_params, github_authentication, progress
+                )
+                # response = requests.get(
+                #     github_api_url, params=github_params, auth=github_authentication
+                # )
+                logger.debug(response.headers)
+                # logger.error(response.status_code)
+                if valid:
+                    # again extract the specific workflow runs list and append it to running response details
+                    json_responses.append(get_workflow_runs(response.json(), console))
+                    # go to the next page in the pagination results list
+                    page = page + 1
+                    # check if the program is about to exceed GitHub's rate limit and then
+                    # sleep the program until the reset time has elapsed
+                    rate_limit_dict = get_rate_limit_details()
+                    get_rate_limit_wait_time(rate_limit_dict)
+                    progress.update(download_pages_task, advance=1)
+    # return the list of workflow runs dictionaries
+    return (valid, json_responses)
