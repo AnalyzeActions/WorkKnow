@@ -83,7 +83,7 @@ def download(
                 console.print(github_api_url, style="link " + github_api_url)
                 console.print()
                 # STEP: access the JSON file that contains the build history
-                (_, json_responses) = request.request_json_from_github(
+                (_, _, _, json_responses) = request.request_json_from_github(
                     github_api_url, console
                 )
                 # STEP: collect data about the number of workflow records in the JSON responses
