@@ -21,7 +21,6 @@ from rich.progress import TimeElapsedColumn
 import pytz
 import requests
 
-from workknow import configure
 from workknow import constants
 
 # Sample of the JSON file returned by the request:
