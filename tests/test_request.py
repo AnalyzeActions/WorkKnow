@@ -19,6 +19,13 @@ def test_simple():
         json={"message": "server error"},
         status=502,
     )
-    (valid, json_responses_list) = request.request_json_from_github(github_api_url, console, 3)
+    (
+        valid,
+        total_retry_count,
+        total_retry_time,
+        json_responses_list,
+    ) = request.request_json_from_github(github_api_url, console, 3)
     assert valid is False
     assert json_responses_list == []
+    assert total_retry_count == 3
+    assert total_retry_time == (1 + 2 + 4)
