@@ -178,8 +178,16 @@ def request_json_from_github_with_caution(
     response = requests.get(
         github_api_url, params=github_params, auth=github_authentication
     )
+    # start the retry count at 1 so that the first calculation of an exponential
+    # back-off works as expected; all retry operations will use <= to the maximum
+    # so as to ensure that the number of retries goes to the maximum value
     response_retries_count = 1
+    # extract the status_code from the response provided by the GitHub server;
+    # in my experience with using WorkKnow, these are two common status codes:
+    # 200: everything worked and JSON response is available
+    # 502: error on the server and a error-message JSON contains no data
     current_response_status_code = response.status_code
+    # indicate that an attempt at a retry has not yet happened
     attempted_retries = False
     if response.status_code != constants.github.Success_Response:
         progress.console.print()
