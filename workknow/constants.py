@@ -74,7 +74,7 @@ github = create_constants(
     Separator="/",
     Success_Response=200,
     User="User",
-    Wait_In_Seconds=10,
+    Wait_In_Seconds=1,
     Workflow_Runs="workflow_runs",
 )
 
