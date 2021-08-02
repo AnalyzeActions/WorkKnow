@@ -25,7 +25,9 @@ data = create_constants(
 
 # define the constants for environment variables
 environment = create_constants(
-    "environment", Github_Access_Token="GITHUB_ACCESS_TOKEN", Timezone="LOCAL_TIMEZONE"
+    "environment",
+    Github_Access_Token="PERSONAL_GITHUB_ACCESS_TOKEN",
+    Timezone="LOCAL_TIMEZONE",
 )
 
 
@@ -43,6 +45,9 @@ filesystem = create_constants(
     Commits="Commits",
     Counts="Counts",
     Csv_Extension=".csv",
+    Csv_Glob="*.csv",
+    Csv_Commits_Glob="*-Commits.csv",
+    Csv_Workflows_Glob="*-Workflows.csv",
     Dash="-",
     Slash="/",
     Results="Results",
@@ -58,15 +63,21 @@ github = create_constants(
     Actions="actions/runs",
     Api="api.github.com/repos/",
     Https="https://",
+    Last="last",
     Maximum_Length_All=3,
     Maximum_Length_Record=25,
+    Maximum_Request_Retries=10,
     Next="next",
     Page="page",
     Page_Start=2,
     Per_Page="per_page",
     Per_Page_Maximum="100",
     Separator="/",
+    Success_Response=200,
+    Url="url",
     User="User",
+    User_Agent="User-Agent",
+    Wait_In_Seconds=1,
     Workflow_Runs="workflow_runs",
 )
 

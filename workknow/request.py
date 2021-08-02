@@ -10,6 +10,7 @@ import time
 
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 from rich.console import Console
 from rich.progress import BarColumn
@@ -41,7 +42,7 @@ def get_github_personal_access_token() -> str:
     # extract the GITHUB_ACCESS_TOKEN environment variable; note that this
     # only works because of the fact that load_dotenv was previously called
     github_personal_access_token = os.getenv(
-        constants.environment.Github_Access_Token, default=""
+        constants.environment.Github_Access_Token, default=constants.markers.Nothing
     )
     return github_personal_access_token
 
@@ -61,9 +62,12 @@ def get_workflow_runs(json_responses, console):
     # will return the list so that it can be stored and analyzed.
     if constants.github.Workflow_Runs in json_responses:
         return json_responses[constants.github.Workflow_Runs]
+    logger = logging.getLogger(constants.logging.Rich)
+    logger.error(json_responses)
     # the workflow runs data is not available and this means that the GitHub REST
     # API did not return any viable data, likely due to the fact that the program
     # is rate limited. It can no longer proceed without error, so exit.
+    console.print()
     console.print(":grimacing_face: No workflow data provided by the GitHub API")
     console.print(
         "WorkKnow may be rate limited or the repository may not exist"
@@ -99,7 +103,7 @@ def utc_to_time(naive, timezone):
     return naive.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
 
 
-def get_rate_limit_wait_time(rate_limit_dict: Dict[str, int]) -> int:
+def get_rate_limit_wait_time_and_wait(rate_limit_dict: Dict[str, int]) -> int:
     """Determine the amount of time needed for waiting because of rate limit."""
     console = Console()
     # initialize the logging subsystem
@@ -140,9 +144,11 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
     """Extract the number of the last page from the links provided by the GitHub API."""
     logger = logging.getLogger(constants.logging.Rich)
     last_page = 0
-    if "last" in response_links_dict:
-        last_dict = response_links_dict["last"]
-        last_url = last_dict["url"]
+    # the "last" key is inside of the response_links_dict and this means
+    # that GitHub's API has revealed the last page; now extract it
+    if constants.github.Last in response_links_dict:
+        last_dict = response_links_dict[constants.github.Last]
+        last_url = last_dict[constants.github.Url]
         logger.debug(last_url)
         query_dict = dict(parse.parse_qsl(parse.urlsplit(last_url).query))
         logger.debug(query_dict)
@@ -150,15 +156,30 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
     return last_page
 
 
-def request_json_from_github(github_api_url: str, console: Console) -> List:
-    """Request the JSON response from the GitHub API."""
-    # initialize the logging subsystem
-    logger = logging.getLogger(constants.logging.Rich)
-    # access the person's GitHub personal access token so that
-    # the use of the tool is not rapidly rate limited
-    github_authentication = (constants.github.User, get_github_personal_access_token())
-    # request the maximum of number of entries per page
-    github_params = {constants.github.Per_Page: constants.github.Per_Page_Maximum}
+def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) -> int:
+    """Calculate the amount of sleep required based on an exponential back-off calculation."""
+    # Reference:
+    # https://findwork.dev/blog/advanced-usage-python-requests-timeouts-retries-hooks/
+    # Note that the implementation in this module does not use the sophisticated
+    # adapters that might ultimately make it easier to perform the back-off procedure
+    return backoff_factor * (2 ** (number_of_retries - 1))
+
+
+def human_readable_boolean(answer: bool) -> str:
+    """Produce a human-readable Yes or No for a boolean value of True or False."""
+    if answer:
+        return "Yes"
+    return "No"
+
+
+def request_json_from_github_with_caution(
+    github_api_url: str,
+    github_params,
+    github_authentication,
+    progress,
+    maximum_retries: int = constants.github.Maximum_Request_Retries,
+) -> Tuple[bool, int, int, requests.Response]:
+    """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
@@ -166,22 +187,112 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
     response = requests.get(
         github_api_url, params=github_params, auth=github_authentication
     )
-    # create an empty list that can store all of the JSON responses for workflow runs
-    json_responses = []
-    # extract the JSON document (it is a dict) and then extract from that the workflow runs list
-    # finally, append the list of workflow runs to the running list of response details
-    json_responses.append(get_workflow_runs(response.json(), console))
-    logger.debug(response.headers)
-    # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
-    # and thus the next page that we will need to extract (if needed) is 2
-    page = constants.github.Page_Start
-    # check if the program is about to exceed GitHub's rate limit and then
-    # sleep the program until the reset time has elapsed
-    rate_limit_dict = get_rate_limit_details()
-    get_rate_limit_wait_time(rate_limit_dict)
-    # extract the index of the last page in order to support progress bar creation
-    last_page_index = extract_last_page(response.links)
-    # continue to extract data from the pages as long as the "next" field is evident
+    # start the retry count at 1 so that the first calculation of an exponential
+    # back-off works as expected; all retry operations will use <= to the maximum
+    # so as to ensure that the number of retries goes to the maximum value
+    response_retries_count = 1
+    # extract the status_code from the response provided by the GitHub server;
+    # in my experience with using WorkKnow, these are two common status codes:
+    # 200: everything worked and JSON response is available
+    # 502: error on the server and a error-message JSON contains no data
+    current_response_status_code = response.status_code
+    # indicate that an attempt at a retry has not yet happened
+    attempted_retries = False
+    running_sleep_time_in_seconds = 0
+    # the response code indicates that there was no success for this
+    # interaction with the GitHub API and thus we must retry in an
+    # exponential back-off fashion up to a maximum number of retries
+    if response.status_code != constants.github.Success_Response:
+        progress.console.print()
+        progress.console.print(
+            f":grimacing_face: Unable to access GitHub API at {github_api_url} due to error code {current_response_status_code}"
+        )
+        # at least one retry is going to happen, so set this
+        # to True to indicate that this took place, ensuring that
+        # no diagnostic output appears above the progress bar unless needed
+        attempted_retries = True
+        progress.console.print(
+            f"{constants.markers.Tab}...Will attempt {maximum_retries} retries"
+        )
+        # keep retrying as long as:
+        # --> the loop has not retried the maximum number of times
+        # --> the status code from the GitHub server is not a success response
+        sleep_time_in_seconds = constants.github.Wait_In_Seconds
+        while (
+            current_response_status_code != constants.github.Success_Response
+            and response_retries_count <= maximum_retries
+        ):
+            # perform an exponential back-off calculation to determine how long to sleep
+            sleep_time_in_seconds = calculate_backoff_sleep_time(
+                constants.github.Wait_In_Seconds, response_retries_count
+            )
+            # sleep for the calculated period of time
+            progress.console.print(
+                f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {sleep_time_in_seconds} seconds"
+            )
+            # the sleep schedule for the default starting sleep is:
+            # 1, 2, 4, 8, 16, 32, 64, 128, 256, [...] seconds
+            time.sleep(sleep_time_in_seconds)
+            # keep track of the total amount of time in sleeping for
+            # diagnostic and testing purposes
+            running_sleep_time_in_seconds = (
+                running_sleep_time_in_seconds + sleep_time_in_seconds
+            )
+            progress.console.print(
+                f"{constants.markers.Tab}{constants.markers.Tab}...Attempt {response_retries_count} to access GitHub API at {github_api_url}"
+            )
+            response = requests.get(
+                github_api_url, params=github_params, auth=github_authentication
+            )
+            # extract the current response code for check in next iteration of loop
+            current_response_status_code = response.status_code
+            # indicate that another retry has taken place
+            response_retries_count = response_retries_count + 1
+    # since the loop will terminate as soon as there is a successful response code,
+    # the last response code is the one that can be checked for a successful response
+    # when the return code is not indicative of success, then the returned data is not valid
+    if current_response_status_code != constants.github.Success_Response:
+        valid = False
+    # the response code is success and thus the returned data is valid
+    else:
+        valid = True
+    # if this function attempted some retries, then display diagnostic information about the number of retries
+    # and whether or not those retries resulted in the collection of valid data. Note that the diagnostic and
+    # the return value both use (response_retries_count-1) because the loop will have incremented this value one
+    # time too many and thus there is a need to subtract one in order to get the accurate count
+    if attempted_retries:
+        progress.console.print(
+            f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {human_readable_boolean(valid)}"
+        )
+    return (valid, response_retries_count - 1, running_sleep_time_in_seconds, response)
+
+
+def request_json_from_github(
+    github_api_url: str,
+    console: Console,
+    maximum_retries=constants.github.Maximum_Request_Retries,
+) -> Tuple[bool, int, int, List]:
+    """Request the JSON response from the GitHub API."""
+    # initialize the logging subsystem
+    logger = logging.getLogger(constants.logging.Rich)
+    # access the person's GitHub personal access token so that
+    # the use of the tool is not rapidly rate limited
+    github_authentication = (constants.github.User, get_github_personal_access_token())
+    # configure the headers sent by requests to the GitHub API:
+    # --> the user agent is the name of the registered OAuth application
+    # --> request the maximum of number of entries per page
+    github_params = {
+        constants.github.User_Agent: constants.workknow.Name,
+        constants.github.Per_Page: constants.github.Per_Page_Maximum,
+    }
+    initial_retry_count = 0
+    initial_sleep_time = 0
+    complete_retry_count = 0
+    complete_sleep_time = 0
+    # use a progress bar to designate the requesting of JSON data from
+    # the GitHub API; this will be divided into two phases:
+    # --> Phase 1: Initial download of the first page
+    # --> Phase 2: Download of all remaining pages by following links
     with Progress(
         constants.progress.Task_Format,
         BarColumn(),
@@ -194,23 +305,78 @@ def request_json_from_github(github_api_url: str, console: Console) -> List:
         TimeRemainingColumn(),
         "remaining",
     ) as progress:
-        download_pages_task = progress.add_task("Download", total=last_page_index - 1)
-        while constants.github.Next in response.links.keys():
-            # update the "page" variable in the URL to go to the next page
-            # otherwise, make sure to use all of the same parameters as the first request
-            github_params[constants.github.Page] = str(page)
-            response = requests.get(
-                github_api_url, params=github_params, auth=github_authentication
-            )
-            logger.debug(response.headers)
-            # again extract the specific workflow runs list and append it to running response details
+        # perform the download of the first page, using the cautious approach
+        download_first_page = progress.add_task("Initial Download", total=1)
+        (
+            valid,
+            initial_retry_count,
+            initial_sleep_time,
+            response,
+        ) = request_json_from_github_with_caution(
+            github_api_url,
+            github_params,
+            github_authentication,
+            progress,
+            maximum_retries,
+        )
+        # since the goal is to only download a single page, advance the progress bar
+        # for this task, thereby signalling completion of this stage
+        progress.advance(download_first_page)
+        # create an empty list that can store all of the JSON responses for workflow runs
+        json_responses = []
+        # the response from the GitHub API was valid, which means that it either returned
+        # correctly the first time or, alternatively, waiting in an exponential back-off
+        # fashion ultimately resulted in the download completing with success
+        if valid:
+            # extract the JSON document (it is a dict) and then extract from that the workflow runs list;
+            # finally, append the list of workflow runs to the running list of response details
             json_responses.append(get_workflow_runs(response.json(), console))
-            # go to the next page in the pagination results list
-            page = page + 1
+            logger.debug(response.headers)
+            # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
+            # and thus the next page that we will need to extract (if needed) is 2
+            page = constants.github.Page_Start
             # check if the program is about to exceed GitHub's rate limit and then
             # sleep the program until the reset time has elapsed
             rate_limit_dict = get_rate_limit_details()
-            get_rate_limit_wait_time(rate_limit_dict)
-            progress.update(download_pages_task, advance=1)
-        # return the list of workflow runs dictionaries
-        return json_responses
+            get_rate_limit_wait_time_and_wait(rate_limit_dict)
+            # extract the index of the last page in order to support progress bar creation
+            last_page_index = extract_last_page(response.links)
+            # continue to extract data from the pages as long as the "next" field is evident
+            download_pages_task = progress.add_task(
+                "Complete Download", total=last_page_index - 1
+            )
+            # there is another page and thus WorkKnow should iterate and download it
+            while constants.github.Next in response.links.keys():
+                # update the "page" variable in the URL to go to the next page
+                # otherwise, make sure to use all of the same parameters as the first request
+                github_params[constants.github.Page] = str(page)
+                # request all of the remaining pages, using the cautious approach
+                (
+                    valid,
+                    complete_retry_count,
+                    complete_sleep_time,
+                    response,
+                ) = request_json_from_github_with_caution(
+                    github_api_url, github_params, github_authentication, progress
+                )
+                logger.debug(response.headers)
+                # the response from the GitHub API was valid, which means that it either returned
+                # correctly the first time or, alternatively, waiting in an exponential back-off
+                # fashion ultimately resulted in the download completing with success
+                if valid:
+                    # again extract the specific workflow runs list and append it to running response details
+                    json_responses.append(get_workflow_runs(response.json(), console))
+                    # go to the next page in the pagination results list
+                    page = page + 1
+                    # check if the program is about to exceed GitHub's rate limit and then
+                    # sleep the program until the reset time has elapsed
+                    rate_limit_dict = get_rate_limit_details()
+                    get_rate_limit_wait_time_and_wait(rate_limit_dict)
+                    progress.update(download_pages_task, advance=1)
+    # return the list of workflow runs dictionaries
+    return (
+        valid,
+        initial_retry_count + complete_retry_count,
+        initial_sleep_time + complete_sleep_time,
+        json_responses,
+    )

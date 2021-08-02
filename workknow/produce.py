@@ -65,10 +65,11 @@ def create_subsetted_list_dict(
     organization: str,
     repo: str,
     repo_url: str,
+    github_api_url: str,
     subset_key_names: Set,
     workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> List[Dict[Any, Any]]:
-    """Create a DataFrame of all of the relevant workflow data."""
+    """Create a list of dictionaries of all of the relevant workflow data."""
     # create an empty list that will store dictionaries to be made into
     # rows of a Pandas DataFrame. This approach avoids the need to incrementally
     # add rows to a Pandas DataFrame, which is known to be inefficient.
@@ -92,6 +93,7 @@ def create_subsetted_list_dict(
             chosen_keys_values[constants.workflow.Organization] = organization
             chosen_keys_values[constants.workflow.Repo] = repo
             chosen_keys_values[constants.workflow.Repo_Url] = repo_url
+            chosen_keys_values[constants.workflow.Actions_Url] = github_api_url
             # add the list of chosen key-value pairs to the list of workflow details
             total_workflow_list.append(chosen_keys_values)
     # return the list of dicts so that calling method can analyze it further
@@ -103,6 +105,7 @@ def create_workflows_dataframe(
     organization: str,
     repo: str,
     repo_url: str,
+    github_api_url: str,
     workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all of the relevant workflow data."""
@@ -118,9 +121,15 @@ def create_workflows_dataframe(
         constants.workflow.Status,
         constants.workflow.Conclusion,
         constants.workflow.Jobs_Url,
+        constants.workflow.Actions_Url,
     }
     total_workflow_list = create_subsetted_list_dict(
-        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
+        organization,
+        repo,
+        repo_url,
+        github_api_url,
+        subset_key_names,
+        workflows_dictionary_list,
     )
     total_workflow_dataframe = pandas.DataFrame(total_workflow_list)
     return total_workflow_dataframe
@@ -130,6 +139,7 @@ def create_commits_dataframe(
     organization: str,
     repo: str,
     repo_url: str,
+    github_api_url: str,
     workflows_dictionary_list: List[Dict[Any, Any]],
 ) -> pandas.DataFrame:
     """Create a DataFrame of all the relevant commit message data."""
@@ -138,9 +148,15 @@ def create_commits_dataframe(
     subset_key_names = {
         constants.workflow.Head_Commit,
     }
+    # print(workflows_dictionary_list)
     # create a subsetted list given the key names
     commits_list = create_subsetted_list_dict(
-        organization, repo, repo_url, subset_key_names, workflows_dictionary_list
+        organization,
+        repo,
+        repo_url,
+        github_api_url,
+        subset_key_names,
+        workflows_dictionary_list,
     )
     # Since the commits list of dictionaries contains dictionaries that are
     # nested in their structure, they must be normalized and then stored
