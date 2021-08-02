@@ -208,8 +208,11 @@ def download(
                     # combine the data in the two data frames so that the count data (i.e., the number of
                     # workflow builds) is joined to the data about the repositories, as created by the
                     # project that reports data about the criticality of open-source projects
-                    all_workflow_record_counts_dataframe_merged = produce.merge_repo_urls_with_count_data(
-                        provided_urls_data_frame, all_workflow_record_counts_dataframe
+                    all_workflow_record_counts_dataframe_merged = (
+                        produce.merge_repo_urls_with_count_data(
+                            provided_urls_data_frame,
+                            all_workflow_record_counts_dataframe,
+                        )
                     )
                     # save the all records count DataFrame
                     # note that it is acceptable to save this
