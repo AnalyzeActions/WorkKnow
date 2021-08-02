@@ -144,9 +144,11 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
     """Extract the number of the last page from the links provided by the GitHub API."""
     logger = logging.getLogger(constants.logging.Rich)
     last_page = 0
-    if "last" in response_links_dict:
-        last_dict = response_links_dict["last"]
-        last_url = last_dict["url"]
+    # the "last" key is inside of the response_links_dict and this means
+    # that GitHub's API has revealed the last page; now extract it
+    if constants.github.Last in response_links_dict:
+        last_dict = response_links_dict[constants.github.Last]
+        last_url = last_dict[constants.github.Url]
         logger.debug(last_url)
         query_dict = dict(parse.parse_qsl(parse.urlsplit(last_url).query))
         logger.debug(query_dict)
