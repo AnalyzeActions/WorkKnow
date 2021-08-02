@@ -233,6 +233,8 @@ def request_json_from_github_with_caution(
             # the sleep schedule for the default starting sleep is:
             # 1, 2, 4, 8, 16, 32, 64, 128, 256, [...] seconds
             time.sleep(sleep_time_in_seconds)
+            # keep track of the total amount of time in sleeping for
+            # diagnostic and testing purposes
             running_sleep_time_in_seconds = (
                 running_sleep_time_in_seconds + sleep_time_in_seconds
             )
@@ -242,12 +244,22 @@ def request_json_from_github_with_caution(
             response = requests.get(
                 github_api_url, params=github_params, auth=github_authentication
             )
+            # extract the current response code for check in next iteration of loop
             current_response_status_code = response.status_code
+            # indicate that another retry has taken place
             response_retries_count = response_retries_count + 1
+    # since the loop will terminate as soon as there is a successful response code,
+    # the last response code is the one that can be checked for a successful response
+    # when the return code is not indicative of success, then the returned data is not valid
     if current_response_status_code != constants.github.Success_Response:
         valid = False
+    # the response code is success and thus the returned data is valid
     else:
         valid = True
+    # if this function attempted some retries, then display diagnostic information about the number of retries
+    # and whether or not those retries resulted in the collection of valid data. Note that the diagnostic and
+    # the return value both use (response_retries_count-1) because the loop will have incremented this value one
+    # time too many and thus there is a need to subtract one in order to get the accurate count
     if attempted_retries:
         progress.console.print(
             f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {human_readable_boolean(valid)}"
