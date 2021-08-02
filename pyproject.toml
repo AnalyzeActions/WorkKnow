@@ -40,6 +40,7 @@ mypy = { cmd = "poetry run mypy workknow", help = "Run the mypy type checker for
 pydocstyle = { cmd = "pydocstyle workknow tests", help = "Run the pydocstyle checks for source code documentation" }
 pylint = { cmd = "pylint workknow tests", help = "Run the pylint checks for source code documentation" }
 test = { cmd = "pytest -x -s", help = "Run the pytest test suite" }
+test-silent = { cmd = "pytest -x --show-capture=no", help = "Run the pytest test suite without showing output" }
 all = "task black && task flake8 && task pydocstyle && task pylint && task mypy && task test && task coverage"
 lint = "task black && task flake8 && task pydocstyle && task pylint"
 tests = "task test && task coverage"
