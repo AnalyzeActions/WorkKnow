@@ -158,6 +158,10 @@ def extract_last_page(response_links_dict: Dict[str, Dict[str, str]]) -> int:
 
 def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) -> int:
     """Calculate the amount of sleep required based on an exponential back-off calculation."""
+    # Reference:
+    # https://findwork.dev/blog/advanced-usage-python-requests-timeouts-retries-hooks/
+    # Note that the implementation in this module does not use the sophisticated
+    # adapters that might ultimately make it easier to perform the back-off procedure
     return backoff_factor * (2 ** (number_of_retries - 1))
 
 
