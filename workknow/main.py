@@ -167,7 +167,7 @@ def download(
                 # is not about to be rate limited, which will cause a crash. If a rate
                 # limit is imminent then sleep for the time remaining until GitHub resets.
                 rate_limit_dict = request.get_rate_limit_details()
-                request.get_rate_limit_wait_time(rate_limit_dict)
+                request.get_rate_limit_wait_time_and_wait(rate_limit_dict)
         # save all of the results in the file system if the save parameter is specified
         if save:
             if files.confirm_valid_directory(results_dir):

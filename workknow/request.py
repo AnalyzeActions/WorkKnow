@@ -103,7 +103,7 @@ def utc_to_time(naive, timezone):
     return naive.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(timezone))
 
 
-def get_rate_limit_wait_time(rate_limit_dict: Dict[str, int]) -> int:
+def get_rate_limit_wait_time_and_wait(rate_limit_dict: Dict[str, int]) -> int:
     """Determine the amount of time needed for waiting because of rate limit."""
     console = Console()
     # initialize the logging subsystem
@@ -338,7 +338,7 @@ def request_json_from_github(
             # check if the program is about to exceed GitHub's rate limit and then
             # sleep the program until the reset time has elapsed
             rate_limit_dict = get_rate_limit_details()
-            get_rate_limit_wait_time(rate_limit_dict)
+            get_rate_limit_wait_time_and_wait(rate_limit_dict)
             # extract the index of the last page in order to support progress bar creation
             last_page_index = extract_last_page(response.links)
             # continue to extract data from the pages as long as the "next" field is evident
@@ -350,6 +350,7 @@ def request_json_from_github(
                 # update the "page" variable in the URL to go to the next page
                 # otherwise, make sure to use all of the same parameters as the first request
                 github_params[constants.github.Page] = str(page)
+                # request all of the remaining pages, using the cautious approach
                 (
                     valid,
                     complete_retry_count,
@@ -370,7 +371,7 @@ def request_json_from_github(
                     # check if the program is about to exceed GitHub's rate limit and then
                     # sleep the program until the reset time has elapsed
                     rate_limit_dict = get_rate_limit_details()
-                    get_rate_limit_wait_time(rate_limit_dict)
+                    get_rate_limit_wait_time_and_wait(rate_limit_dict)
                     progress.update(download_pages_task, advance=1)
     # return the list of workflow runs dictionaries
     return (
