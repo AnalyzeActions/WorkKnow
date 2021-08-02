@@ -11,8 +11,6 @@ from typing import Union
 
 from giturlparse import parse  # type: ignore
 
-from rich.pretty import pprint
-
 import pandas
 
 from workknow import constants
