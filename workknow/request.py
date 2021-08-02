@@ -278,9 +278,11 @@ def request_json_from_github(
     # access the person's GitHub personal access token so that
     # the use of the tool is not rapidly rate limited
     github_authentication = (constants.github.User, get_github_personal_access_token())
-    # request the maximum of number of entries per page
+    # configure the headers sent by requests to the GitHub API:
+    # --> the user agent is the name of the registered OAuth application
+    # --> request the maximum of number of entries per page
     github_params = {
-        "User-Agent": "gkapfham",
+        constants.github.User_Agent: constants.workknow.Name,
         constants.github.Per_Page: constants.github.Per_Page_Maximum,
     }
     initial_retry_count = 0
