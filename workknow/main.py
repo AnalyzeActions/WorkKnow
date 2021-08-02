@@ -27,7 +27,7 @@ cli = typer.Typer()
 
 @cli.command()
 def download(
-    repo_urls: List[str] = typer.Option(None),
+    repo_urls: List[str] = typer.Option([]),
     repos_csv_file: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
     env_file: Path = typer.Option(None),
