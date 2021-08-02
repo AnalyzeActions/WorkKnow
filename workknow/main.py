@@ -174,6 +174,12 @@ def download(
                     # limit is imminent then sleep for the time remaining until GitHub resets.
                     rate_limit_dict = request.get_rate_limit_details()
                     request.get_rate_limit_wait_time_and_wait(rate_limit_dict)
+                else:
+                    console.print()
+                    # explain that the save could not work correctly due to invalid results directory
+                    console.print(
+                        f":grimacing_face: Could not download workflow and commit details for {organization}/{repo}"
+                    )
             # save all of the results in the file system if the save parameter is specified
             if save:
                 if files.confirm_valid_directory(results_dir):
