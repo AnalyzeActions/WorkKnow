@@ -83,174 +83,182 @@ def download(
                 console.print(github_api_url, style="link " + github_api_url)
                 console.print()
                 # STEP: access the JSON file that contains the build history
-                (_, _, _, json_responses) = request.request_json_from_github(
+                (valid, _, _, json_responses) = request.request_json_from_github(
                     github_api_url, console
                 )
-                # STEP: collect data about the number of workflow records in the JSON responses
-                repo_url_workflow_record_dict = (
-                    produce.create_workflow_record_count_dictionary(
+                # the data returned from the API is valid; this means that either no difficulties
+                # were encountered or, alternatively, there were difficulties but a series of
+                # one or more retries allowed for the "waiting out" of the problem and the
+                # ultimate collection of valid data that can now be extracted and saved
+                if valid:
+                    # STEP: collect data about the number of workflow records in the JSON responses
+                    repo_url_workflow_record_dict = (
+                        produce.create_workflow_record_count_dictionary(
+                            organization, repo, repo_url, github_api_url, json_responses
+                        )
+                    )
+                    repo_url_workflow_record_list.append(repo_url_workflow_record_dict)
+                    # STEP: print some details about the completed download
+                    # --> display a peek into the downloaded data structure
+                    if peek:
+                        console.print()
+                        console.print(
+                            f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that each look like:\n"
+                        )
+                        # STEP: print debugging information in a summarized fashion
+                        pprint(
+                            json_responses,
+                            max_length=constants.github.Maximum_Length_All,
+                        )
+                        if produce.count_individual_builds(json_responses) != 0:
+                            console.print()
+                            console.print(
+                                ":lion_face: The first workflow record looks like:\n"
+                            )
+                            pprint(
+                                json_responses[0][0],
+                                max_length=constants.github.Maximum_Length_Record,
+                            )
+                            logger.debug(json_responses[0][0])
+                        console.print()
+                    # --> the program should not display a peek into the downloaded data structure
+                    else:
+                        console.print()
+                        console.print(
+                            f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records\n"
+                        )
+                    # STEP: create the workflows DataFrame
+                    workflows_dataframe = produce.create_workflows_dataframe(
                         organization, repo, repo_url, github_api_url, json_responses
                     )
-                )
-                repo_url_workflow_record_list.append(repo_url_workflow_record_dict)
-                # STEP: print some details about the completed download
-                # --> display a peek into the downloaded data structure
-                if peek:
+                    repository_urls_dataframes_workflows.append(workflows_dataframe)
+                    # STEP: create the commit details DataFrame
+                    commits_dataframe = produce.create_commits_dataframe(
+                        organization, repo, repo_url, github_api_url, json_responses
+                    )
+                    repository_urls_dataframes_commits.append(commits_dataframe)
+                    # STEP: save the workflows DataFrame when saving is stipulated and
+                    # the results directory is valid for the user's file system
+                    # save the workflows DataFrame
+                    if save:
+                        # the directory is valid so attempt a save to file system
+                        if files.confirm_valid_directory(results_dir):
+                            console.print(
+                                f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                            )
+                            console.print("\t... Saving the workflows data")
+                            files.save_dataframe(
+                                results_dir,
+                                organization,
+                                repo,
+                                constants.filesystem.Workflows,
+                                workflows_dataframe,
+                            )
+                            # save the commits DataFrame
+                            console.print("\t... Saving the commits data")
+                            files.save_dataframe(
+                                results_dir,
+                                organization,
+                                repo,
+                                constants.filesystem.Commits,
+                                commits_dataframe,
+                            )
+                        else:
+                            # explain that the save could not work correctly due to invalid results directory
+                            console.print(
+                                f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
+                            )
+                            console.print()
+                    # before going on to the next GitHub repository, ensure that the program
+                    # is not about to be rate limited, which will cause a crash. If a rate
+                    # limit is imminent then sleep for the time remaining until GitHub resets.
+                    rate_limit_dict = request.get_rate_limit_details()
+                    request.get_rate_limit_wait_time_and_wait(rate_limit_dict)
+            # save all of the results in the file system if the save parameter is specified
+            if save:
+                if files.confirm_valid_directory(results_dir):
+                    # finished processing all of the individual repositories and now ready to create
+                    # the "combined" data sets that include data for every repository subject to analysis
                     console.print()
                     console.print(
-                        f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records that each look like:\n"
+                        ":runner: Creating combined data sets across all repositories"
                     )
-                    # STEP: print debugging information in a summarized fashion
-                    pprint(
-                        json_responses, max_length=constants.github.Maximum_Length_All
+                    # combine all of the individual DataFrames for the workflow data
+                    all_workflows_dataframe = pandas.concat(
+                        repository_urls_dataframes_workflows
                     )
-                    if produce.count_individual_builds(json_responses) != 0:
+                    # combine all of the individual DataFrames for the commit data
+                    all_commits_dataframe = pandas.concat(
+                        repository_urls_dataframes_commits
+                    )
+                    # combine all of the dictionaries in the list to create DataFrame of workflow record data
+                    all_workflow_record_counts_dataframe = pandas.DataFrame(
+                        repo_url_workflow_record_list
+                    )
+                    console.print()
+                    # save the all records count DataFrame
+                    # note that it is acceptable to save this
+                    # DataFrame since it is always smaller in size
+                    console.print(
+                        f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
+                    )
+                    console.print(
+                        f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
+                    )
+                    files.save_dataframe_all(
+                        results_dir,
+                        constants.filesystem.Counts,
+                        all_workflow_record_counts_dataframe,
+                    )
+                    # combine the individual data files into the (very very) large data files that include
+                    # details about each of the repositories; note that the --combine argument will create
+                    # data files that cannot be automatically uploaded to a GitHub repository due to the
+                    # fact that they are going to be over 100 MB in size and thus require GitHub LFS
+                    if combine:
+                        # save the all workflows DataFrame
+                        console.print(
+                            f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+                        )
+                        files.save_dataframe_all(
+                            results_dir,
+                            constants.filesystem.Workflows,
+                            all_workflows_dataframe,
+                        )
+                        # save the all commits DataFrame
+                        console.print(
+                            f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                        )
+                        files.save_dataframe_all(
+                            results_dir,
+                            constants.filesystem.Commits,
+                            all_commits_dataframe,
+                        )
+                        # save a .zip file of all of the CSV files in the results directory
                         console.print()
                         console.print(
-                            ":lion_face: The first workflow record looks like:\n"
+                            f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
                         )
-                        pprint(
-                            json_responses[0][0],
-                            max_length=constants.github.Maximum_Length_Record,
+                        results_file_list = files.create_results_zip_file_list(
+                            results_dir
                         )
-                        logger.debug(json_responses[0][0])
-                    console.print()
-                # --> the program should not display a peek into the downloaded data structure
+                        files.create_results_zip_file(results_dir, results_file_list)
                 else:
                     console.print()
+                    # explain that the save could not work correctly due to invalid results directory
                     console.print(
-                        f":inbox_tray: Downloaded a total of {produce.count_individual_builds(json_responses)} records\n"
+                        f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
                     )
-                # STEP: create the workflows DataFrame
-                workflows_dataframe = produce.create_workflows_dataframe(
-                    organization, repo, repo_url, github_api_url, json_responses
-                )
-                repository_urls_dataframes_workflows.append(workflows_dataframe)
-                # STEP: create the commit details DataFrame
-                commits_dataframe = produce.create_commits_dataframe(
-                    organization, repo, repo_url, github_api_url, json_responses
-                )
-                repository_urls_dataframes_commits.append(commits_dataframe)
-                # STEP: save the workflows DataFrame when saving is stipulated and
-                # the results directory is valid for the user's file system
-                # save the workflows DataFrame
-                if save:
-                    # the directory is valid so attempt a save to file system
-                    if files.confirm_valid_directory(results_dir):
-                        console.print(
-                            f":sparkles: Saving data for {organization}/{repo} in the directory {str(results_dir).strip()}"
-                        )
-                        console.print("\t... Saving the workflows data")
-                        files.save_dataframe(
-                            results_dir,
-                            organization,
-                            repo,
-                            constants.filesystem.Workflows,
-                            workflows_dataframe,
-                        )
-                        # save the commits DataFrame
-                        console.print("\t... Saving the commits data")
-                        files.save_dataframe(
-                            results_dir,
-                            organization,
-                            repo,
-                            constants.filesystem.Commits,
-                            commits_dataframe,
-                        )
-                    else:
-                        # explain that the save could not work correctly due to invalid results directory
-                        console.print(
-                            f"Could not save workflow and commit data for {organization}/{repo} in the directory {str(results_dir).strip()}"
-                        )
-                        console.print()
-                # before going on to the next GitHub repository, ensure that the program
-                # is not about to be rate limited, which will cause a crash. If a rate
-                # limit is imminent then sleep for the time remaining until GitHub resets.
-                rate_limit_dict = request.get_rate_limit_details()
-                request.get_rate_limit_wait_time_and_wait(rate_limit_dict)
-        # save all of the results in the file system if the save parameter is specified
-        if save:
-            if files.confirm_valid_directory(results_dir):
-                # finished processing all of the individual repositories and now ready to create
-                # the "combined" data sets that include data for every repository subject to analysis
-                console.print()
-                console.print(
-                    ":runner: Creating combined data sets across all repositories"
-                )
-                # combine all of the individual DataFrames for the workflow data
-                all_workflows_dataframe = pandas.concat(
-                    repository_urls_dataframes_workflows
-                )
-                # combine all of the individual DataFrames for the commit data
-                all_commits_dataframe = pandas.concat(
-                    repository_urls_dataframes_commits
-                )
-                # combine all of the dictionaries in the list to create DataFrame of workflow record data
-                all_workflow_record_counts_dataframe = pandas.DataFrame(
-                    repo_url_workflow_record_list
-                )
-                console.print()
-                # save the all records count DataFrame
-                # note that it is acceptable to save this
-                # DataFrame since it is always smaller in size
-                console.print(
-                    f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
-                )
-                console.print(
-                    f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
-                )
-                files.save_dataframe_all(
-                    results_dir,
-                    constants.filesystem.Counts,
-                    all_workflow_record_counts_dataframe,
-                )
-                # combine the individual data files into the (very very) large data files that include
-                # details about each of the repositories; note that the --combine argument will create
-                # data files that cannot be automatically uploaded to a GitHub repository due to the
-                # fact that they are going to be over 100 MB in size and thus require GitHub LFS
-                if combine:
-                    # save the all workflows DataFrame
                     console.print(
-                        f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+                        constants.markers.Space
+                        + constants.markers.Space
+                        + constants.markers.Space
+                        + "Did you specify a valid results directory?"
+                        + constants.markers.Newline
+                        + constants.markers.Newline
+                        + ":sad_but_relieved_face: Exiting now!"
                     )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Workflows,
-                        all_workflows_dataframe,
-                    )
-                    # save the all commits DataFrame
-                    console.print(
-                        f"{constants.markers.Tab}... Saving combined commits data for all repositories"
-                    )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Commits,
-                        all_commits_dataframe,
-                    )
-                    # save a .zip file of all of the CSV files in the results directory
-                    console.print()
-                    console.print(
-                        f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
-                    )
-                    results_file_list = files.create_results_zip_file_list(results_dir)
-                    files.create_results_zip_file(results_dir, results_file_list)
-            else:
-                console.print()
-                # explain that the save could not work correctly due to invalid results directory
-                console.print(
-                    f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
-                )
-                console.print(
-                    constants.markers.Space
-                    + constants.markers.Space
-                    + constants.markers.Space
-                    + "Did you specify a valid results directory?"
-                    + constants.markers.Newline
-                    + constants.markers.Newline
-                    + ":sad_but_relieved_face: Exiting now!"
-                )
-        console.print()
-        request.get_rate_limit_details()
+            console.print()
+            request.get_rate_limit_details()
     # there were no valid repository URLs provided on the command-line so workflow analysis could not proceed
     else:
         console.print(
