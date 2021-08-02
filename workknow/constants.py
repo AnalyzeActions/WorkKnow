@@ -76,6 +76,7 @@ github = create_constants(
     Success_Response=200,
     Url="url",
     User="User",
+    User_Agent="User-Agent",
     Wait_In_Seconds=1,
     Workflow_Runs="workflow_runs",
 )
