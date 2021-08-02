@@ -166,7 +166,7 @@ def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) ->
 
 
 def human_readable_boolean(answer: bool) -> str:
-    """Produce a human-readable Yes or No for a boolean True or False."""
+    """Produce a human-readable Yes or No for a boolean value of True or False."""
     if answer:
         return "Yes"
     return "No"
