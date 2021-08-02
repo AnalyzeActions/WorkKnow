@@ -11,6 +11,8 @@ from typing import Union
 
 from giturlparse import parse  # type: ignore
 
+from rich.pretty import pprint
+
 import pandas
 
 from workknow import constants
@@ -209,3 +211,20 @@ def extract_repo_urls_list(repos_dataframe: pandas.DataFrame) -> List[Union[str,
         if url_column_series is not None:
             url_column_list = url_column_series.tolist()
     return list(url_column_list)
+
+
+def merge_repo_urls_with_count_data(
+    repos_dataframe: pandas.DataFrame, count_dataframe: pandas.DataFrame
+) -> pandas.DataFrame:
+    """Combine two data frames to produce a new data frame of all relevant data."""
+    # logger = logging.getLogger(constants.logging.Rich)
+    repos_dataframe.rename(columns={"url": "repo_url"}, inplace=True)
+    # pandas.set_option('display.max_columns', None)
+    # print("original data frame")
+    # pprint(repos_dataframe)
+    outer_merged = pandas.merge(
+        repos_dataframe, count_dataframe, how="outer", on=["repo_url"]
+    )
+    # print("merged data frame")
+    # pprint(outer_merged)
+    return outer_merged
