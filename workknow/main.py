@@ -224,7 +224,9 @@ def download(
                     # no extra data to record; in this situation the "merged" data file that will be
                     # saved is only the one that has the counts of the workflow builds for each project
                     else:
-                        all_workflow_record_counts_dataframe_merged = all_workflow_record_counts_dataframe
+                        all_workflow_record_counts_dataframe_merged = (
+                            all_workflow_record_counts_dataframe
+                        )
                     # save the all records count DataFrame
                     # note that it is acceptable to save this
                     # DataFrame since it is always smaller in size
