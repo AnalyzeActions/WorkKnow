@@ -41,11 +41,13 @@ def download(
     console, logger = configure.setup(debug_level)
     # STEP: load the execution environment to support GitHub API access
     environment.load_environment(env_file, logger)
-    # STEP: display the messages about the tool
+    # display the messages about the tool
     display.display_tool_details(debug_level)
-    # STEP: create empty lists of the data frames
+    # create empty lists of the data frames
     repository_urls_dataframes_workflows = []
     repository_urls_dataframes_commits = []
+    # assume that the repos_csv_file was not specified and prove otherwise
+    repos_csv_file_valid = False
     # STEP: get any rate limit details and stop using the program
     # if it is in danger of being rate limited and not having data
     request.get_rate_limit_details()
@@ -55,6 +57,7 @@ def download(
     # command-line is not valid or, alternatively, it is not specified at all
     provided_urls_data_frame = pandas.DataFrame()
     if files.confirm_valid_file(repos_csv_file):
+        repos_csv_file_valid = True
         # read the CSV file and produce a Pandas DataFrame out of it
         provided_urls_data_frame = files.read_csv_file(repos_csv_file)
         # extract the repository URLs from the data frame;
@@ -205,15 +208,23 @@ def download(
                         repo_url_workflow_record_list
                     )
                     console.print()
-                    # combine the data in the two data frames so that the count data (i.e., the number of
+                    # Combine the data in the two data frames so that the count data (i.e., the number of
                     # workflow builds) is joined to the data about the repositories, as created by the
-                    # project that reports data about the criticality of open-source projects
-                    all_workflow_record_counts_dataframe_merged = (
-                        produce.merge_repo_urls_with_count_data(
-                            provided_urls_data_frame,
-                            all_workflow_record_counts_dataframe,
+                    # project that reports data about the criticality of open-source projects. WorkKnow
+                    # can only take this step if the user specified the CSV file from the criticality
+                    # score project that contains multiple additional columns of data
+                    if repos_csv_file_valid:
+                        all_workflow_record_counts_dataframe_merged = (
+                            produce.merge_repo_urls_with_count_data(
+                                provided_urls_data_frame,
+                                all_workflow_record_counts_dataframe,
+                            )
                         )
-                    )
+                    # there was no specification of a CSV file on the command line and thus there is
+                    # no extra data to record; in this situation the "merged" data file that will be
+                    # saved is only the one that has the counts of the workflow builds for each project
+                    else:
+                        all_workflow_record_counts_dataframe_merged = all_workflow_record_counts_dataframe
                     # save the all records count DataFrame
                     # note that it is acceptable to save this
                     # DataFrame since it is always smaller in size
