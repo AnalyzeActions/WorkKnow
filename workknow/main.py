@@ -186,108 +186,110 @@ def download(
                     console.print(
                         f":grimacing_face: Could not download workflow and commit details for {organization}/{repo}"
                     )
-            # save all of the results in the file system if the save parameter is specified
-            if save:
-                if files.confirm_valid_directory(results_dir):
-                    # finished processing all of the individual repositories and now ready to create
-                    # the "combined" data sets that include data for every repository subject to analysis
-                    console.print()
-                    console.print(
-                        ":runner: Creating combined data sets across all repositories"
-                    )
-                    # combine all of the individual DataFrames for the workflow data
-                    all_workflows_dataframe = pandas.concat(
-                        repository_urls_dataframes_workflows
-                    )
-                    # combine all of the individual DataFrames for the commit data
-                    all_commits_dataframe = pandas.concat(
-                        repository_urls_dataframes_commits
-                    )
-                    # combine all of the dictionaries in the list to create DataFrame of workflow record data
-                    all_workflow_record_counts_dataframe = pandas.DataFrame(
-                        repo_url_workflow_record_list
-                    )
-                    console.print()
-                    # Combine the data in the two data frames so that the count data (i.e., the number of
-                    # workflow builds) is joined to the data about the repositories, as created by the
-                    # project that reports data about the criticality of open-source projects. WorkKnow
-                    # can only take this step if the user specified the CSV file from the criticality
-                    # score project that contains multiple additional columns of data
-                    if repos_csv_file_valid:
-                        all_workflow_record_counts_dataframe_merged = (
-                            produce.merge_repo_urls_with_count_data(
-                                provided_urls_data_frame,
-                                all_workflow_record_counts_dataframe,
-                            )
+        # now that WorkKnow is finished with the processing of each of the individual repositories and
+        # they are stored in the currently in-memory DataFrames, save the required data to disk;
+        # however, only save all of the results in the file system if the save parameter is specified
+        if save:
+            if files.confirm_valid_directory(results_dir):
+                # finished processing all of the individual repositories and now ready to create
+                # the "combined" data sets that include data for every repository subject to analysis
+                console.print()
+                console.print(
+                    ":runner: Creating combined data sets across all repositories"
+                )
+                # combine all of the individual DataFrames for the workflow data
+                all_workflows_dataframe = pandas.concat(
+                    repository_urls_dataframes_workflows
+                )
+                # combine all of the individual DataFrames for the commit data
+                all_commits_dataframe = pandas.concat(
+                    repository_urls_dataframes_commits
+                )
+                # combine all of the dictionaries in the list to create DataFrame of workflow record data
+                all_workflow_record_counts_dataframe = pandas.DataFrame(
+                    repo_url_workflow_record_list
+                )
+                console.print()
+                # Combine the data in the two data frames so that the count data (i.e., the number of
+                # workflow builds) is joined to the data about the repositories, as created by the
+                # project that reports data about the criticality of open-source projects. WorkKnow
+                # can only take this step if the user specified the CSV file from the criticality
+                # score project that contains multiple additional columns of data
+                if repos_csv_file_valid:
+                    all_workflow_record_counts_dataframe_merged = (
+                        produce.merge_repo_urls_with_count_data(
+                            provided_urls_data_frame,
+                            all_workflow_record_counts_dataframe,
                         )
-                    # there was no specification of a CSV file on the command line and thus there is
-                    # no extra data to record; in this situation the "merged" data file that will be
-                    # saved is only the one that has the counts of the workflow builds for each project
-                    else:
-                        all_workflow_record_counts_dataframe_merged = (
-                            all_workflow_record_counts_dataframe
-                        )
-                    # save the all records count DataFrame
-                    # note that it is acceptable to save this
-                    # DataFrame since it is always smaller in size
-                    console.print(
-                        f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
                     )
+                # there was no specification of a CSV file on the command line and thus there is
+                # no extra data to record; in this situation the "merged" data file that will be
+                # saved is only the one that has the counts of the workflow builds for each project
+                else:
+                    all_workflow_record_counts_dataframe_merged = (
+                        all_workflow_record_counts_dataframe
+                    )
+                # save the all records count DataFrame
+                # note that it is acceptable to save this
+                # DataFrame since it is always smaller in size
+                console.print(
+                    f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
+                )
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Counts,
+                    all_workflow_record_counts_dataframe_merged,
+                )
+                # combine the individual data files into the (very very) large data files that include
+                # details about each of the repositories; note that the --combine argument will create
+                # data files that cannot be automatically uploaded to a GitHub repository due to the
+                # fact that they are going to be over 100 MB in size and thus require GitHub LFS
+                if combine:
+                    # save the all workflows DataFrame
                     console.print(
-                        f"{constants.markers.Tab}... Saving combined workflow count data for all repositories"
+                        f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
                     )
                     files.save_dataframe_all(
                         results_dir,
-                        constants.filesystem.Counts,
-                        all_workflow_record_counts_dataframe_merged,
+                        constants.filesystem.Workflows,
+                        all_workflows_dataframe,
                     )
-                    # combine the individual data files into the (very very) large data files that include
-                    # details about each of the repositories; note that the --combine argument will create
-                    # data files that cannot be automatically uploaded to a GitHub repository due to the
-                    # fact that they are going to be over 100 MB in size and thus require GitHub LFS
-                    if combine:
-                        # save the all workflows DataFrame
-                        console.print(
-                            f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
-                        )
-                        files.save_dataframe_all(
-                            results_dir,
-                            constants.filesystem.Workflows,
-                            all_workflows_dataframe,
-                        )
-                        # save the all commits DataFrame
-                        console.print(
-                            f"{constants.markers.Tab}... Saving combined commits data for all repositories"
-                        )
-                        files.save_dataframe_all(
-                            results_dir,
-                            constants.filesystem.Commits,
-                            all_commits_dataframe,
-                        )
-                        # save a .zip file of all of the CSV files in the results directory
-                        console.print()
-                        console.print(
-                            f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
-                        )
-                        results_file_list = files.create_results_zip_file_list(
-                            results_dir
-                        )
-                        files.create_results_zip_file(results_dir, results_file_list)
-                else:
+                    # save the all commits DataFrame
+                    console.print(
+                        f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                    )
+                    files.save_dataframe_all(
+                        results_dir,
+                        constants.filesystem.Commits,
+                        all_commits_dataframe,
+                    )
+                    # save a .zip file of all of the CSV files in the results directory
                     console.print()
-                    # explain that the save could not work correctly due to invalid results directory
                     console.print(
-                        f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
+                        f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
                     )
-                    console.print(
-                        constants.markers.Space
-                        + constants.markers.Space
-                        + constants.markers.Space
-                        + "Did you specify a valid results directory?"
-                        + constants.markers.Newline
-                        + constants.markers.Newline
-                        + ":sad_but_relieved_face: Exiting now!"
+                    results_file_list = files.create_results_zip_file_list(
+                        results_dir
                     )
+                    files.create_results_zip_file(results_dir, results_file_list)
+            else:
+                console.print()
+                # explain that the save could not work correctly due to invalid results directory
+                console.print(
+                    f":grimacing_face: Could not save workflow and commit details in the directory {str(results_dir).strip()}"
+                )
+                console.print(
+                    constants.markers.Space
+                    + constants.markers.Space
+                    + constants.markers.Space
+                    + "Did you specify a valid results directory?"
+                    + constants.markers.Newline
+                    + constants.markers.Newline
+                    + ":sad_but_relieved_face: Exiting now!"
+                )
             console.print()
             request.get_rate_limit_details()
     # there were no valid repository URLs provided on the command-line so workflow analysis could not proceed
