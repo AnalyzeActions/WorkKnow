@@ -326,8 +326,17 @@ def request_json_from_github_with_caution(
             # response = requests.get(
             #     github_api_url, params=github_params, auth=github_authentication
             # )
-            (valid, request_retries_count, request_sleep_time, response) = request_with_caution(
-                github_api_url, github_params, github_authentication, progress, maximum_retries
+            (
+                valid,
+                request_retries_count,
+                request_sleep_time,
+                response,
+            ) = request_with_caution(
+                github_api_url,
+                github_params,
+                github_authentication,
+                progress,
+                maximum_retries,
             )
             if not valid:
                 return (valid, request_retries_count, request_sleep_time, None)
