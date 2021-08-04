@@ -116,6 +116,10 @@ markers = create_constants(
 )
 
 
+# define the names of packages used in pluginbase
+packages = create_constants("packages", Plugins="workknow.checks")
+
+
 # define the constants for progress bars
 progress = create_constants(
     "progress",
