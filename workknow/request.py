@@ -277,14 +277,14 @@ def request_json_from_github_with_caution(
     # in my experience with using WorkKnow, these are two common status codes:
     # 200: everything worked and JSON response is available
     # 502: error on the server and a error-message JSON contains no data
-    current_response_status_code = response.status_code
+    current_response_status_code = response.status_code  # type: ignore
     # indicate that an attempt at a retry has not yet happened
     attempted_retries = False
     running_sleep_time_in_seconds = 0
     # the response code indicates that there was no success for this
     # interaction with the GitHub API and thus we must retry in an
     # exponential back-off fashion up to a maximum number of retries
-    if response.status_code != constants.github.Success_Response:
+    if response.status_code != constants.github.Success_Response:  # type: ignore
         progress.console.print()
         progress.console.print(
             f":grimacing_face: Unable to access GitHub API at {github_api_url} due to error code {current_response_status_code}"
@@ -341,7 +341,7 @@ def request_json_from_github_with_caution(
             if not valid:
                 return (valid, request_retries_count, request_sleep_time, None)
             # extract the current response code for check in next iteration of loop
-            current_response_status_code = response.status_code
+            current_response_status_code = response.status_code  # type: ignore
             # indicate that another retry has taken place
             response_retries_count = response_retries_count + 1
     # since the loop will terminate as soon as there is a successful response code,
@@ -426,8 +426,8 @@ def request_json_from_github(
         if valid:
             # extract the JSON document (it is a dict) and then extract from that the workflow runs list;
             # finally, append the list of workflow runs to the running list of response details
-            json_responses.append(get_workflow_runs(response.json(), console))
-            logger.debug(response.headers)
+            json_responses.append(get_workflow_runs(response.json(), console))  # type: ignore
+            logger.debug(response.headers)  # type: ignore
             # pagination in GitHub Actions is 1-indexed (i.e., the first index is 1)
             # and thus the next page that we will need to extract (if needed) is 2
             page = constants.github.Page_Start
@@ -436,13 +436,13 @@ def request_json_from_github(
             rate_limit_dict = get_rate_limit_details()
             get_rate_limit_wait_time_and_wait(rate_limit_dict)
             # extract the index of the last page in order to support progress bar creation
-            last_page_index = extract_last_page(response.links)
+            last_page_index = extract_last_page(response.links)  # type: ignore
             # continue to extract data from the pages as long as the "next" field is evident
             download_pages_task = progress.add_task(
                 "Complete Download", total=last_page_index - 1
             )
             # there is another page and thus WorkKnow should iterate and download it
-            while constants.github.Next in response.links.keys():
+            while constants.github.Next in response.links.keys():  # type: ignore
                 # update the "page" variable in the URL to go to the next page
                 # otherwise, make sure to use all of the same parameters as the first request
                 github_params[constants.github.Page] = str(page)
@@ -455,13 +455,13 @@ def request_json_from_github(
                 ) = request_json_from_github_with_caution(
                     github_api_url, github_params, github_authentication, progress
                 )
-                logger.debug(response.headers)
+                logger.debug(response.headers)  # type: ignore
                 # the response from the GitHub API was valid, which means that it either returned
                 # correctly the first time or, alternatively, waiting in an exponential back-off
                 # fashion ultimately resulted in the download completing with success
                 if valid:
                     # again extract the specific workflow runs list and append it to running response details
-                    json_responses.append(get_workflow_runs(response.json(), console))
+                    json_responses.append(get_workflow_runs(response.json(), console))  # type: ignore
                     # go to the next page in the pagination results list
                     page = page + 1
                     # check if the program is about to exceed GitHub's rate limit and then
