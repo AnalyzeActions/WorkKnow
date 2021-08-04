@@ -271,9 +271,7 @@ def download(
                     console.print(
                         f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
                     )
-                    results_file_list = files.create_results_zip_file_list(
-                        results_dir
-                    )
+                    results_file_list = files.create_results_zip_file_list(results_dir)
                     files.create_results_zip_file(results_dir, results_file_list)
             else:
                 console.print()
