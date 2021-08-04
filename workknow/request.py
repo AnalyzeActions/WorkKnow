@@ -11,6 +11,7 @@ import time
 from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import Union
 
 from rich.console import Console
 from rich.progress import BarColumn
@@ -170,6 +171,62 @@ def human_readable_boolean(answer: bool) -> str:
     if answer:
         return "Yes"
     return "No"
+
+
+def request_with_caution(
+    github_api_url: str,
+    github_params,
+    github_authentication,
+    progress,
+    maximum_retries: int = constants.github.Maximum_Request_Retries,
+) -> Tuple[bool, int, int, Union[None, requests.Response]]:
+    """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
+    # use requests to access the GitHub API with:
+    # --> provided GitHub URL that accesses a project's GitHub Actions log
+    # --> the parameters that currently specify the page limit and will specify the page
+    # --> the GitHub authentication information with the personal access token
+    response = None
+    valid_response = False
+    request_retries_count = 1
+    running_sleep_time_in_seconds = 0
+    sleep_time_in_seconds = constants.github.Wait_In_Seconds
+    while not valid_response and request_retries_count <= maximum_retries:
+        try:
+            response = requests.get(
+                github_api_url, params=github_params, auth=github_authentication
+            )
+            valid_response = True
+        except requests.exceptions.RequestException as request_exception:
+            progress.console.print()
+            progress.console.print(
+                f":grimacing_face: Unable to access GitHub API at {github_api_url} due to exception {request_exception}"
+            )
+            progress.console.print(
+                f"{constants.markers.Tab}...Will attempt {maximum_retries} retries"
+            )
+            # perform an exponential back-off calculation to determine how long to sleep
+            sleep_time_in_seconds = calculate_backoff_sleep_time(
+                constants.github.Wait_In_Seconds, request_retries_count
+            )
+            progress.console.print(
+                f"{constants.markers.Tab}{constants.markers.Tab}...Waiting for {sleep_time_in_seconds} seconds"
+            )
+            # the sleep schedule for the default starting sleep is:
+            # 1, 2, 4, 8, 16, 32, 64, 128, 256, [...] seconds
+            time.sleep(sleep_time_in_seconds)
+            # keep track of the total amount of time in sleeping for
+            # diagnostic and testing purposes
+            running_sleep_time_in_seconds = (
+                running_sleep_time_in_seconds + sleep_time_in_seconds
+            )
+            request_retries_count = request_retries_count + 1
+            progress.console.print(
+                f"{constants.markers.Tab}{constants.markers.Tab}...Attempt {request_retries_count} to access GitHub API at {github_api_url}"
+            )
+    valid = False
+    if response is not None:
+        valid = True
+    return (valid, request_retries_count, running_sleep_time_in_seconds, response)
 
 
 def request_json_from_github_with_caution(
