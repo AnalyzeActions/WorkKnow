@@ -235,15 +235,20 @@ def request_json_from_github_with_caution(
     github_authentication,
     progress,
     maximum_retries: int = constants.github.Maximum_Request_Retries,
-) -> Tuple[bool, int, int, requests.Response]:
+) -> Tuple[bool, int, int, Union[requests.Response, None]]:
     """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
     # --> the GitHub authentication information with the personal access token
-    response = requests.get(
-        github_api_url, params=github_params, auth=github_authentication
+    # response = requests.get(
+    #     github_api_url, params=github_params, auth=github_authentication
+    # )
+    (valid, request_retries_count, request_sleep_time, response) = request_with_caution(
+        github_api_url, github_params, github_authentication, progress, maximum_retries
     )
+    if not valid:
+        return (valid, request_retries_count, request_sleep_time, None)
     # start the retry count at 1 so that the first calculation of an exponential
     # back-off works as expected; all retry operations will use <= to the maximum
     # so as to ensure that the number of retries goes to the maximum value
