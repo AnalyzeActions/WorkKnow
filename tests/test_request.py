@@ -15,7 +15,7 @@ from workknow import request
 
 
 @responses.activate
-def test_request_exception_backoff_retry_mocked():
+def test_request_exception_backoff_retry_mocked_HTTPError():
     """Check that a mocked request to an API fails and handles correctly."""
     github_authentication = (
         constants.github.User,
@@ -50,7 +50,60 @@ def test_request_exception_backoff_retry_mocked():
             github_api_url,
             body=requests.exceptions.HTTPError("requests.exceptions.HTTPError"),
         )
-        # attempt to download the JSON data from the mocked GitHub API; since this
+        # attempt to make a request from the mocked GitHub API; since this
+        # will always result in failure this will cause the exponential back-off
+        # and retry mechanism to start working until the maximum number of retries
+        (
+            valid,
+            total_retry_count,
+            total_retry_time,
+            response,
+        ) = request.request_with_caution(
+            github_api_url, github_params, github_authentication, progress, 2
+        )
+        assert valid is False
+        assert response is None
+        assert total_retry_count == 2
+        assert total_retry_time == (1 + 2)
+
+
+@responses.activate
+def test_request_exception_backoff_retry_mocked_ChunkedEcodingError():
+    """Check that a mocked request to an API fails and handles correctly."""
+    github_authentication = (
+        constants.github.User,
+        request.get_github_personal_access_token(),
+    )
+    github_params = {
+        constants.github.User_Agent: constants.workknow.Name,
+        constants.github.Per_Page: constants.github.Per_Page_Maximum,
+    }
+    with Progress(
+        constants.progress.Task_Format,
+        BarColumn(),
+        constants.progress.Percentage_Format,
+        constants.progress.Completed,
+        "•",
+        TimeElapsedColumn(),
+        "elapsed",
+        "•",
+        TimeRemainingColumn(),
+        "remaining",
+    ) as progress:
+        # configure the system so that it does not produce debugging output
+        debug_level = debug.DebugLevel.ERROR
+        _, _ = configure.setup(debug_level)
+        # define a URL that can be interacted with in a mocked fashion; importantly,
+        # this test case is using responses and thus there is no actual interaction
+        # with the GitHub API and no network transmission at all
+        github_api_url = "https://api.github.com/repos/home-assistant/core/actions/runs"
+        # define the response that the mocked API will return for al interactions
+        responses.add(
+            responses.GET,
+            github_api_url,
+            body=requests.exceptions.ChunkedEncodingError("requests.exceptions.ChunkedEncodingError"),
+        )
+        # attempt to make a request from the mocked GitHub API; since this
         # will always result in failure this will cause the exponential back-off
         # and retry mechanism to start working until the maximum number of retries
         (
