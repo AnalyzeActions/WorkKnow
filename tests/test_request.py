@@ -39,7 +39,7 @@ def test_request_exception_backoff_retry_mocked():
     ) as progress:
         # configure the system so that it does not produce debugging output
         debug_level = debug.DebugLevel.ERROR
-        console, _ = configure.setup(debug_level)
+        _, _ = configure.setup(debug_level)
         # define a URL that can be interacted with in a mocked fashion; importantly,
         # this test case is using responses and thus there is no actual interaction
         # with the GitHub API and no network transmission at all
