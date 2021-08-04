@@ -303,9 +303,14 @@ def request_json_from_github_with_caution(
             progress.console.print(
                 f"{constants.markers.Tab}{constants.markers.Tab}...Attempt {response_retries_count} to access GitHub API at {github_api_url}"
             )
-            response = requests.get(
-                github_api_url, params=github_params, auth=github_authentication
+            # response = requests.get(
+            #     github_api_url, params=github_params, auth=github_authentication
+            # )
+            (valid, request_retries_count, request_sleep_time, response) = request_with_caution(
+                github_api_url, github_params, github_authentication, progress, maximum_retries
             )
+            if not valid:
+                return (valid, request_retries_count, request_sleep_time, None)
             # extract the current response code for check in next iteration of loop
             current_response_status_code = response.status_code
             # indicate that another retry has taken place
