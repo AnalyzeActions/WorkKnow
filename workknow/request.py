@@ -180,24 +180,37 @@ def request_with_caution(
     progress,
     maximum_retries: int = constants.github.Maximum_Request_Retries,
 ) -> Tuple[bool, int, int, Union[None, requests.Response]]:
-    """Request data from the GitHub API in a cautious fashion, checking error codes and waiting when needed."""
+    """Request data from the GitHub API in a cautious fashion, checking for exceptions and waiting when needed."""
     # use requests to access the GitHub API with:
     # --> provided GitHub URL that accesses a project's GitHub Actions log
     # --> the parameters that currently specify the page limit and will specify the page
     # --> the GitHub authentication information with the personal access token
+    # assume that there is no valid response and extract one if possible
     response = None
     valid_response = False
+    # keep track of the number of requests for diagnostic report back
     request_retries_count = 1
+    # keep track of whether or not any sleeping took place during retries
     running_sleep_time_in_seconds = 0
+    # the first sleep should be the default about of sleeping
     sleep_time_in_seconds = constants.github.Wait_In_Seconds
+    # allow a special diagnostic message to appear on first exception
     first_exception = True
+    # continue performing a retry as long as there is no valid response and
+    # this process has not exceeded the value number of retries
     while not valid_response and request_retries_count <= maximum_retries:
+        # attempt to extract a response which checking for an exception
         try:
             response = requests.get(
                 github_api_url, params=github_params, auth=github_authentication
             )
+            # the response was valid because of the fact that the previous line
+            # of code did not trigger an exception and jump to the except block
             valid_response = True
         except requests.exceptions.RequestException as request_exception:
+            # there was an exception and, in fact, it was the first exception
+            # and thus WorkKnow must display a diagnostic message about the
+            # standard progress bar to indicate the failure and retries
             if first_exception:
                 progress.console.print()
                 progress.console.print(
@@ -206,6 +219,8 @@ def request_with_caution(
                 progress.console.print(
                     f"{constants.markers.Tab}...Will attempt {maximum_retries} retries"
                 )
+                # if any follow-on exceptions occur then they will be, by definition,
+                # not the first exception and thus this diagnostic output is not needed
                 first_exception = False
             # perform an exponential back-off calculation to determine how long to sleep
             sleep_time_in_seconds = calculate_backoff_sleep_time(
@@ -223,9 +238,14 @@ def request_with_caution(
                 running_sleep_time_in_seconds + sleep_time_in_seconds
             )
             request_retries_count = request_retries_count + 1
+    # assume that the response is not valid and prove otherwise
     valid = False
+    # if the response object is not None then it probably has data that was returned
+    # from the GitHub API and thus it is safe to return it to the calling function
     if response is not None:
         valid = True
+    # note that this returns request_retries_count - 1 because this variable is always
+    # incremented at the end of the loop even though that round did not take place yet
     return (valid, request_retries_count - 1, running_sleep_time_in_seconds, response)
 
 
