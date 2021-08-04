@@ -222,7 +222,6 @@ def request_with_caution(
             running_sleep_time_in_seconds = (
                 running_sleep_time_in_seconds + sleep_time_in_seconds
             )
-            print(running_sleep_time_in_seconds)
             request_retries_count = request_retries_count + 1
     valid = False
     if response is not None:
