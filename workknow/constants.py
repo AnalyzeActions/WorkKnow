@@ -124,6 +124,7 @@ plugins = create_constants(
     Internal_Plugins_Dir="workknow/plugins",
     Plugins="workknow.plugins",
     Plugin_Base_Identifier="WorkKnowPluginBase",
+    Plugin_Prefix="plugin_",
 )
 
 
