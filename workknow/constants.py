@@ -116,8 +116,15 @@ markers = create_constants(
 )
 
 
-# define the names of packages used in pluginbase
-packages = create_constants("packages", Plugins="workknow.checks")
+# define the names of plugins used in pluginbase
+plugins = create_constants(
+    "plugins",
+    Home=".",
+    Function_Analyze="analyze",
+    Internal_Plugins_Dir="workknow/plugins",
+    Plugins="workknow.plugins",
+    Plugin_Base_Identifier="WorkKnowPluginBase",
+)
 
 
 # define the constants for progress bars
