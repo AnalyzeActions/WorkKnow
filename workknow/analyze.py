@@ -53,8 +53,24 @@ def get_source(plugin_path: Path) -> pluginbase.PluginSource:
 
 
 def transform_plugin_name(plugin_name: str) -> str:
-    """Transform the chosen check from the provided command-line arguments."""
+    """Transform the chosen plugin from the provided command-line arguments."""
     # add "plugin" to the name of the plugin so that it looks like, for instance,
     # "plugin_" when "CountCommits" is chosen on command-line
-    transformed_check = constants.plugins.Plugin_Prefix + plugin_name
-    return transformed_check
+    transformed_plugin = constants.plugins.Plugin_Prefix + plugin_name
+    return transformed_plugin
+
+
+def verify_plugin_existence(
+    plugin: str, plugin_source: pluginbase.PluginSource
+) -> bool:
+    """Verify that the requested plugin is available from the source(s)."""
+    plugin_exists = False
+    # list each of the plugins by name as they are available in the
+    # --> internal source that comes with GatorGrader
+    # --> the external source specified by user on the command-line
+    plugin_list = plugin_source.list_plugins()
+    # if the name of the plugin is in the list of plugins
+    # then we can confirm its existence, signalling its use is acceptable
+    if plugin in plugin_list:
+        plugin_exists = True
+    return plugin_exists
