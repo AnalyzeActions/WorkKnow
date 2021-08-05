@@ -421,6 +421,7 @@ def combine(
 @cli.command()
 def analyze(
     plugins_dir: Path = typer.Option(None),
+    plugin: str = typer.Option(""),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
     """Analyze previously the downloaded data."""
@@ -433,3 +434,5 @@ def analyze(
     console.print()
     plugin_source = study.get_source(plugins_dir)
     logger.debug(plugin_source)
+    transformed_plugin_name = study.transform_plugin_name(plugin)
+    logger.debug(transformed_plugin_name)
