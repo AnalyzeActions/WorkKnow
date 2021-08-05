@@ -50,3 +50,11 @@ def get_source(plugin_path: Path) -> pluginbase.PluginSource:
             searchpath=all_plugin_paths,
         )
     return PLUGIN_SOURCE
+
+
+def transform_plugin_name(plugin_name: str) -> str:
+    """Transform the chosen check from the provided command-line arguments."""
+    # add "plugin" to the name of the plugin so that it looks like, for instance,
+    # "plugin_" when "CountCommits" is chosen on command-line
+    transformed_check = constants.plugins.Plugin_Prefix + plugin_name
+    return transformed_check
