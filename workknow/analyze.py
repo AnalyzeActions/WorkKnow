@@ -17,7 +17,7 @@ DEFAULT_FUNCTIONS = [
 
 def get_source(plugin_path: Path) -> pluginbase.PluginSource:
     """Load all of the plugins using pluginbase."""
-    # define the "package" in which the checks reside
+    # define the "package" in which the plugins reside
     # the term "package" corresponds to "module.sub-module"
     plugin_base = PluginBase(package=constants.plugins.Plugins)
     # remove any directories from the path listings that are Nothing (i.e., "")
