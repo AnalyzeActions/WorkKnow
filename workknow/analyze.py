@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import pluginbase
+import pluginbase  # type: ignore
 from pluginbase import PluginBase
 
 from workknow import constants
