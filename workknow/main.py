@@ -9,6 +9,7 @@ import typer
 
 from rich.pretty import pprint
 
+from workknow import analyze as study
 from workknow import concatenate
 from workknow import configure
 from workknow import constants
@@ -418,11 +419,17 @@ def combine(
 
 
 @cli.command()
-def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
-    """Analyze already the downloaded data."""
+def analyze(
+    plugins_dir: Path = typer.Option(None),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+):
+    """Analyze previously the downloaded data."""
     # setup the console and the logger instance
-    console, _ = configure.setup(debug_level)
+    console, logger = configure.setup(debug_level)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
-    console.print(":person_shrugging: Sorry, this feature does not yet exist.")
     console.print()
+    console.print(":runner: Performing an analysis of GitHub Action workflow data.")
+    console.print()
+    plugin_source = study.get_source(plugins_dir)
+    logger.debug(plugin_source)
