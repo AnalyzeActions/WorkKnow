@@ -4,6 +4,7 @@ import logging
 import zipfile
 
 from pathlib import Path
+from glob import glob
 
 from typing import List
 
@@ -178,3 +179,36 @@ def create_results_zip_file(
             # --> Parameter 1: the name of the file as found on current file system
             # --> Parameter 2: the name of the file as it will be stored in the .zip file
             results_zip_file.write(results_file_name, pathlib_path_file.name)
+
+
+def create_paths(*args, file=constants.markers.Nothing, home):
+    """Create a generator of Path objects for a glob with varying sub-path count."""
+    # attempt to create the path that could contain:
+    # --> a glob (e.g., *.py) or
+    # --> a single file (e.g., hello.py)
+    # Pathlib does not support globs of absolute directories, so use glob
+    # to create a list of all files matched by the glob
+    file_or_glob_path = create_path(*args, file=file, home=home)
+    home_directory_globbed = [Path(p) for p in glob(str(file_or_glob_path))]
+    # return this list of Path objects resulting from glob application
+    return home_directory_globbed
+
+
+def create_path(*args, file=constants.markers.Nothing, home):
+    """Create a Path object for a file with varying sub-path count."""
+    # create the Path for the home
+    home_path = Path(home)
+    # create the Path for the given file
+    given_file_path = Path(file)
+    final_path = home_path
+    # Create a containing directory of sub-directories for the file.
+    # Each of these paths will be a path between the home and the
+    # specified file. None of these paths need their anchor, though,
+    # which is given like "C:\" on Windows and "/" otherwise.
+    # pylint: disable=old-division
+    for containing_path in args:
+        nested_path = Path(containing_path)
+        final_path = final_path / nested_path.relative_to(nested_path.anchor)
+    # add the file at the end of the constructed file path
+    final_path = final_path / given_file_path
+    return final_path
