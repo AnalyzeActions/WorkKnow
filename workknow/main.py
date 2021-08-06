@@ -433,12 +433,29 @@ def analyze(
     console.print(":runner: Performing an analysis of GitHub Action workflow data.")
     console.print()
     # STEP: verify the specified data analysis plugin
+    # get the source of all the plugins, both internal and external
     plugin_source = study.get_source(plugins_dir)
+    # the person using WorkKnow will give the human-readable name of
+    # the plugin; this means that the tool must transform it to the
+    # internal name of the plugin so that it can be found
     transformed_plugin_name = study.transform_plugin_name(plugin)
-    verified_plugin_existence = study.verify_plugin_existence(
+    # confirm that the plugin exists and next step is feasible
+    plugin_exists = study.verify_plugin_existence(
         transformed_plugin_name, plugin_source
     )
     # provide diagnostic output about the plugin source
     logger.debug(f"Plugin source {plugin_source}")
     logger.debug(f"Transformed name of the plugin {transformed_plugin_name}")
-    logger.debug(f"Was the plugin available? {verified_plugin_existence}")
+    logger.debug(f"Was the plugin available? {plugin_exists}")
+    # STEP: Load the plugin and verify that it is valid:
+    plugin_verified = False
+    plugin = None
+    # since the plugin exists the tool can attempt to load it and then
+    # verify that it contains the correct functions
+    if plugin_exists:
+        # load the plugin from the source
+        plugin = plugin_source.load_plugin(transformed_plugin_name)
+        # verify that the plugin has the required function(s)
+        plugin_verified = study.verify_plugin_functions(plugin)
+        # provide diagnostic output about the plugin's verification
+        logger.debug(f"Is the plugin verified? {plugin_verified}")
