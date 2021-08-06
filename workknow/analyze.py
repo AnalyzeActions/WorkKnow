@@ -74,3 +74,23 @@ def verify_plugin_existence(
     if plugin in plugin_list:
         plugin_exists = True
     return plugin_exists
+
+
+def verify_plugin_function(plugin, function):
+    """Verify that the requested plugin has a function."""
+    # the specified plugin, a module loaded by pluginbase, has the specified function
+    if hasattr(plugin, function):
+        return True
+    # the specified plugin does not have the function, so do not verify it
+    return False
+
+
+def verify_plugin_functions(plugin, functions=DEFAULT_FUNCTIONS):
+    """Verify that the requested plugin has the required function(s)."""
+    # perform verification on the specified plugin, a module loaded by pluginbase,
+    # for all of the provided functions, which are, DEFAULT_FUNCTIONS by default
+    verify_status_results = [
+        verify_plugin_function(plugin, function) for function in functions
+    ]
+    # verify the status of the plugin as long as all values in verify_status_results are True
+    return all(verify_status_results)
