@@ -7,6 +7,7 @@ from pathlib import Path
 from glob import glob
 
 from typing import List
+from typing import Tuple
 
 import pandas
 
@@ -28,6 +29,40 @@ def read_csv_file(csv_data_file: Path) -> pandas.DataFrame:
     # the CSV file was empty and thus we must return an empty DataFrame
     except pandas.errors.EmptyDataError:
         return data_frame_csv
+
+
+def read_csv_data_files(
+    csv_data_file_directory: Path,
+) -> Tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]:
+    """Read in the three main results files and return as Pandas DataFrames."""
+    # create the All-Counts.csv file as a pathlib Path object
+    csv_data_file_all_counts = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Counts
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Counts.csv file from the data file directory
+    csv_data_file_all_counts_df = read_csv_file(csv_data_file_all_counts)
+    # create the All-Commits.csv file as a pathlib Path object
+    csv_data_file_all_commits = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Commits
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Commits.csv file from the data file directory
+    csv_data_file_all_commits_df = read_csv_file(csv_data_file_all_commits)
+    # create the All-Workflows.csv file as a pathlib Path object
+    csv_data_file_all_workflows = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Workflows
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Commits.csv file from the data file directory
+    csv_data_file_all_workflows_df = read_csv_file(csv_data_file_all_workflows)
+    return (csv_data_file_all_counts_df, csv_data_file_all_commits_df, csv_data_file_all_workflows_df)
 
 
 def create_directory(directory: Path) -> None:
