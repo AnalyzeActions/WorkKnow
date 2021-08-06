@@ -120,6 +120,7 @@ markers = create_constants(
 plugins = create_constants(
     "plugins",
     Home=".",
+    Expected_Number_Of_Parameters=3,
     Function_Analyze="analyze",
     Internal_Plugins_Dir="workknow/plugins",
     Plugins="workknow.plugins",
