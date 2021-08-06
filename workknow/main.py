@@ -468,11 +468,17 @@ def analyze(
         # the plugin is not valid, so the tool cannot run an analysis
         # print diagnostic information and then exit the program
         else:
-            console.print(f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!")
+            console.print(
+                f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!"
+            )
             print(f"{constants.markers.Tab}... Check that the plugin has the correct")
             print(f"{constants.markers.Tab}{constants.markers.Tab}... function name")
-            print(f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters")
-            print(f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter")
+            print(
+                f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters"
+            )
+            print(
+                f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter"
+            )
             console.print()
             console.print(":sad_but_relieved_face: Exiting now!")
             console.print()
