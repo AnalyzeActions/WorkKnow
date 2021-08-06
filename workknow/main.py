@@ -476,6 +476,10 @@ def analyze(
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
                 plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
+                if save:
+                    console.print(
+                        f":sparkles: Saving analysis results into the directory {str(results_dir).strip()}"
+                    )
             # the plugin is not valid, so the tool cannot run an analysis
             # print diagnostic information and then exit the program
             else:
