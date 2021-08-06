@@ -432,7 +432,13 @@ def analyze(
     console.print()
     console.print(":runner: Performing an analysis of GitHub Action workflow data.")
     console.print()
+    # STEP: verify the specified data analysis plugin
     plugin_source = study.get_source(plugins_dir)
-    logger.debug(plugin_source)
     transformed_plugin_name = study.transform_plugin_name(plugin)
-    logger.debug(transformed_plugin_name)
+    verified_plugin_existence = study.verify_plugin_existence(
+        transformed_plugin_name, plugin_source
+    )
+    # provide diagnostic output about the plugin source
+    logger.debug(f"Plugin source {plugin_source}")
+    logger.debug(f"Transformed name of the plugin {transformed_plugin_name}")
+    logger.debug(f"Was the plugin available? {verified_plugin_existence}")
