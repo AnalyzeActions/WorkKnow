@@ -430,7 +430,7 @@ def analyze(
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
     console.print()
-    console.print(":runner: Performing an analysis of GitHub Action workflow data.")
+    console.print(":runner: Performing an analysis of GitHub Action workflow data")
     console.print()
     # STEP: verify the specified data analysis plugin
     # get the source of all the plugins, both internal and external
