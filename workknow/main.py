@@ -461,9 +461,6 @@ def analyze(
         plugin_verified = study.verify_plugin_functions(plugin)
         # provide diagnostic output about the plugin's verification
         logger.debug(f"Is the plugin verified? {plugin_verified}")
-        df1 = pandas.DataFrame()
-        df2 = pandas.DataFrame()
-        df3 = pandas.DataFrame()
         # read in the three data frames needed to complete any analysis plugin
         # the directory is valid so attempt a save to file system
         if files.confirm_valid_directory(results_dir):
@@ -473,10 +470,10 @@ def analyze(
             console.print("\t... Retrieving the counts data")
             console.print("\t... Retrieving the commits data")
             console.print("\t... Retrieving the workflows data")
-            (counts_df, _, _) = files.read_csv_data_files(results_dir)
+            (counts_df, commits_df, workflows_df) = files.read_csv_data_files(results_dir)
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
-                plugin.analyze(df1, df2, df3)  # type: ignore
+                plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
             # the plugin is not valid, so the tool cannot run an analysis
             # print diagnostic information and then exit the program
             else:
