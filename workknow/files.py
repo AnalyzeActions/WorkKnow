@@ -62,7 +62,11 @@ def read_csv_data_files(
     )
     # read the All-Commits.csv file from the data file directory
     csv_data_file_all_workflows_df = read_csv_file(csv_data_file_all_workflows)
-    return (csv_data_file_all_counts_df, csv_data_file_all_commits_df, csv_data_file_all_workflows_df)
+    return (
+        csv_data_file_all_counts_df,
+        csv_data_file_all_commits_df,
+        csv_data_file_all_workflows_df,
+    )
 
 
 def create_directory(directory: Path) -> None:
