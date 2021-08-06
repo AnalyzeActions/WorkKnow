@@ -470,7 +470,9 @@ def analyze(
             console.print("\t... Retrieving the counts data")
             console.print("\t... Retrieving the commits data")
             console.print("\t... Retrieving the workflows data")
-            (counts_df, commits_df, workflows_df) = files.read_csv_data_files(results_dir)
+            (counts_df, commits_df, workflows_df) = files.read_csv_data_files(
+                results_dir
+            )
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
                 plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
@@ -480,8 +482,12 @@ def analyze(
                 console.print(
                     f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!"
                 )
-                print(f"{constants.markers.Tab}... Check that the plugin has the correct")
-                print(f"{constants.markers.Tab}{constants.markers.Tab}... function name")
+                print(
+                    f"{constants.markers.Tab}... Check that the plugin has the correct"
+                )
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... function name"
+                )
                 print(
                     f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters"
                 )
