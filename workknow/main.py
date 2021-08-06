@@ -464,23 +464,39 @@ def analyze(
         df1 = pandas.DataFrame()
         df2 = pandas.DataFrame()
         df3 = pandas.DataFrame()
-        # the plugin is verified so it is appropriate to call the function
-        if plugin_verified:
-            plugin.analyze(df1, df2, df3)  # type: ignore
-        # the plugin is not valid, so the tool cannot run an analysis
-        # print diagnostic information and then exit the program
-        else:
+        # read in the three data frames needed to complete any analysis plugin
+        # the directory is valid so attempt a save to file system
+        if files.confirm_valid_directory(results_dir):
             console.print(
-                f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!"
+                f":sparkles: Retrieving data files from the directory {str(results_dir).strip()}"
             )
-            print(f"{constants.markers.Tab}... Check that the plugin has the correct")
-            print(f"{constants.markers.Tab}{constants.markers.Tab}... function name")
-            print(
-                f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters"
+            console.print("\t... Retrieving the counts data")
+            console.print("\t... Retrieving the commits data")
+            console.print("\t... Retrieving the workflows data")
+            (counts_df, _, _) = files.read_csv_data_files(results_dir)
+            # the plugin is verified so it is appropriate to call the function
+            if plugin_verified:
+                plugin.analyze(df1, df2, df3)  # type: ignore
+            # the plugin is not valid, so the tool cannot run an analysis
+            # print diagnostic information and then exit the program
+            else:
+                console.print(
+                    f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!"
+                )
+                print(f"{constants.markers.Tab}... Check that the plugin has the correct")
+                print(f"{constants.markers.Tab}{constants.markers.Tab}... function name")
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters"
+                )
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter"
+                )
+                console.print()
+                console.print(":sad_but_relieved_face: Exiting now!")
+                console.print()
+        else:
+            # explain that the save could not work correctly due to invalid results directory
+            console.print(
+                f"Could not retrieve data files from the directory {str(results_dir).strip()}"
             )
-            print(
-                f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter"
-            )
-            console.print()
-            console.print(":sad_but_relieved_face: Exiting now!")
             console.print()
