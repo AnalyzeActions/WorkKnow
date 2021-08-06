@@ -421,6 +421,7 @@ def combine(
 @cli.command()
 def analyze(
     plugins_dir: Path = typer.Option(None),
+    results_dir: Path = typer.Option(None),
     plugin: str = typer.Option(""),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
