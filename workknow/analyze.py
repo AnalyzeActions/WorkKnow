@@ -1,9 +1,13 @@
 """Analyze a data frame to answer research questions and return a data frame."""
 
+import inspect
+
 from pathlib import Path
 
 import pluginbase  # type: ignore
 from pluginbase import PluginBase
+
+import pandas
 
 from workknow import constants
 from workknow import files
@@ -78,6 +82,24 @@ def verify_plugin_existence(
 
 def verify_plugin_function(plugin, function):
     """Verify that the requested plugin has a function."""
+    callable_function = getattr(plugin, function)
+    print(inspect.signature(callable_function))
+    function_signature = inspect.signature(callable_function)
+    function_parameters = function_signature.parameters
+    for function_parameter in function_parameters:
+        # if function_parameter.annotation is not pandas.core.frame.DataFrame:
+        print("not problem" + str(function_parameter))
+        print(type(function_parameter))
+        print("going into mapping")
+        print(function_signature.parameters[function_parameter])
+        if function_signature.parameters[function_parameter].annotation is pandas.DataFrame:
+            print("verify!")
+    print(type(function_signature))
+    print("**")
+    print(function_signature.parameters['all_counts_df'].annotation)
+    print(type(function_signature.parameters['all_counts_df']))
+    if function_signature.parameters['all_counts_df'].annotation is pandas.DataFrame:
+        print("found all_counts_df")
     # the specified plugin, a module loaded by pluginbase, has the specified function
     if hasattr(plugin, function):
         return True
