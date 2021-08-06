@@ -449,7 +449,7 @@ def analyze(
     logger.debug(f"Was the plugin available? {plugin_exists}")
     # STEP: Load the plugin and verify that it is valid:
     plugin_verified = False
-    plugin = None
+    plugin = None  # type: ignore
     # since the plugin exists the tool can attempt to load it and then
     # verify that it contains the correct functions
     if plugin_exists:
@@ -459,3 +459,20 @@ def analyze(
         plugin_verified = study.verify_plugin_functions(plugin)
         # provide diagnostic output about the plugin's verification
         logger.debug(f"Is the plugin verified? {plugin_verified}")
+        df1 = pandas.DataFrame()
+        df2 = pandas.DataFrame()
+        df3 = pandas.DataFrame()
+        # the plugin is verified so it is appropriate to call the function
+        if plugin_verified:
+            plugin.analyze(df1, df2, df3)  # type: ignore
+        # the plugin is not valid, so the tool cannot run an analysis
+        # print diagnostic information and then exit the program
+        else:
+            console.print(f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!")
+            print(f"{constants.markers.Tab}... Check that the plugin has the correct")
+            print(f"{constants.markers.Tab}{constants.markers.Tab}... function name")
+            print(f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters")
+            print(f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter")
+            console.print()
+            console.print(":sad_but_relieved_face: Exiting now!")
+            console.print()
