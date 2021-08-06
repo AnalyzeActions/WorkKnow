@@ -15,3 +15,5 @@ def analyze(
     """Plugin: Study the correlation between the project's criticality and its build conclusion."""
     console = configure.setup_console()
     console.print("Running analysis")
+    return_value_df = pandas.DataFrame()
+    return (return_value_df, "stats", True)
