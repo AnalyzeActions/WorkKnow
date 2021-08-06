@@ -1,6 +1,7 @@
 """Analyze a data frame to answer research questions and return a data frame."""
 
 import inspect
+import logging
 
 from pathlib import Path
 
@@ -82,26 +83,45 @@ def verify_plugin_existence(
 
 def verify_plugin_function(plugin, function):
     """Verify that the requested plugin has a function."""
+    logger = logging.getLogger(constants.logging.Rich)
+    # reflectively access the function using is package and function name
+    # (e.g., this would be like "plugins.plugin_CorrelateCriticalityToConclusion")
     callable_function = getattr(plugin, function)
-    print(inspect.signature(callable_function))
+    # extract the signature of the function that should contain the plugin
     function_signature = inspect.signature(callable_function)
+    # extract the parameters of the function that should contain the plugin
     function_parameters = function_signature.parameters
+    # create a boolean list that will store the verification status
+    # of all the parameters to the plugin
+    verified_parameters_list = []
+    # assume that the parameters in the list are not verified and prove otherwise
+    verified_parameters_type = False
+    # iterate through the function's parameters and ensure that they are DataFrames
     for function_parameter in function_parameters:
-        # if function_parameter.annotation is not pandas.core.frame.DataFrame:
-        print("not problem" + str(function_parameter))
-        print(type(function_parameter))
-        print("going into mapping")
-        print(function_signature.parameters[function_parameter])
-        if function_signature.parameters[function_parameter].annotation is pandas.DataFrame:
-            print("verify!")
-    print(type(function_signature))
-    print("**")
-    print(function_signature.parameters['all_counts_df'].annotation)
-    print(type(function_signature.parameters['all_counts_df']))
-    if function_signature.parameters['all_counts_df'].annotation is pandas.DataFrame:
-        print("found all_counts_df")
+        # the type annotation of the parameter is a pandas DataFrame, so record
+        # True to indicate that this was as expected
+        if (
+            function_signature.parameters[function_parameter].annotation
+            is pandas.DataFrame
+        ):
+            verified_parameters_list.append(True)
+        # the type annotation was not a pandas DataFrame, so record false to
+        # indicate that this is not a valid parameter type
+        else:
+            verified_parameters_list.append(False)
+    logger.debug(verified_parameters_list)
+    # if the verified_parameters_list contains all true values and there are
+    # a total of Expected_Number_Of_Parameters (normally 3) then this means
+    # that the types of the parameters are verified for the plugin's function
+    if (
+        all(verified_parameters_list) is True
+        and len(verified_parameters_list)
+        == constants.plugins.Expected_Number_Of_Parameters
+    ):
+        verified_parameters_type = True
     # the specified plugin, a module loaded by pluginbase, has the specified function
-    if hasattr(plugin, function):
+    # and the parameters of the specified function are as expected
+    if hasattr(plugin, function) and verified_parameters_type:
         return True
     # the specified plugin does not have the function, so do not verify it
     return False
