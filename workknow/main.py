@@ -423,6 +423,7 @@ def analyze(
     plugins_dir: Path = typer.Option(None),
     results_dir: Path = typer.Option(None),
     plugin: str = typer.Option(""),
+    save: bool = typer.Option(False),
     debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
 ):
     """Analyze previously the downloaded data."""
