@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 import pandas
+from tabulate import tabulate
 import typer
 
 from rich.pretty import pprint
@@ -475,7 +476,12 @@ def analyze(
             )
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
-                plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
+                (analysis_data_frame, _, _) = plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
+                console.print(tabulate(analysis_data_frame, headers="keys"))
+                # analysis_data_frame_markdown = analysis_data_frame.to_markdown()
+                # console.print(analysis_data_frame_markdown)
+                # analysis_data_frame_markdown_rendered = Markdown(analysis_data_frame_markdown)
+                # console.print(analysis_data_frame_markdown_rendered)
                 if save:
                     console.print(
                         f":sparkles: Saving analysis results into the directory {str(results_dir).strip()}"
