@@ -100,7 +100,6 @@ def analyze(
     return_value_df = pandas.DataFrame(repo_dict_list)
     # perform the statistical analysis of the results in the final DataFrame
     logger.debug(return_value_df)
-    logger.debug(return_value_df["failure_percentage"])
     failure_percentage = return_value_df["failure_percentage"].tolist()
     logger.debug(failure_percentage)
     criticality_score = return_value_df["criticality_score"].tolist()
