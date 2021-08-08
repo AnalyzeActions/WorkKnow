@@ -34,25 +34,31 @@ class HideAndSaveOutput:
     """Define a context manager that will collect stderr and stdout, hide it, save it, and provide it."""
 
     def __init__(self, channels=("stdout",)):
+        """Construct an instance of the context manager."""
         self._stomach = StringIO()
         self._orig = {ch: None for ch in channels}
 
     def __enter__(self):
+        """Enter into the context and prepare to save stderr and stdouti."""
         for ch in self._orig:
             self._orig[ch] = getattr(sys, ch)
             setattr(sys, ch, self)
         return self
 
     def write(self, string):
+        """Save the results for later access if requested."""
         self._stomach.write(string)
 
     def flush(self):
+        """Flush the buffer."""
         pass
 
     def autopsy(self):
+        """Extract the stored information that was output to stderr and/or stdout."""
         return self._stomach.getvalue()
 
-    def __exit__(self, *args):
+    def __exit__(self, *args):  # type: ignore
+        """Leave the context manager."""
         for ch in self._orig:
             setattr(sys, ch, self._orig[ch])
 
