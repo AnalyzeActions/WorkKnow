@@ -670,6 +670,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-tabulate"
+version = "0.8.1"
+description = "Typing stubs for tabulate"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.10.0.0"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -709,7 +717,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "a06e77875462b4f9a57f8c94e38e242b387e0940ce06df4bfe6b1e47043a5719"
+content-hash = "d259baddefb5cb4a69365221729e9ef1cdf630431afb8c620b9deea65e6d5944"
 
 [metadata.files]
 appdirs = [
@@ -1240,6 +1248,10 @@ types-pytz = [
 types-requests = [
     {file = "types-requests-2.25.0.tar.gz", hash = "sha256:ee0d0c507210141b7d5b8639cc43eaa726084178775db2a5fb06fbf85c185808"},
     {file = "types_requests-2.25.0-py3-none-any.whl", hash = "sha256:fa5c1e5e832ff6193507d8da7e1159281383908ee193a2f4b37bc08140b51844"},
+]
+types-tabulate = [
+    {file = "types-tabulate-0.8.1.tar.gz", hash = "sha256:f2721c8f9873a7111eb34b83fd00ad1f7c473e1020f4c12ac258ef2ac9089ca4"},
+    {file = "types_tabulate-0.8.1-py3-none-any.whl", hash = "sha256:6ca66e366b67f189abc2f3ea84389a0d1f391ddca781a738c7ee01091179e9a2"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.0-py2-none-any.whl", hash = "sha256:0ac0f89795dd19de6b97debb0c6af1c70987fd80a2d62d1958f7e56fcc31b497"},
