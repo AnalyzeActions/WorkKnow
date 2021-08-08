@@ -19,10 +19,6 @@ def analyze(
     """Plugin: Study the correlation between the project's criticality and its build conclusion."""
     logger = logging.getLogger(constants.logging.Rich)
     console = configure.setup_console()
-    # logger.debug(f"All counts {all_counts_df}")
-    # console.print(all_counts_df)
-    # logger.debug(f"All commits {all_commits_df}")
-    # logger.debug(f"All workflows {all_workflows_df}")
     logger.debug(all_workflows_df.columns.tolist())
     repo_dict_list = []
     if "conclusion" in all_workflows_df:
@@ -33,8 +29,6 @@ def analyze(
                 ["count"]
             )
         ).reset_index()
-        # pandas.set_option("display.max_columns", None)
-        # pandas.set_option("display.max_rows", None)
         logger.debug(all_workflows_df)
         logger.debug(groupby)
         console.print()
