@@ -58,48 +58,6 @@ class HideAndSaveOutput:
             setattr(sys, ch, self._orig[ch])
 
 
-# Define a context manager to suppress stdout and stderr.
-# Reference:
-# https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
-class suppress_stdout_stderr(object):
-    """A context manager for suppressing standard out and standard error."""
-
-    def __init__(self):
-        # Open a pair of null files
-        self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
-        # Save the actual stdout (1) and stderr (2) file descriptors.
-        self.save_fds = [os.dup(1), os.dup(2)]
-
-    def __enter__(self):
-        # Assign the null pointers to stdout and stderr.
-        os.dup2(self.null_fds[0], 1)
-        os.dup2(self.null_fds[1], 2)
-
-    def __exit__(self, *_):
-        # Re-assign the real stdout/stderr back to (1) and (2)
-        os.dup2(self.save_fds[0], 1)
-        os.dup2(self.save_fds[1], 2)
-        # Close all file descriptors
-        for fd in self.null_fds + self.save_fds:
-            os.close(fd)
-
-
-@contextlib.contextmanager
-def nostdout():
-    save_stdout = sys.stdout
-    sys.stdout = io.BytesIO()
-    yield
-    sys.stdout = save_stdout
-
-
-@contextlib.contextmanager
-def nostderr():
-    save_sterr = sys.stderr
-    sys.stderr = io.BytesIO()
-    yield
-    sys.stderr = save_sterr
-
-
 # create a Typer object to supper the command-line interface
 cli = typer.Typer()
 
