@@ -9,9 +9,6 @@ import pandas
 from tabulate import tabulate
 import typer
 
-import contextlib
-import io
-import os
 import sys
 
 from rich.pretty import pprint
