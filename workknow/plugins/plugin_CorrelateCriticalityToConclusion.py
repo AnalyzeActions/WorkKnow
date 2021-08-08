@@ -58,7 +58,9 @@ def analyze(
             # repo_group_not_failure = repo_group.loc[
             #     repo_group["conclusion"] != "failure"
             # ]
-            repo_group_not_failure = repo_group[~repo_group.conclusion.isin(["failure"])]
+            repo_group_not_failure = repo_group[
+                ~repo_group.conclusion.isin(["failure"])
+            ]
             if not repo_group_not_failure.empty:
                 repo_group_not_failure_count = groupby["status"].sum()
             else:
