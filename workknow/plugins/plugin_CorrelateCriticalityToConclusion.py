@@ -8,7 +8,6 @@ from typing import Tuple
 
 
 from workknow import constants
-from workknow import configure
 
 
 def analyze(
@@ -19,7 +18,6 @@ def analyze(
     """Plugin: Study the correlation between the project's criticality and its build conclusion."""
     # create a logger and a console for output
     logger = logging.getLogger(constants.logging.Rich)
-    console = configure.setup_console()
     logger.debug(all_workflows_df.columns.tolist())
     # create a list of dictionaries that will store data about the repositories
     # and ultimately be converted to a Pandas data frame for function's output
