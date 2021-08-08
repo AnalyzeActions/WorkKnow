@@ -27,9 +27,11 @@ from workknow import files
 from workknow import produce
 from workknow import release
 from workknow import request
+from workknow import util
 
 # Reference:
 # https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
+
 
 class HideAndSaveOutput:
     def __init__(self, channels=("stdout",)):
@@ -566,7 +568,15 @@ def analyze(
                 console.print()
                 console.print(tabulate(analysis_data_frame, headers="keys"))
                 console.print()
+                console.print(
+                    f":sparkles: {plugin} produced the following statistical analysis summary:"
+                )
+                console.print()
                 console.print(tabulate(stats_data_frame, headers="keys"))
+                console.print()
+                console.print(
+                    f":sparkles: Were {plugin}'s results statistically significant? {util.human_readable_boolean(significant)}"
+                )
                 console.print()
                 if statistical_analysis_results != "":
                     console.print(
