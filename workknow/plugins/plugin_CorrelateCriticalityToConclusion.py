@@ -3,9 +3,11 @@
 import logging
 
 import pandas
+import pingouin
+
+from tabulate import tabulate
 
 from typing import Tuple
-
 
 from workknow import constants
 
@@ -14,7 +16,7 @@ def analyze(
     all_counts_df: pandas.DataFrame,
     all_commits_df: pandas.DataFrame,
     all_workflows_df: pandas.DataFrame,
-) -> Tuple[pandas.DataFrame, str, bool]:
+) -> Tuple[pandas.DataFrame, pandas.DataFrame, bool]:
     """Plugin: Study the correlation between the project's criticality and its build conclusion."""
     # create a logger and a console for output
     logger = logging.getLogger(constants.logging.Rich)
@@ -60,6 +62,9 @@ def analyze(
             # count the number of failures associated with builds for this repository
             repo_group_failure = repo_group.loc[repo_group["conclusion"] == "failure"]
             repo_group_failure_count = repo_group_failure["status"].values[0][0]
+            # print("***f")
+            # print(type(repo_group_failure_count))
+            # print(repo_group_failure_count)
             # count the number of failures not associated with builds for this repository
             repo_group_not_failure = repo_group[
                 ~repo_group.conclusion.isin(["failure"])
@@ -67,11 +72,14 @@ def analyze(
             # if there are some build conclusions not related to failure then extract
             # all of their counts and then sum them to get the non-failure count
             if not repo_group_not_failure.empty:
-                repo_group_not_failure_count = groupby["status"].sum()
+                repo_group_not_failure_count = groupby["status"].sum()[0]
             # there were no counts that were not related to failures and thus
             # the tool must assume that the number of non-failures in 0
             else:
                 repo_group_not_failure_count = 0
+            # print("***nf")
+            # print(type(repo_group_not_failure_count))
+            # print(repo_group_not_failure_count)
             # store the name of the repository in the dictionary
             repo_dict["repo"] = repository
             # store the name of the organization in the dictionary
@@ -81,11 +89,30 @@ def analyze(
             failure_percentage = (repo_group_failure_count) / (
                 repo_group_failure_count + repo_group_not_failure_count
             )
-            repo_dict["failure_percentage"] = failure_percentage
-            repo_dict["criticality_score"] = repo_group_criticality_score
+            # print(type(failure_percentage))
+            # print(failure_percentage)
+            repo_dict["failure_percentage"] = failure_percentage.item()
+            repo_dict["criticality_score"] = repo_group_criticality_score.item()
             # add the currently created dictionary to the list of dictionaries
             repo_dict_list.append(repo_dict)
         logger.debug(f"groupby modified = {groupby}")
     # create a pandas DataFrame from the list of dictionaries
     return_value_df = pandas.DataFrame(repo_dict_list)
-    return (return_value_df, "stats", True)
+    # perform the statistical analysis of the results in the final DataFrame
+    logger.debug(return_value_df)
+    # print(tabulate(return_value_df, headers="keys"))
+    logger.debug(return_value_df["failure_percentage"])
+    failure_percentage = return_value_df["failure_percentage"].tolist()
+    logger.debug(failure_percentage)
+    # print(failure_percentage)
+    criticality_score = return_value_df["criticality_score"].tolist()
+    pingouin_analysis_df = pingouin.corr(
+        failure_percentage, criticality_score, method="spearman"
+    )
+    logger.debug(pingouin_analysis_df)
+    p_value = pingouin_analysis_df["p-val"].item()
+    if p_value <= 0.05:
+        significant = True
+    else:
+        significant = False
+    return (return_value_df, pingouin_analysis_df, significant)
