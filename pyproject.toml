@@ -21,6 +21,7 @@ PyGithub = "^1.55"
 pluginbase = "^1.0.1"
 tabulate = "^0.8.9"
 types-tabulate = "^0.8.1"
+pingouin = "^0.3.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
