@@ -1,5 +1,6 @@
 """Command-line interface for the workknow program."""
 
+from io import StringIO
 from pathlib import Path
 
 from typing import List
@@ -7,6 +8,11 @@ from typing import List
 import pandas
 from tabulate import tabulate
 import typer
+
+import contextlib
+import io
+import os
+import sys
 
 from rich.pretty import pprint
 
@@ -21,6 +27,73 @@ from workknow import files
 from workknow import produce
 from workknow import release
 from workknow import request
+
+
+class Hider:
+    def __init__(self, channels=('stdout',)):
+        self._stomach = StringIO()
+        self._orig = {ch : None for ch in channels}
+
+    def __enter__(self):
+        for ch in self._orig:
+            self._orig[ch] = getattr(sys, ch)
+            setattr(sys, ch, self)
+        return self
+
+    def write(self, string):
+        self._stomach.write(string)
+
+    def flush(self):
+        pass
+
+    def autopsy(self):
+        return self._stomach.getvalue()
+
+    def __exit__(self, *args):
+        for ch in self._orig:
+            setattr(sys, ch, self._orig[ch])
+
+
+# Define a context manager to suppress stdout and stderr.
+# Reference:
+# https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
+class suppress_stdout_stderr(object):
+    """A context manager for suppressing standard out and standard error."""
+
+    def __init__(self):
+        # Open a pair of null files
+        self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+        # Save the actual stdout (1) and stderr (2) file descriptors.
+        self.save_fds = [os.dup(1), os.dup(2)]
+
+    def __enter__(self):
+        # Assign the null pointers to stdout and stderr.
+        os.dup2(self.null_fds[0], 1)
+        os.dup2(self.null_fds[1], 2)
+
+    def __exit__(self, *_):
+        # Re-assign the real stdout/stderr back to (1) and (2)
+        os.dup2(self.save_fds[0], 1)
+        os.dup2(self.save_fds[1], 2)
+        # Close all file descriptors
+        for fd in self.null_fds + self.save_fds:
+            os.close(fd)
+
+
+@contextlib.contextmanager
+def nostdout():
+    save_stdout = sys.stdout
+    sys.stdout = io.BytesIO()
+    yield
+    sys.stdout = save_stdout
+
+
+@contextlib.contextmanager
+def nostderr():
+    save_sterr = sys.stderr
+    sys.stderr = io.BytesIO()
+    yield
+    sys.stderr = save_sterr
 
 
 # create a Typer object to supper the command-line interface
@@ -452,14 +525,14 @@ def analyze(
     logger.debug(f"Was the plugin available? {plugin_exists}")
     # STEP: Load the plugin and verify that it is valid:
     plugin_verified = False
-    plugin = None  # type: ignore
+    plugin_use = None  # type: ignore
     # since the plugin exists the tool can attempt to load it and then
     # verify that it contains the correct functions
     if plugin_exists:
         # load the plugin from the source
-        plugin = plugin_source.load_plugin(transformed_plugin_name)
+        plugin_use = plugin_source.load_plugin(transformed_plugin_name)
         # verify that the plugin has the required function(s)
-        plugin_verified = study.verify_plugin_functions(plugin)
+        plugin_verified = study.verify_plugin_functions(plugin_use)
         # provide diagnostic output about the plugin's verification
         logger.debug(f"Is the plugin verified? {plugin_verified}")
         # read in the three data frames needed to complete any analysis plugin
@@ -476,8 +549,29 @@ def analyze(
             )
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
-                (analysis_data_frame, stats_data_frame, _) = plugin.analyze(counts_df, commits_df, workflows_df)  # type: ignore
+                statistical_analysis_results = ""
+                with Hider(["stderr", "stdout"]) as hidden:
+                    (
+                        analysis_data_frame,
+                        stats_data_frame,
+                        significant,
+                    ) = plugin_use.analyze(counts_df, commits_df, workflows_df)
+                    statistical_analysis_results = hidden.autopsy()
+                console.print()
+                console.print(
+                    f":sparkles: {plugin} produced the following results summary:"
+                )
+                console.print()
                 console.print(tabulate(analysis_data_frame, headers="keys"))
+                console.print()
+                console.print(tabulate(stats_data_frame, headers="keys"))
+                console.print()
+                if statistical_analysis_results is not "":
+                    console.print(
+                        f":person_shrugging: {plugin}'s statistical analysis produced this extra output:"
+                    )
+                    console.print()
+                    console.print(statistical_analysis_results)
                 if save:
                     console.print(
                         f":sparkles: Saving analysis results into the directory {str(results_dir).strip()}"
