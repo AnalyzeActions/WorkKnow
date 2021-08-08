@@ -99,14 +99,18 @@ def analyze(
     # create a pandas DataFrame from the list of dictionaries
     return_value_df = pandas.DataFrame(repo_dict_list)
     # perform the statistical analysis of the results in the final DataFrame
-    logger.debug(return_value_df)
+    # --> extract the failure percentage from the data frame
     failure_percentage = return_value_df["failure_percentage"].tolist()
+    logger.debug(return_value_df)
     logger.debug(failure_percentage)
+    # --> extract the criticality score from the data frame
     criticality_score = return_value_df["criticality_score"].tolist()
+    # --> calculate the correlation between failure percentage and criticality score
     pingouin_analysis_df = pingouin.corr(
         failure_percentage, criticality_score, method="spearman"
     )
     logger.debug(pingouin_analysis_df)
+    # extract the p-value and use it to determine if the results are significant
     p_value = pingouin_analysis_df["p-val"].item()
     if p_value <= 0.05:
         significant = True
