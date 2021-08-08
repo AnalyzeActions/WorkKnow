@@ -100,11 +100,9 @@ def analyze(
     return_value_df = pandas.DataFrame(repo_dict_list)
     # perform the statistical analysis of the results in the final DataFrame
     logger.debug(return_value_df)
-    # print(tabulate(return_value_df, headers="keys"))
     logger.debug(return_value_df["failure_percentage"])
     failure_percentage = return_value_df["failure_percentage"].tolist()
     logger.debug(failure_percentage)
-    # print(failure_percentage)
     criticality_score = return_value_df["criticality_score"].tolist()
     pingouin_analysis_df = pingouin.corr(
         failure_percentage, criticality_score, method="spearman"
