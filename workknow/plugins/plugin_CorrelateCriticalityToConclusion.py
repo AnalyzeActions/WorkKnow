@@ -23,23 +23,11 @@ def analyze(
     repo_dict_list = []
     if "conclusion" in all_workflows_df:
         dfkeep = all_workflows_df[["organization", "repo", "status", "conclusion"]]
-        logger.debug(dfkeep)
         groupby = (
             dfkeep.groupby(["organization", "repo", "conclusion"], as_index=True).agg(
                 ["count"]
             )
         ).reset_index()
-        logger.debug(all_workflows_df)
-        logger.debug(groupby)
-        console.print()
-        console.print(groupby)
-        console.print(type(groupby))
-        if "conclusion" in groupby:
-            console.print("here")
-            console.print(groupby)
-            logger.debug(groupby.columns.tolist())
-        else:
-            console.print("not there")
         repositories = groupby["repo"].unique()
         logger.debug(repositories)
         for repository in repositories:
