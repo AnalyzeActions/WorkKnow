@@ -5,8 +5,6 @@ import logging
 import pandas
 import pingouin
 
-from tabulate import tabulate
-
 from typing import Tuple
 
 from workknow import constants
