@@ -63,7 +63,7 @@ class HideAndSaveOutput:
             setattr(sys, ch, self._orig[ch])
 
 
-# create a Typer object to supper the command-line interface
+# create a Typer object to support the command-line interface
 cli = typer.Typer()
 
 
