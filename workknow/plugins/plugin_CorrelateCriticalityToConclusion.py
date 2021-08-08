@@ -30,14 +30,16 @@ def analyze(
         # extract the attributes about the workflows needed for this analysis, discarding
         # the other attributes that are not needed for the analysis, making output and the
         # statistical analysis easier to conduct and understand
-        workflows_keep = all_workflows_df[["organization", "repo", "status", "conclusion"]]
+        workflows_keep = all_workflows_df[
+            ["organization", "repo", "status", "conclusion"]
+        ]
         # using the attributes that were previously chosen as keepers, group the data so
         # that it is possible to see the number of different conclusions for each project;
         # note that it is important to run reset_index so that this makes indexable a data frame
         groupby = (
-            workflows_keep.groupby(["organization", "repo", "conclusion"], as_index=True).agg(
-                ["count"]
-            )
+            workflows_keep.groupby(
+                ["organization", "repo", "conclusion"], as_index=True
+            ).agg(["count"])
         ).reset_index()
         # get a list of the unique repositories inside of the workflows data set
         repositories = groupby["repo"].unique()
