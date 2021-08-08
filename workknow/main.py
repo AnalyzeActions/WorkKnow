@@ -31,6 +31,8 @@ from workknow import util
 
 
 class HideAndSaveOutput:
+    """Define a context manager that will collect stderr and stdout, hide it, save it, and provide it."""
+
     def __init__(self, channels=("stdout",)):
         self._stomach = StringIO()
         self._orig = {ch: None for ch in channels}
