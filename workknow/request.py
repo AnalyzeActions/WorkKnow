@@ -23,6 +23,8 @@ import pytz
 import requests
 
 from workknow import constants
+from workknow import util
+
 
 # Sample of the JSON file returned by the request:
 
@@ -164,13 +166,6 @@ def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) ->
     # Note that the implementation in this module does not use the sophisticated
     # adapters that might ultimately make it easier to perform the back-off procedure
     return backoff_factor * (2 ** (number_of_retries - 1))
-
-
-def human_readable_boolean(answer: bool) -> str:
-    """Produce a human-readable Yes or No for a boolean value of True or False."""
-    if answer:
-        return "Yes"
-    return "No"
 
 
 def request_with_caution(
@@ -358,7 +353,7 @@ def request_json_from_github_with_caution(
     # time too many and thus there is a need to subtract one in order to get the accurate count
     if attempted_retries:
         progress.console.print(
-            f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {human_readable_boolean(valid)}"
+            f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {util.human_readable_boolean(valid)}"
         )
     return (valid, response_retries_count - 1, running_sleep_time_in_seconds, response)
 
