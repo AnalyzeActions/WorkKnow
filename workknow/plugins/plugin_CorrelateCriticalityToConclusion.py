@@ -50,7 +50,9 @@ def analyze(
         logger.debug(repositories)
         for repository in repositories:
             repo_dict = {}
-            repo_group_criticality = all_counts_df.loc[lambda df: df["name"] == repository]
+            repo_group_criticality = all_counts_df.loc[
+                lambda df: df["name"] == repository
+            ]
             logger.debug(repo_group_criticality)
             repo_group_criticality_score = repo_group_criticality["criticality_score"]
             repo_group = groupby.loc[lambda df: df["repo"] == repository]
