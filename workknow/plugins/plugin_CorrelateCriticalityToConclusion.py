@@ -55,9 +55,6 @@ def analyze(
             logger.debug(repo_group)
             logger.debug(f"repo group failure: {repo_group_failure}")
             logger.debug(f"*** failure count: {repo_group_failure_count}")
-            # repo_group_not_failure = repo_group.loc[
-            #     repo_group["conclusion"] != "failure"
-            # ]
             repo_group_not_failure = repo_group[
                 ~repo_group.conclusion.isin(["failure"])
             ]
@@ -77,7 +74,6 @@ def analyze(
             logger.debug("calculated failure percentage: " + str(failure_percentage))
             repo_dict["failure_percentage"] = failure_percentage
             repo_dict_list.append(repo_dict)
-            # groupby.loc[(groupby["repo"] == repository), "percent_failure"] = 27
         logger.debug(f"groupby modified = {groupby}")
     return_value_df = pandas.DataFrame(repo_dict_list)
     logger.debug(return_value_df)
