@@ -568,7 +568,7 @@ def analyze(
                 console.print()
                 console.print(tabulate(stats_data_frame, headers="keys"))
                 console.print()
-                if statistical_analysis_results is not "":
+                if statistical_analysis_results != "":
                     console.print(
                         f":person_shrugging: {plugin}'s statistical analysis produced this extra output:"
                     )
