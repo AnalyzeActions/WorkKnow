@@ -3,7 +3,7 @@
 import logging
 
 import pandas
-import pingouin
+import pingouin  # type: ignore
 
 from typing import Tuple
 
