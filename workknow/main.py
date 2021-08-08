@@ -28,11 +28,13 @@ from workknow import produce
 from workknow import release
 from workknow import request
 
+# Reference:
+# https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
 
-class Hider:
-    def __init__(self, channels=('stdout',)):
+class HideAndSaveOutput:
+    def __init__(self, channels=("stdout",)):
         self._stomach = StringIO()
-        self._orig = {ch : None for ch in channels}
+        self._orig = {ch: None for ch in channels}
 
     def __enter__(self):
         for ch in self._orig:
@@ -550,7 +552,7 @@ def analyze(
             # the plugin is verified so it is appropriate to call the function
             if plugin_verified:
                 statistical_analysis_results = ""
-                with Hider(["stderr", "stdout"]) as hidden:
+                with HideAndSaveOutput(["stderr", "stdout"]) as hidden:
                     (
                         analysis_data_frame,
                         stats_data_frame,
