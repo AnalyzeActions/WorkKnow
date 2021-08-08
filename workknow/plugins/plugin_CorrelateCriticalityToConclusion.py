@@ -40,9 +40,6 @@ def analyze(
             repo_group = groupby.loc[lambda df: df["repo"] == repository]
             repo_group_failure = repo_group.loc[repo_group["conclusion"] == "failure"]
             repo_group_failure_count = repo_group_failure["status"].values[0][0]
-            logger.debug(repo_group)
-            logger.debug(f"repo group failure: {repo_group_failure}")
-            logger.debug(f"*** failure count: {repo_group_failure_count}")
             repo_group_not_failure = repo_group[
                 ~repo_group.conclusion.isin(["failure"])
             ]
