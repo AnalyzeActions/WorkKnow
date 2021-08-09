@@ -231,7 +231,10 @@ def download(
         # now that WorkKnow is finished with the processing of each of the individual repositories and
         # they are stored in the currently in-memory DataFrames, save the required data to disk;
         # however, only save all of the results in the file system if the save parameter is specified
-        if save:
+        # and there is a request to combine the data files together (note that the saving of the
+        # individual files for each subject takes place as soon as the data is downloaded)
+        if save and combine:
+            # the directory is a valid one and/or it was possible to create the directory
             if files.confirm_valid_directory(results_dir):
                 # finished processing all of the individual repositories and now ready to create
                 # the "combined" data sets that include data for every repository subject to analysis
@@ -271,9 +274,9 @@ def download(
                     all_workflow_record_counts_dataframe_merged = (
                         all_workflow_record_counts_dataframe
                     )
-                # save the all records count DataFrame
-                # note that it is acceptable to save this
-                # DataFrame since it is always smaller in size
+                # save the all records count DataFrame; note that this DataFrame is always smaller in size
+                # because of the fact that it includes details about each subject and then a brief summary
+                # of the number of different build conclusions as reported by GitHub Actions
                 console.print(
                     f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
                 )
@@ -289,32 +292,32 @@ def download(
                 # details about each of the repositories; note that the --combine argument will create
                 # data files that cannot be automatically uploaded to a GitHub repository due to the
                 # fact that they are going to be over 100 MB in size and thus require GitHub LFS
-                if combine:
-                    # save the all workflows DataFrame
-                    console.print(
-                        f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
-                    )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Workflows,
-                        all_workflows_dataframe,
-                    )
-                    # save the all commits DataFrame
-                    console.print(
-                        f"{constants.markers.Tab}... Saving combined commits data for all repositories"
-                    )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Commits,
-                        all_commits_dataframe,
-                    )
-                    # save a .zip file of all of the CSV files in the results directory
-                    console.print()
-                    console.print(
-                        f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
-                    )
-                    results_file_list = files.create_results_zip_file_list(results_dir)
-                    files.create_results_zip_file(results_dir, results_file_list)
+                # save the all workflows DataFrame
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Workflows,
+                    all_workflows_dataframe,
+                )
+                # save the all commits DataFrame
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Commits,
+                    all_commits_dataframe,
+                )
+                # save a .zip file of all of the CSV files in the results directory
+                console.print()
+                console.print(
+                    f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
+                )
+                results_file_list = files.create_results_zip_file_list(results_dir)
+                files.create_results_zip_file(results_dir, results_file_list)
+            # there is no valid directory and thus it is not possible to save contents from the download
             else:
                 console.print()
                 # explain that the save could not work correctly due to invalid results directory
