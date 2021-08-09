@@ -118,6 +118,7 @@ def perform_github_upload(
                 commit_sha = update_dict["commit"].sha
             else:
                 # create the file since it is not currently inside the GitHub repository
+                logger.debug(f"Creating the file {result_file_name}")
                 create_dict = github_repository.create_file(
                     result_file_name,
                     "Add WorkKnow Data " + semver + " for " + result_file_name,
