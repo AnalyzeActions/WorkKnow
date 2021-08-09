@@ -532,7 +532,7 @@ def analyze(
                 console.print(tabulate(analysis_data_frame, headers="keys"))
                 console.print()
                 console.print(
-                    f":sparkles: {plugin} produced the following statistical analysis summary:"
+                    f":sparkles: {plugin} produced the following statistical analysis:"
                 )
                 console.print()
                 console.print(tabulate(stats_data_frame, headers="keys"))
