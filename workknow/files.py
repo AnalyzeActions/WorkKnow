@@ -104,12 +104,28 @@ def confirm_valid_file(file: Path) -> bool:
 
 
 def confirm_valid_directory(directory: Path) -> bool:
-    """Confirm that the provided directory is a valid path."""
+    """Attempt to create the provided directory and then confirm that it is a valid path."""
     # attempt to create the directory first if it does not already exist
+    # the directory is not the default value of None
     if directory is not None:
+        # create the directory on the file system and then confirm
+        # that it is, in fact, a directory, returning true if it is
         create_directory(directory)
         if directory.is_dir():
             return True
+    # the provided pathlib Path is not a valid directory
+    return False
+
+
+def confirm_directory_exists(directory: Path) -> bool:
+    """Confirm that the provided directory exists on the filesystem."""
+    # the directory is not the default value of None
+    if directory is not None:
+        # the directory does exist and thus this function returns True
+        if directory.exists():
+            return True
+    # the directory does not exist either because it is None or because
+    # it is not a directory on the file system, thus return False
     return False
 
 
