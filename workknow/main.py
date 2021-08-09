@@ -548,9 +548,33 @@ def analyze(
                     console.print()
                     console.print(statistical_analysis_results)
                 if save:
-                    console.print(
-                        f":sparkles: Saving analysis results into the directory {str(results_dir).strip()}"
-                    )
+                    if files.confirm_directory_exists(results_dir):
+                        console.print(
+                            f":sparkles: Saving results from {plugin} in the directory {str(results_dir).strip()}"
+                        )
+                        console.print("\t... Saving the results summary data")
+                        files.save_dataframe(
+                            results_dir,
+                            plugin,
+                            constants.filesystem.Analysis,
+                            constants.filesystem.Summary,
+                            analysis_data_frame,
+                        )
+                        console.print("\t... Saving the statistical analysis data")
+                        files.save_dataframe(
+                            results_dir,
+                            plugin,
+                            constants.filesystem.Pingouin,
+                            constants.filesystem.Statistics,
+                            stats_data_frame,
+                        )
+                        console.print()
+                    else:
+                        # explain that the save could not work correctly due to invalid results directory
+                        console.print(
+                            f"Could not save the analysis results for {plugin} in {str(results_dir).strip()}"
+                        )
+                        console.print()
             # the plugin is not valid, so the tool cannot run an analysis
             # print diagnostic information and then exit the program
             else:
