@@ -104,6 +104,7 @@ def analyze(
     # --> extract the criticality score from the data frame
     criticality_score = return_value_df["criticality_score"].tolist()
     # --> calculate the correlation between failure percentage and criticality score
+    # Reference: https://pingouin-stats.org/generated/pingouin.corr.html#pingouin.corr
     pingouin_analysis_df = pingouin.corr(
         failure_percentage, criticality_score, method="spearman"
     )
