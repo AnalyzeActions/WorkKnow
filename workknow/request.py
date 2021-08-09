@@ -1,7 +1,7 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
 from urllib import parse
-from urllib3 import exceptions
+from urllib3 import exceptions  # type: ignore
 
 import datetime
 import logging
