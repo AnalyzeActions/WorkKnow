@@ -42,15 +42,20 @@ files = create_constants(
 filesystem = create_constants(
     "filesystem",
     All="All",
+    Analysis="Analysis",
     Commits="Commits",
     Counts="Counts",
+    Correlation="Correlation",
     Csv_Extension=".csv",
     Csv_Glob="*.csv",
     Csv_Commits_Glob="*-Commits.csv",
     Csv_Workflows_Glob="*-Workflows.csv",
     Dash="-",
-    Slash="/",
+    Pingouin="Pingouin",
     Results="Results",
+    Slash="/",
+    Statistics="Statistics",
+    Summary="Summary",
     Wildcard="*",
     Workflows="Workflows",
     Zip_Extension=".zip",
@@ -113,6 +118,19 @@ markers = create_constants(
     Space=" ",
     Tab="\t",
     Underscore="_",
+)
+
+
+# define the names of plugins used in pluginbase
+plugins = create_constants(
+    "plugins",
+    Home=".",
+    Expected_Number_Of_Parameters=3,
+    Function_Analyze="analyze",
+    Internal_Plugins_Dir="workknow/plugins",
+    Plugins="workknow.plugins",
+    Plugin_Base_Identifier="WorkKnowPluginBase",
+    Plugin_Prefix="plugin_",
 )
 
 

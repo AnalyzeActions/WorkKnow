@@ -4,8 +4,10 @@ import logging
 import zipfile
 
 from pathlib import Path
+from glob import glob
 
 from typing import List
+from typing import Tuple
 
 import pandas
 
@@ -27,6 +29,44 @@ def read_csv_file(csv_data_file: Path) -> pandas.DataFrame:
     # the CSV file was empty and thus we must return an empty DataFrame
     except pandas.errors.EmptyDataError:
         return data_frame_csv
+
+
+def read_csv_data_files(
+    csv_data_file_directory: Path,
+) -> Tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]:
+    """Read in the three main results files and return as Pandas DataFrames."""
+    # create the All-Counts.csv file as a pathlib Path object
+    csv_data_file_all_counts = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Counts
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Counts.csv file from the data file directory
+    csv_data_file_all_counts_df = read_csv_file(csv_data_file_all_counts)
+    # create the All-Commits.csv file as a pathlib Path object
+    csv_data_file_all_commits = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Commits
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Commits.csv file from the data file directory
+    csv_data_file_all_commits_df = read_csv_file(csv_data_file_all_commits)
+    # create the All-Workflows.csv file as a pathlib Path object
+    csv_data_file_all_workflows = csv_data_file_directory / (
+        constants.filesystem.All
+        + constants.filesystem.Dash
+        + constants.filesystem.Workflows
+        + constants.filesystem.Csv_Extension
+    )
+    # read the All-Commits.csv file from the data file directory
+    csv_data_file_all_workflows_df = read_csv_file(csv_data_file_all_workflows)
+    return (
+        csv_data_file_all_counts_df,
+        csv_data_file_all_commits_df,
+        csv_data_file_all_workflows_df,
+    )
 
 
 def create_directory(directory: Path) -> None:
@@ -64,12 +104,28 @@ def confirm_valid_file(file: Path) -> bool:
 
 
 def confirm_valid_directory(directory: Path) -> bool:
-    """Confirm that the provided directory is a valid path."""
+    """Attempt to create the provided directory and then confirm that it is a valid path."""
     # attempt to create the directory first if it does not already exist
+    # the directory is not the default value of None
     if directory is not None:
+        # create the directory on the file system and then confirm
+        # that it is, in fact, a directory, returning true if it is
         create_directory(directory)
         if directory.is_dir():
             return True
+    # the provided pathlib Path is not a valid directory
+    return False
+
+
+def confirm_directory_exists(directory: Path) -> bool:
+    """Confirm that the provided directory exists on the filesystem."""
+    # the directory is not the default value of None
+    if directory is not None:
+        # the directory does exist and thus this function returns True
+        if directory.exists():
+            return True
+    # the directory does not exist either because it is None or because
+    # it is not a directory on the file system, thus return False
     return False
 
 
@@ -178,3 +234,36 @@ def create_results_zip_file(
             # --> Parameter 1: the name of the file as found on current file system
             # --> Parameter 2: the name of the file as it will be stored in the .zip file
             results_zip_file.write(results_file_name, pathlib_path_file.name)
+
+
+def create_paths(*args, file=constants.markers.Nothing, home):
+    """Create a generator of Path objects for a glob with varying sub-path count."""
+    # attempt to create the path that could contain:
+    # --> a glob (e.g., *.py) or
+    # --> a single file (e.g., hello.py)
+    # Pathlib does not support globs of absolute directories, so use glob
+    # to create a list of all files matched by the glob
+    file_or_glob_path = create_path(*args, file=file, home=home)
+    home_directory_globbed = [Path(p) for p in glob(str(file_or_glob_path))]
+    # return this list of Path objects resulting from glob application
+    return home_directory_globbed
+
+
+def create_path(*args, file=constants.markers.Nothing, home):
+    """Create a Path object for a file with varying sub-path count."""
+    # create the Path for the home
+    home_path = Path(home)
+    # create the Path for the given file
+    given_file_path = Path(file)
+    final_path = home_path
+    # Create a containing directory of sub-directories for the file.
+    # Each of these paths will be a path between the home and the
+    # specified file. None of these paths need their anchor, though,
+    # which is given like "C:\" on Windows and "/" otherwise.
+    # pylint: disable=old-division
+    for containing_path in args:
+        nested_path = Path(containing_path)
+        final_path = final_path / nested_path.relative_to(nested_path.anchor)
+    # add the file at the end of the constructed file path
+    final_path = final_path / given_file_path
+    return final_path

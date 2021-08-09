@@ -1,14 +1,19 @@
 """Command-line interface for the workknow program."""
 
+from io import StringIO
 from pathlib import Path
 
 from typing import List
 
 import pandas
+from tabulate import tabulate
 import typer
+
+import sys
 
 from rich.pretty import pprint
 
+from workknow import analyze as study
 from workknow import concatenate
 from workknow import configure
 from workknow import constants
@@ -19,9 +24,46 @@ from workknow import files
 from workknow import produce
 from workknow import release
 from workknow import request
+from workknow import util
+
+# Reference:
+# https://stackoverflow.com/questions/11130156/suppress-stdout-stderr-print-from-python-functions
 
 
-# create a Typer object to supper the command-line interface
+class HideAndSaveOutput:
+    """Define a context manager that will collect stderr and stdout, hide it, save it, and provide it."""
+
+    def __init__(self, channels=("stdout",)):
+        """Construct an instance of the context manager."""
+        self._stomach = StringIO()
+        self._orig = {ch: None for ch in channels}
+
+    def __enter__(self):
+        """Enter into the context and prepare to save stderr and stdouti."""
+        for ch in self._orig:
+            self._orig[ch] = getattr(sys, ch)
+            setattr(sys, ch, self)
+        return self
+
+    def write(self, string):
+        """Save the results for later access if requested."""
+        self._stomach.write(string)
+
+    def flush(self):
+        """Flush the buffer."""
+        pass
+
+    def autopsy(self):
+        """Extract the stored information that was output to stderr and/or stdout."""
+        return self._stomach.getvalue()
+
+    def __exit__(self, *args):  # type: ignore
+        """Leave the context manager."""
+        for ch in self._orig:
+            setattr(sys, ch, self._orig[ch])
+
+
+# create a Typer object to support the command-line interface
 cli = typer.Typer()
 
 
@@ -189,7 +231,10 @@ def download(
         # now that WorkKnow is finished with the processing of each of the individual repositories and
         # they are stored in the currently in-memory DataFrames, save the required data to disk;
         # however, only save all of the results in the file system if the save parameter is specified
-        if save:
+        # and there is a request to combine the data files together (note that the saving of the
+        # individual files for each subject takes place as soon as the data is downloaded)
+        if save and combine:
+            # the directory is a valid one and/or it was possible to create the directory
             if files.confirm_valid_directory(results_dir):
                 # finished processing all of the individual repositories and now ready to create
                 # the "combined" data sets that include data for every repository subject to analysis
@@ -229,9 +274,9 @@ def download(
                     all_workflow_record_counts_dataframe_merged = (
                         all_workflow_record_counts_dataframe
                     )
-                # save the all records count DataFrame
-                # note that it is acceptable to save this
-                # DataFrame since it is always smaller in size
+                # save the all records count DataFrame; note that this DataFrame is always smaller in size
+                # because of the fact that it includes details about each subject and then a brief summary
+                # of the number of different build conclusions as reported by GitHub Actions
                 console.print(
                     f":sparkles: Saving combined data for all repositories in the directory {str(results_dir).strip()}"
                 )
@@ -247,32 +292,32 @@ def download(
                 # details about each of the repositories; note that the --combine argument will create
                 # data files that cannot be automatically uploaded to a GitHub repository due to the
                 # fact that they are going to be over 100 MB in size and thus require GitHub LFS
-                if combine:
-                    # save the all workflows DataFrame
-                    console.print(
-                        f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
-                    )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Workflows,
-                        all_workflows_dataframe,
-                    )
-                    # save the all commits DataFrame
-                    console.print(
-                        f"{constants.markers.Tab}... Saving combined commits data for all repositories"
-                    )
-                    files.save_dataframe_all(
-                        results_dir,
-                        constants.filesystem.Commits,
-                        all_commits_dataframe,
-                    )
-                    # save a .zip file of all of the CSV files in the results directory
-                    console.print()
-                    console.print(
-                        f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
-                    )
-                    results_file_list = files.create_results_zip_file_list(results_dir)
-                    files.create_results_zip_file(results_dir, results_file_list)
+                # save the all workflows DataFrame
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined workflows data for all repositories"
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Workflows,
+                    all_workflows_dataframe,
+                )
+                # save the all commits DataFrame
+                console.print(
+                    f"{constants.markers.Tab}... Saving combined commits data for all repositories"
+                )
+                files.save_dataframe_all(
+                    results_dir,
+                    constants.filesystem.Commits,
+                    all_commits_dataframe,
+                )
+                # save a .zip file of all of the CSV files in the results directory
+                console.print()
+                console.print(
+                    f":sparkles: Saving a Zip file of all results in the directory {str(results_dir).strip()}"
+                )
+                results_file_list = files.create_results_zip_file_list(results_dir)
+                files.create_results_zip_file(results_dir, results_file_list)
+            # there is no valid directory and thus it is not possible to save contents from the download
             else:
                 console.print()
                 # explain that the save could not work correctly due to invalid results directory
@@ -329,6 +374,7 @@ def upload(
     # and it is possible to move onto the uploading to GitHub step
     if github_organization is not None and github_repository is not None:
         # display diagnostic message in the console
+        console.print()
         console.print(
             f":runner: Uploading all workflow history data to the GitHub repository at: {repo_url}"
         )
@@ -418,11 +464,145 @@ def combine(
 
 
 @cli.command()
-def analyze(debug_level: debug.DebugLevel = debug.DebugLevel.ERROR):
-    """Analyze already the downloaded data."""
+def analyze(
+    plugins_dir: Path = typer.Option(None),
+    results_dir: Path = typer.Option(None),
+    plugin: str = typer.Option(""),
+    save: bool = typer.Option(False),
+    debug_level: debug.DebugLevel = debug.DebugLevel.ERROR,
+):
+    """Analyze previously the downloaded data."""
     # setup the console and the logger instance
-    console, _ = configure.setup(debug_level)
+    console, logger = configure.setup(debug_level)
     # STEP: display the messages about the tool
     display.display_tool_details(debug_level)
-    console.print(":person_shrugging: Sorry, this feature does not yet exist.")
     console.print()
+    console.print(":runner: Performing an analysis of GitHub Action workflow data")
+    console.print()
+    # STEP: verify the specified data analysis plugin
+    # get the source of all the plugins, both internal and external
+    plugin_source = study.get_source(plugins_dir)
+    # the person using WorkKnow will give the human-readable name of
+    # the plugin; this means that the tool must transform it to the
+    # internal name of the plugin so that it can be found
+    transformed_plugin_name = study.transform_plugin_name(plugin)
+    # confirm that the plugin exists and next step is feasible
+    plugin_exists = study.verify_plugin_existence(
+        transformed_plugin_name, plugin_source
+    )
+    # provide diagnostic output about the plugin source
+    logger.debug(f"Plugin source {plugin_source}")
+    logger.debug(f"Transformed name of the plugin {transformed_plugin_name}")
+    logger.debug(f"Was the plugin available? {plugin_exists}")
+    # STEP: Load the plugin and verify that it is valid:
+    plugin_verified = False
+    plugin_use = None  # type: ignore
+    # since the plugin exists the tool can attempt to load it and then
+    # verify that it contains the correct functions
+    if plugin_exists:
+        # load the plugin from the source
+        plugin_use = plugin_source.load_plugin(transformed_plugin_name)
+        # verify that the plugin has the required function(s)
+        plugin_verified = study.verify_plugin_functions(plugin_use)
+        # provide diagnostic output about the plugin's verification
+        logger.debug(f"Is the plugin verified? {plugin_verified}")
+        # read in the three data frames needed to complete any analysis plugin
+        # the directory is valid so attempt a save to file system
+        if files.confirm_directory_exists(results_dir):
+            console.print(
+                f":sparkles: Retrieving data files from the directory {str(results_dir).strip()}"
+            )
+            console.print("\t... Retrieving the counts data")
+            console.print("\t... Retrieving the commits data")
+            console.print("\t... Retrieving the workflows data")
+            (counts_df, commits_df, workflows_df) = files.read_csv_data_files(
+                results_dir
+            )
+            # the plugin is verified so it is appropriate to call the function
+            if plugin_verified:
+                statistical_analysis_results = ""
+                with HideAndSaveOutput(["stderr", "stdout"]) as hidden:
+                    (
+                        analysis_data_frame,
+                        stats_data_frame,
+                        significant,
+                    ) = plugin_use.analyze(counts_df, commits_df, workflows_df)
+                    statistical_analysis_results = hidden.autopsy()
+                console.print()
+                console.print(
+                    f":sparkles: {plugin} produced the following results summary:"
+                )
+                console.print()
+                console.print(tabulate(analysis_data_frame, headers="keys"))
+                console.print()
+                console.print(
+                    f":sparkles: {plugin} produced the following statistical analysis:"
+                )
+                console.print()
+                console.print(tabulate(stats_data_frame, headers="keys"))
+                console.print()
+                console.print(
+                    f":sparkles: Were {plugin}'s results statistically significant? {util.human_readable_boolean(significant)}"
+                )
+                console.print()
+                if statistical_analysis_results != "":
+                    console.print(
+                        f":person_shrugging: {plugin}'s statistical analysis produced this extra output:"
+                    )
+                    console.print()
+                    console.print(statistical_analysis_results)
+                if save:
+                    if files.confirm_directory_exists(results_dir):
+                        console.print(
+                            f":sparkles: Saving results from {plugin} in the directory {str(results_dir).strip()}"
+                        )
+                        console.print("\t... Saving the results summary data")
+                        files.save_dataframe(
+                            results_dir,
+                            plugin,
+                            constants.filesystem.Analysis,
+                            constants.filesystem.Summary,
+                            analysis_data_frame,
+                        )
+                        console.print("\t... Saving the statistical analysis data")
+                        files.save_dataframe(
+                            results_dir,
+                            plugin,
+                            constants.filesystem.Pingouin,
+                            constants.filesystem.Statistics,
+                            stats_data_frame,
+                        )
+                        console.print()
+                    else:
+                        # explain that the save could not work correctly due to invalid results directory
+                        console.print(
+                            f"Could not save the analysis results for {plugin} in {str(results_dir).strip()}"
+                        )
+                        console.print()
+            # the plugin is not valid, so the tool cannot run an analysis
+            # print diagnostic information and then exit the program
+            else:
+                console.print(
+                    f":grimacing_face: Unable to use invalid plugin {transformed_plugin_name}!"
+                )
+                print(
+                    f"{constants.markers.Tab}... Check that the plugin has the correct"
+                )
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... function name"
+                )
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... number of parameters"
+                )
+                print(
+                    f"{constants.markers.Tab}{constants.markers.Tab}... type for each parameter"
+                )
+                console.print()
+                console.print(":sad_but_relieved_face: Exiting now!")
+                console.print()
+        else:
+            # explain that the save could not work correctly due to invalid results directory
+            console.print(
+                f"Could not retrieve data files from the directory {str(results_dir).strip()}"
+            )
+            console.print()

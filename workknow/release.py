@@ -103,6 +103,7 @@ def perform_github_upload(
                     )
                 # the contents of the file *should* be accessible now in
                 # the variable called "contents" and thus it is okay to call update_file
+                logger.debug(result_file_name + " ATTEMPT UPDATE")
                 update_dict = github_repository.update_file(
                     result_file_name,
                     "Update WorkKnow Data " + semver + " for " + result_file_name,
@@ -118,6 +119,7 @@ def perform_github_upload(
                 commit_sha = update_dict["commit"].sha
             else:
                 # create the file since it is not currently inside the GitHub repository
+                logger.debug(result_file_name + " ATTEMPT CREATE")
                 create_dict = github_repository.create_file(
                     result_file_name,
                     "Add WorkKnow Data " + semver + " for " + result_file_name,

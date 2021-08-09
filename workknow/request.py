@@ -1,6 +1,7 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
 from urllib import parse
+from urllib3 import exceptions  # type: ignore
 
 import datetime
 import logging
@@ -23,6 +24,8 @@ import pytz
 import requests
 
 from workknow import constants
+from workknow import util
+
 
 # Sample of the JSON file returned by the request:
 
@@ -166,13 +169,6 @@ def calculate_backoff_sleep_time(backoff_factor: int, number_of_retries: int) ->
     return backoff_factor * (2 ** (number_of_retries - 1))
 
 
-def human_readable_boolean(answer: bool) -> str:
-    """Produce a human-readable Yes or No for a boolean value of True or False."""
-    if answer:
-        return "Yes"
-    return "No"
-
-
 def request_with_caution(
     github_api_url: str,
     github_params,
@@ -207,10 +203,19 @@ def request_with_caution(
             # the response was valid because of the fact that the previous line
             # of code did not trigger an exception and jump to the except block
             valid_response = True
-        except requests.exceptions.RequestException as request_exception:
+        # Reference:
+        # https://docs.python-requests.org/en/latest/api/
+        # https://urllib3.readthedocs.io/en/latest/reference/urllib3.exceptions.html#urllib3.exceptions.HTTPError
+        except (
+            requests.exceptions.RequestException,
+            exceptions.HTTPError,
+        ) as request_exception:
             # there was an exception and, in fact, it was the first exception
             # and thus WorkKnow must display a diagnostic message about the
-            # standard progress bar to indicate the failure and retries
+            # standard progress bar to indicate the failure and retries.
+            # Note that the RequestException is the parent class of exceptions
+            # that are raised by the use of the requests package and the HTTPError
+            # is the parent class of the exceptions raised by the urllib3 package
             if first_exception:
                 progress.console.print()
                 progress.console.print(
@@ -358,7 +363,7 @@ def request_json_from_github_with_caution(
     # time too many and thus there is a need to subtract one in order to get the accurate count
     if attempted_retries:
         progress.console.print(
-            f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {human_readable_boolean(valid)}"
+            f"{constants.markers.Tab}...After {response_retries_count - 1} retries, did the retry procedure work correctly? {util.human_readable_boolean(valid)}"
         )
     return (valid, response_retries_count - 1, running_sleep_time_in_seconds, response)
 
