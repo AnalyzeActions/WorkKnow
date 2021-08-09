@@ -374,6 +374,7 @@ def upload(
     # and it is possible to move onto the uploading to GitHub step
     if github_organization is not None and github_repository is not None:
         # display diagnostic message in the console
+        console.print()
         console.print(
             f":runner: Uploading all workflow history data to the GitHub repository at: {repo_url}"
         )
