@@ -1,6 +1,7 @@
 """Use the GitHub REST API to access information about GitHub Action Workflows."""
 
 from urllib import parse
+from urllib3 import exceptions
 
 import datetime
 import logging
@@ -202,10 +203,13 @@ def request_with_caution(
             # the response was valid because of the fact that the previous line
             # of code did not trigger an exception and jump to the except block
             valid_response = True
-        except requests.exceptions.RequestException as request_exception:
+        except (requests.exceptions.RequestException, exceptions.HTTPError) as request_exception:
             # there was an exception and, in fact, it was the first exception
             # and thus WorkKnow must display a diagnostic message about the
-            # standard progress bar to indicate the failure and retries
+            # standard progress bar to indicate the failure and retries.
+            # Note that the RequestException is the parent class of exceptions
+            # that are raised by the use of the requests package and the HTTPError
+            # is the parent class of the exceptions raised by the urllib3 package
             if first_exception:
                 progress.console.print()
                 progress.console.print(
