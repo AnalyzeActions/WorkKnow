@@ -203,6 +203,9 @@ def request_with_caution(
             # the response was valid because of the fact that the previous line
             # of code did not trigger an exception and jump to the except block
             valid_response = True
+        # Reference:
+        # https://docs.python-requests.org/en/latest/api/
+        # https://urllib3.readthedocs.io/en/latest/reference/urllib3.exceptions.html#urllib3.exceptions.HTTPError
         except (
             requests.exceptions.RequestException,
             exceptions.HTTPError,
