@@ -504,7 +504,7 @@ def analyze(
         logger.debug(f"Is the plugin verified? {plugin_verified}")
         # read in the three data frames needed to complete any analysis plugin
         # the directory is valid so attempt a save to file system
-        if files.confirm_valid_directory(results_dir):
+        if files.confirm_directory_exists(results_dir):
             console.print(
                 f":sparkles: Retrieving data files from the directory {str(results_dir).strip()}"
             )
